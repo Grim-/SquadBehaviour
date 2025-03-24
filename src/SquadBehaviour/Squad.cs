@@ -30,7 +30,7 @@ namespace SquadBehaviour
 
             if (!Leader.TryGetSquadLeader(out ISquadLeader squadLeader))
             {
-                Log.Error("Passed a pawn who is not a squad leader");
+                //Log.Error("Passed a pawn who is not a squad leader");
                 return;
             }
 

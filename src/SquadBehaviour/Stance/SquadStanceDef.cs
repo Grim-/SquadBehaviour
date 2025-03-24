@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -8,18 +9,23 @@ namespace SquadBehaviour
     {
         public bool maintainsFormation = true;
         public bool respondToThreats = true;
-        public bool requiresDefendPoint = false;
-        public bool allowNormalBehavior = false;
-
-        public float aggressionLevel = 0.5f;
-        public float formationTightness = 0.8f; 
-        public float maxEngagementDistance = 40f;
-
-
-        public bool shouldWander = false;
-        public float wanderRadius = 10f;
-
         public Type stanceJobGiverClass;
+        public string uiIconPath = "";
+
+        private Texture2D _Tex;
+
+        public Texture2D Tex
+        {
+            get
+            {
+                if (_Tex == null && !string.IsNullOrEmpty(uiIconPath))
+                {
+                    _Tex = ContentFinder<Texture2D>.Get(uiIconPath);
+                }
+
+                return _Tex;
+            }
+        }
 
         public ThinkNode_JobGiver CreateJobGiver()
         {

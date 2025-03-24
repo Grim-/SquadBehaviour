@@ -34,6 +34,10 @@ namespace SquadBehaviour
         private Squad _AssignedSquad = null;
         public Squad AssignedSquad { get => _AssignedSquad; set => _AssignedSquad = value; }
 
+
+        public SquadStanceDef _CurrentStance = null;
+        SquadStanceDef ISquadMember.CurrentStance { get => _CurrentStance; set => _CurrentStance = value; }
+
         public void SetSquadLeader(Pawn squadLeader)
         {
             referencedPawn = squadLeader;
@@ -70,6 +74,18 @@ namespace SquadBehaviour
             {
                 Pawn.jobs.EndCurrentJob(Verse.AI.JobCondition.InterruptForced);
             }
+        }
+
+        public override string CompInspectStringExtra()
+        {
+            string baseString = base.CompInspectStringExtra();
+
+            if (SquadLeader != null && SquadLeader.SquadLeaderPawn != null)
+            {
+                baseString += $"Squad Leader : {SquadLeader.SquadLeaderPawn.Name}";
+            }
+
+            return baseString;
         }
 
         public override void PostExposeData()

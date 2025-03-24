@@ -35,8 +35,8 @@ namespace SquadBehaviour
 
         public ITab_SquadManager()
         {
-            this.labelKey = "Undead";
-            this.tutorTag = "Undead";
+            this.labelKey = "SquadManager";
+            this.tutorTag = "SquadManager";
             this.size = new Vector2(500f, 450f);
             this.squadDisplay = new SquadDisplayUtility();
         }
@@ -49,20 +49,18 @@ namespace SquadBehaviour
 
             if (pawn != null && UndeadMaster != null)
             {
-                // Calculate heights for different sections
                 float controlButtonsHeight = BUTTON_HEIGHT + SPACING;
                 float dividerHeight = 10f;
                 float squadListAreaHeight = rect.height - controlButtonsHeight - dividerHeight;
 
-                // Draw control buttons at the top
                 Rect controlButtonsRect = new Rect(rect.x, rect.y, rect.width, controlButtonsHeight);
                 DrawControlButtons(controlButtonsRect);
 
-                // Add divider
+
                 Rect dividerRect = new Rect(rect.x, controlButtonsRect.yMax, rect.width, dividerHeight);
                 Widgets.DrawLineHorizontal(dividerRect.x, dividerRect.y + dividerRect.height / 2, dividerRect.width);
 
-                // Squad list area below
+
                 Rect squadListRect = new Rect(rect.x, dividerRect.yMax, rect.width, squadListAreaHeight);
                 DrawSquadList(squadListRect);
             }
@@ -80,14 +78,14 @@ namespace SquadBehaviour
             float willBarWidth = availableWidth * 0.4f;
             float squadButtonWidth = availableWidth * 0.2f;
 
-            // Will capacity bar
+
             Rect willBarRect = new Rect(rect.x, rect.y, willBarWidth, buttonHeight);
             //Widgets.FillableBar(willBarRect, this.UndeadMaster.WillCapacityAsPercent);
             //Text.Anchor = TextAnchor.MiddleCenter;
             //Widgets.Label(willBarRect, $"Will: {this.UndeadMaster.WillRequiredForUndead} / {this.UndeadMaster.WillStat}");
             //Text.Anchor = TextAnchor.UpperLeft;
 
-            // Squad manager button
+
             Rect squadButtonRect = new Rect(willBarRect.xMax + buttonMargin, rect.y, squadButtonWidth, buttonHeight);
             if (Widgets.ButtonText(squadButtonRect, "Squad"))
             {
@@ -105,7 +103,7 @@ namespace SquadBehaviour
                 return;
             }
 
-            // Use the reusable squad display utility
+
             squadDisplay.DrawSquadsList(rect, ref scrollPosition, UndeadMaster.ActiveSquads, UndeadMaster);
         }
     }

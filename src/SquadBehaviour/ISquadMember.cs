@@ -10,7 +10,7 @@ namespace SquadBehaviour
         Pawn Pawn { get; }
 
         SquadMemberState CurrentState { get; }
-        SquadStanceDef CurrentStance { get; }
+        SquadStanceDef CurrentStance { get; set; }
         Squad AssignedSquad { get; set; }
 
 

@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=2.3.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.2.3.5\lib\net48\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -77,6 +81,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Stance\Designator_PatrolPath.cs" />
+    <Compile Include="Stance\PatrolPath.cs" />
+    <Compile Include="Stance\PatrolPathManager.cs" />
+    <Compile Include="Stance\SquadBehaviourPatches.cs" />
+    <Compile Include="Stance\SquadStanceDef.cs" />
+    <Compile Include="Stance\ThinkNode_ConditionalHasStance.cs" />
     <Compile Include="AI\JobGiver_MoveToDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadMemberDefendSquadLeader.cs" />
@@ -84,37 +94,37 @@
     <Compile Include="AI\JobGiver_SquadMemberFollowLoose.cs" />
     <Compile Include="AI\JobGiver_StandAndStarePeriodic.cs" />
     <Compile Include="AI\JobGiver_StandAndStareShort.cs" />
-    <Compile Include="AI\Orders\SquadOrderDef.cs" />
-    <Compile Include="AI\Orders\SquadOrderSettings.cs" />
-    <Compile Include="AI\Orders\SquadOrderWorker.cs" />
-    <Compile Include="AI\Orders\SquadOrder_Attack.cs" />
-    <Compile Include="AI\Orders\SquadOrder_ClearDefendPoint.cs" />
-    <Compile Include="AI\Orders\SquadOrder_DefendPoint.cs" />
-    <Compile Include="AI\Orders\SquadOrder_RunToPointAndExplode.cs" />
+    <Compile Include="Orders\SquadOrderDef.cs" />
+    <Compile Include="Orders\SquadOrderSettings.cs" />
+    <Compile Include="Orders\SquadOrderWorker.cs" />
+    <Compile Include="Orders\SquadOrder_Attack.cs" />
+    <Compile Include="Orders\SquadOrder_ClearDefendPoint.cs" />
+    <Compile Include="Orders\SquadOrder_DefendPoint.cs" />
+    <Compile Include="Orders\SquadOrder_RunToPointAndExplode.cs" />
     <Compile Include="Gizmo_FormationControl.cs" />
     <Compile Include="ITab_SquadManager.cs" />
-    <Compile Include="JobDriver_FormationFollow.cs" />
-    <Compile Include="JobGiver_SummonedCreatureFightEnemy.cs" />
-    <Compile Include="JobGiver_SummonedCreatureFollowMaster.cs" />
-    <Compile Include="JobGiver_SummonedCreatureFormationFollow.cs" />
+    <Compile Include="AI\JobDriver_FormationFollow.cs" />
+    <Compile Include="AI\JobGiver_SummonedCreatureFightEnemy.cs" />
+    <Compile Include="AI\JobGiver_SummonedCreatureFollowMaster.cs" />
+    <Compile Include="AI\JobGiver_SummonedCreatureFormationFollow.cs" />
     <Compile Include="SquadDefOf.cs" />
     <Compile Include="SquadHostility.cs" />
     <Compile Include="SquadMemberState.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalHasDefendPoint.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalHasSquadLeader.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsAtDefendPoint.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsAtFormationPosition.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsCalledToArms.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsColonistBehaviourAllowed.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsDefendingPoint.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsPartOfASquad.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsSquadAggresive.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsSquadDefensive.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsSquadInFormation.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalNearSquadLeader.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalShouldDoNothing.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalShouldFollowFormation.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalSquadHasTarget.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalHasDefendPoint.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalHasSquadLeader.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsAtDefendPoint.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsAtFormationPosition.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsCalledToArms.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsColonistBehaviourAllowed.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsDefendingPoint.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPartOfASquad.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsSquadAggresive.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsSquadDefensive.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsSquadInFormation.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalNearSquadLeader.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldDoNothing.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldFollowFormation.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadHasTarget.cs" />
     <Compile Include="CompSquadLeader.cs" />
     <Compile Include="CompSquadMember.cs" />
     <Compile Include="SquadManagerWindow.cs" />
@@ -127,6 +137,9 @@
     <Compile Include="SquadDisplayUtility.cs" />
     <Compile Include="SquadManager.cs" />
     <Compile Include="SquadUtil.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
