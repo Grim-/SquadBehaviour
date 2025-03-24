@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{368B92A4-1F9E-441D-92F3-491B65EBA800}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SquadBehaviour</RootNamespace>
+    <AssemblyName>SquadBehaviour</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>D:\Games\RimWorld\Mods\SquadBehaviours\1.5\Assemblies\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AI\JobGiver_MoveToDefendPoint.cs" />
+    <Compile Include="AI\JobGiver_SquadDefendPoint.cs" />
+    <Compile Include="AI\JobGiver_SquadMemberDefendSquadLeader.cs" />
+    <Compile Include="AI\JobGiver_SquadMemberFollowInFormation.cs" />
+    <Compile Include="AI\JobGiver_SquadMemberFollowLoose.cs" />
+    <Compile Include="AI\JobGiver_StandAndStarePeriodic.cs" />
+    <Compile Include="AI\JobGiver_StandAndStareShort.cs" />
+    <Compile Include="AI\Orders\SquadOrderDef.cs" />
+    <Compile Include="AI\Orders\SquadOrderSettings.cs" />
+    <Compile Include="AI\Orders\SquadOrderWorker.cs" />
+    <Compile Include="AI\Orders\SquadOrder_Attack.cs" />
+    <Compile Include="AI\Orders\SquadOrder_ClearDefendPoint.cs" />
+    <Compile Include="AI\Orders\SquadOrder_DefendPoint.cs" />
+    <Compile Include="AI\Orders\SquadOrder_RunToPointAndExplode.cs" />
+    <Compile Include="Gizmo_FormationControl.cs" />
+    <Compile Include="ITab_SquadManager.cs" />
+    <Compile Include="JobDriver_FormationFollow.cs" />
+    <Compile Include="JobGiver_SummonedCreatureFightEnemy.cs" />
+    <Compile Include="JobGiver_SummonedCreatureFollowMaster.cs" />
+    <Compile Include="JobGiver_SummonedCreatureFormationFollow.cs" />
+    <Compile Include="SquadDefOf.cs" />
+    <Compile Include="SquadHostility.cs" />
+    <Compile Include="SquadMemberState.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalHasDefendPoint.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalHasSquadLeader.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsAtDefendPoint.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsAtFormationPosition.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsCalledToArms.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsColonistBehaviourAllowed.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsDefendingPoint.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsPartOfASquad.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsSquadAggresive.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsSquadDefensive.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsSquadInFormation.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalNearSquadLeader.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalShouldDoNothing.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalShouldFollowFormation.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalSquadHasTarget.cs" />
+    <Compile Include="CompSquadLeader.cs" />
+    <Compile Include="CompSquadMember.cs" />
+    <Compile Include="SquadManagerWindow.cs" />
+    <Compile Include="FormationUtils.cs" />
+    <Compile Include="ISquadLeader.cs" />
+    <Compile Include="ISquadMember.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RowLayoutManager.cs" />
+    <Compile Include="Squad.cs" />
+    <Compile Include="SquadDisplayUtility.cs" />
+    <Compile Include="SquadManager.cs" />
+    <Compile Include="SquadUtil.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

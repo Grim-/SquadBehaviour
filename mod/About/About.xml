@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Squad Behaviours</name>
+  <author>Emo</author>
+  <supportedVersions>
+    <li>1.5</li>
+  </supportedVersions>
+	<packageId>com.emo.squads</packageId>
+        <description>Allows you to organise pawns into squads.</description>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+		<li>Ludeon.RimWorld.Biotech</li>
+	</loadAfter>
+	<modDependencies>
+	</modDependencies>
+</ModMetaData>
