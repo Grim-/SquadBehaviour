@@ -161,6 +161,8 @@ namespace SquadBehaviour
                     return "Stand down";
                 case SquadMemberState.DefendPoint:
                     return "Defend point";
+                case SquadMemberState.Patrol:
+                    return "Patrol";
                 default:
                     return "invalid state";
             }
@@ -178,6 +180,8 @@ namespace SquadBehaviour
                 case SquadMemberState.AtEase:
                     return TexCommand.HoldOpen;
                 case SquadMemberState.DefendPoint:
+                    return TexCommand.SquadAttack;
+                case SquadMemberState.Patrol:
                     return TexCommand.SquadAttack;
                 default:
                     return TexCommand.DesirePower;

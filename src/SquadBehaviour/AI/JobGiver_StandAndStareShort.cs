@@ -1,15 +1,14 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
 namespace SquadBehaviour
 {
-
     public class JobGiver_StandAndStareShort : JobGiver_StandAndStare
     {
         protected override Job TryGiveJob(Pawn pawn)
         {
-            //let the base run but return another job
             base.TryGiveJob(pawn);
 
             Job job = JobMaker.MakeJob(SquadDefOf.SquadMember_InterruptableWait);

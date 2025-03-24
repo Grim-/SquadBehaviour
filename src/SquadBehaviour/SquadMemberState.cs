@@ -5,6 +5,7 @@
         DoNothing,
         CalledToArms,
         AtEase,
-        DefendPoint
+        DefendPoint,
+        Patrol
     }
 }

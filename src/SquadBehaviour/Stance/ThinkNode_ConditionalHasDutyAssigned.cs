@@ -4,17 +4,17 @@ using Verse.AI;
 
 namespace SquadBehaviour
 {
-    public class ThinkNode_ConditionalHasStance : ThinkNode_Conditional
+    public class ThinkNode_ConditionalHasDutyAssigned : ThinkNode_Conditional
     {
-        private static Dictionary<SquadStanceDef, ThinkNode_JobGiver> jobGiverCache =
-            new Dictionary<SquadStanceDef, ThinkNode_JobGiver>();
+        private static Dictionary<SquadDutyDef, ThinkNode_JobGiver> jobGiverCache =
+            new Dictionary<SquadDutyDef, ThinkNode_JobGiver>();
 
         protected override bool Satisfied(Pawn pawn)
         {
             if (pawn == null || !pawn.IsPartOfSquad(out ISquadMember squadMember))
                 return false;
 
-            SquadStanceDef stance = squadMember.CurrentStance;
+            SquadDutyDef stance = squadMember.CurrentStance;
             return stance != null;
         }
 
@@ -26,7 +26,7 @@ namespace SquadBehaviour
             if (!pawn.IsPartOfSquad(out ISquadMember squadMember))
                 return ThinkResult.NoJob;
 
-            SquadStanceDef stance = squadMember.CurrentStance;
+            SquadDutyDef stance = squadMember.CurrentStance;
             if (stance == null)
                 return ThinkResult.NoJob;
 

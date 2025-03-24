@@ -10,7 +10,10 @@ namespace SquadBehaviour
         Pawn Pawn { get; }
 
         SquadMemberState CurrentState { get; }
-        SquadStanceDef CurrentStance { get; set; }
+        SquadDutyDef CurrentStance { get; set; }
+
+        Zone_PatrolPath AssignedPatrol { get; set; }
+
         Squad AssignedSquad { get; set; }
 
 

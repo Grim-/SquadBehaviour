@@ -81,7 +81,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Stance\Designator_PatrolPath.cs" />
+    <Compile Include="Stance\ThinkNode_ConditionalIsPatrolling.cs" />
+    <Compile Include="Stance\Designator_ZoneAdd_PatrolPath.cs" />
+    <Compile Include="Stance\Designator_ZoneAdd_PatrolPath_Expand.cs" />
     <Compile Include="Stance\PatrolPath.cs" />
     <Compile Include="Stance\PatrolPathManager.cs" />
     <Compile Include="Stance\SquadBehaviourPatches.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="SquadDisplayUtility.cs" />
     <Compile Include="SquadManager.cs" />
     <Compile Include="SquadUtil.cs" />
+    <Compile Include="Stance\Zone_PatrolPath.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

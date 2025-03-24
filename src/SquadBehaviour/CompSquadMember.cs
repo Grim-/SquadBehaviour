@@ -35,8 +35,12 @@ namespace SquadBehaviour
         public Squad AssignedSquad { get => _AssignedSquad; set => _AssignedSquad = value; }
 
 
-        public SquadStanceDef _CurrentStance = null;
-        SquadStanceDef ISquadMember.CurrentStance { get => _CurrentStance; set => _CurrentStance = value; }
+        private SquadDutyDef _CurrentStance = null;
+        SquadDutyDef ISquadMember.CurrentStance { get => _CurrentStance; set => _CurrentStance = value; }
+
+
+        private Zone_PatrolPath _AssignedPatrol = null;
+        Zone_PatrolPath ISquadMember.AssignedPatrol { get => _AssignedPatrol; set => _AssignedPatrol = value; }
 
         public void SetSquadLeader(Pawn squadLeader)
         {
