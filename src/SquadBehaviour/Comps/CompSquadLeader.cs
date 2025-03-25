@@ -114,21 +114,23 @@ namespace SquadBehaviour
             return IntVec3.Invalid;
         }
 
-        public void ExecuteSquadOrder(SquadOrderDef orderDef, LocalTargetInfo target)
-        {
-            foreach (var squadMember in SquadMembersPawns)
-            {
-                if (squadMember.IsPartOfSquad(out ISquadMember member))
-                {
-                    SquadOrderWorker squadOrderWorker = orderDef.CreateWorker(this, member);
 
-                    if (squadOrderWorker.CanExecuteOrder(target))
-                    {
-                        squadOrderWorker.ExecuteOrder(target);
-                    }
-                }
+        public void IssueGlobalOrder(SquadOrderDef orderDef, LocalTargetInfo target)
+        {
+            foreach (var squad in ActiveSquads)
+            {
+                squad.Value.IssueSquadOrder(orderDef, target);
             }
         }
+
+        public void IssueSquadOrder(Squad squad, SquadOrderDef orderDef, LocalTargetInfo target)
+        {
+            if (squad != null)
+            {
+                squad.IssueSquadOrder(orderDef, target);
+            }
+        }
+
         public IntVec3 GetFormationPositionFor(Pawn pawn) => GetFormationPositionFor(pawn, SquadLeaderPawn.Position, SquadLeaderPawn.Rotation);
 
         public bool AddSquad(int squadID, List<Pawn> startingMembers)

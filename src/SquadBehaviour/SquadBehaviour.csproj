@@ -81,14 +81,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Stance\ThinkNode_ConditionalIsPatrolling.cs" />
-    <Compile Include="Stance\Designator_ZoneAdd_PatrolPath.cs" />
-    <Compile Include="Stance\Designator_ZoneAdd_PatrolPath_Expand.cs" />
-    <Compile Include="Stance\PatrolPath.cs" />
-    <Compile Include="Stance\PatrolPathManager.cs" />
-    <Compile Include="Stance\SquadBehaviourPatches.cs" />
-    <Compile Include="Stance\SquadStanceDef.cs" />
-    <Compile Include="Stance\ThinkNode_ConditionalHasStance.cs" />
+    <Compile Include="Duty\JobGiver_SquadDuty.cs" />
+    <Compile Include="Duty\JobGiver_SquadPatrol.cs" />
+    <Compile Include="Orders\SquadOrder_ClearDuty.cs" />
+    <Compile Include="Orders\SquadOrder_PatrolZone.cs" />
+    <Compile Include="Duty\ThinkNode_ConditionalAlreadyPatrolling.cs" />
+    <Compile Include="Duty\ThinkNode_ConditionalEnemiesNearPatrol.cs" />
+    <Compile Include="Duty\ThinkNode_ConditionalIsPatrolling.cs" />
+    <Compile Include="Gizmo\Gizmo_SquadMemberInfo.cs" />
+    <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath.cs" />
+    <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath_Expand.cs" />
+    <Compile Include="Patrol\PatrolTracker.cs" />
+    <Compile Include="Patrol\PatrolPathManager.cs" />
+    <Compile Include="Duty\SquadBehaviourPatches.cs" />
+    <Compile Include="Duty\SquadDutyDef.cs" />
+    <Compile Include="Duty\ThinkNode_ConditionalHasDutyAssigned.cs" />
     <Compile Include="AI\JobGiver_MoveToDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadMemberDefendSquadLeader.cs" />
@@ -103,8 +110,10 @@
     <Compile Include="Orders\SquadOrder_ClearDefendPoint.cs" />
     <Compile Include="Orders\SquadOrder_DefendPoint.cs" />
     <Compile Include="Orders\SquadOrder_RunToPointAndExplode.cs" />
-    <Compile Include="Gizmo_FormationControl.cs" />
-    <Compile Include="ITab_SquadManager.cs" />
+    <Compile Include="Gizmo\Gizmo_FormationControl.cs" />
+    <Compile Include="Patrol\PatrolUtil.cs" />
+    <Compile Include="ThinkNode_ConditionalHasNoLeader.cs" />
+    <Compile Include="UI\ITab_SquadManager.cs" />
     <Compile Include="AI\JobDriver_FormationFollow.cs" />
     <Compile Include="AI\JobGiver_SummonedCreatureFightEnemy.cs" />
     <Compile Include="AI\JobGiver_SummonedCreatureFollowMaster.cs" />
@@ -127,19 +136,19 @@
     <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldDoNothing.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldFollowFormation.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadHasTarget.cs" />
-    <Compile Include="CompSquadLeader.cs" />
-    <Compile Include="CompSquadMember.cs" />
+    <Compile Include="Comps\CompSquadLeader.cs" />
+    <Compile Include="Comps\CompSquadMember.cs" />
     <Compile Include="SquadManagerWindow.cs" />
     <Compile Include="FormationUtils.cs" />
     <Compile Include="ISquadLeader.cs" />
     <Compile Include="ISquadMember.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RowLayoutManager.cs" />
+    <Compile Include="UI\RowLayoutManager.cs" />
     <Compile Include="Squad.cs" />
-    <Compile Include="SquadDisplayUtility.cs" />
+    <Compile Include="UI\SquadDisplayUtility.cs" />
     <Compile Include="SquadManager.cs" />
     <Compile Include="SquadUtil.cs" />
-    <Compile Include="Stance\Zone_PatrolPath.cs" />
+    <Compile Include="Patrol\Zone_PatrolPath.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -15,7 +15,6 @@ namespace SquadBehaviour
             Phalanx
         }
 
-        // Main public method to get formation positions
         public static IntVec3 GetFormationPosition(FormationType formation, Vector3 leaderPos, Rot4 rotation, int index, int totalUnits)
         {
             Vector3 rawPosition;

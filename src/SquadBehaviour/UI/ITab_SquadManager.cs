@@ -80,12 +80,6 @@ namespace SquadBehaviour
 
 
             Rect willBarRect = new Rect(rect.x, rect.y, willBarWidth, buttonHeight);
-            //Widgets.FillableBar(willBarRect, this.UndeadMaster.WillCapacityAsPercent);
-            //Text.Anchor = TextAnchor.MiddleCenter;
-            //Widgets.Label(willBarRect, $"Will: {this.UndeadMaster.WillRequiredForUndead} / {this.UndeadMaster.WillStat}");
-            //Text.Anchor = TextAnchor.UpperLeft;
-
-
             Rect squadButtonRect = new Rect(willBarRect.xMax + buttonMargin, rect.y, squadButtonWidth, buttonHeight);
             if (Widgets.ButtonText(squadButtonRect, "Squad"))
             {

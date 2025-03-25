@@ -4,8 +4,6 @@
     {
         DoNothing,
         CalledToArms,
-        AtEase,
-        DefendPoint,
-        Patrol
+        AtEase
     }
 }

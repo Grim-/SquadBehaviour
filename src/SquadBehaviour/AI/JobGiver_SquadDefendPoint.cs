@@ -7,6 +7,11 @@ namespace SquadBehaviour
 {
     public class JobGiver_SquadDefendPoint : JobGiver_AIDefendPoint
     {
+        public JobGiver_SquadDefendPoint()
+        {
+        }
+
+
         // Override the shooting position finder to use your squad system
         protected override bool TryFindShootingPosition(Pawn pawn, out IntVec3 dest, Verb verbToUse = null)
         {
@@ -24,8 +29,7 @@ namespace SquadBehaviour
             IntVec3 defendPos = IntVec3.Invalid;
             float defendRadius = 0f;
 
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember) &&
-                squadMember.CurrentState == SquadMemberState.DefendPoint)
+            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
             {
                 if (squadMember.AssignedSquad.InFormation)
                 {
@@ -200,8 +204,7 @@ namespace SquadBehaviour
         // Helper to create a job to stay at defend point
         private Job StayAtDefendPointJob(Pawn pawn)
         {
-            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember) &&
-                squadMember.CurrentState == SquadMemberState.DefendPoint)
+            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember))
             {
                 IntVec3 defendPos;
                 if (squadMember.AssignedSquad.InFormation)
@@ -231,61 +234,5 @@ namespace SquadBehaviour
 
             return null;
         }
-        // Override to provide a fallback behavior when no enemies are present
-        //protected override Job TryGiveJob(Pawn pawn)
-        //{
-        //    // Try to get the standard combat job
-        //    Job combatJob = base.TryGiveJob(pawn);
-        //    if (combatJob != null)
-        //    {
-        //        return combatJob;
-        //    }
-
-        //    // If no enemies to fight, make sure pawn stays at defend position
-        //    if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember) &&
-        //        squadMember.CurrentState == SquadMemberState.DefendPoint)
-        //    {
-        //        IntVec3 defendPos;
-        //        if (squadMember.AssignedSquad.InFormation)
-        //        {
-        //            defendPos = squadMember.SquadLeader.GetFormationPositionFor(pawn, squadMember.DefendPoint, Rot4.North);
-        //        }
-        //        else
-        //        {
-        //            defendPos = squadMember.DefendPoint;
-        //        }
-
-        //        // If not at defend position, go there
-        //        if (!pawn.Position.InHorDistOf(defendPos, 0.9f))
-        //        {
-        //            Job goToJob = JobMaker.MakeJob(JobDefOf.Goto, defendPos);
-        //            goToJob.expiryInterval = 120;
-        //            goToJob.checkOverrideOnExpire = true;
-        //            return goToJob;
-        //        }
-
-        //        // If at position, wait in combat stance
-        //        Job waitJob = JobMaker.MakeJob(JobDefOf.Wait_Combat);
-        //        waitJob.expiryInterval = 120; // Recheck every 2 seconds
-        //        waitJob.checkOverrideOnExpire = true;
-        //        return waitJob;
-        //    }
-
-        //    return null;
-        //}
     }
-
-
-    //public class JobGiver_SquadDefendPoint : JobGiver_AIDefendPoint
-    //{
-    //    protected override IntVec3 GetFlagPosition(Pawn pawn)
-    //    {
-    //        if (pawn.IsPartOfSquad(out ISquadMember squadMember) && squadMember.DefendPoint != IntVec3.Invalid)
-    //        {
-    //            return squadMember.DefendPoint;
-    //        }
-
-    //        return base.GetFlagPosition(pawn);
-    //    }
-    //}
 }

@@ -23,6 +23,7 @@ namespace SquadBehaviour
         public override void ExecuteOrder(LocalTargetInfo Target)
         {
             SquadMember.SetDefendPoint(Target.Cell);
+            SquadMember.CurrentStance = SquadDefOf.DefendPoint;
         }
     }
 }

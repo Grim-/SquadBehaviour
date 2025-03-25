@@ -5,17 +5,16 @@ using Verse;
 
 namespace SquadBehaviour
 {
-    // Expander designator for adding to existing patrol paths
-    public class Designator_ZoneAdd_PatrolPath_Expand : Designator_ZoneAdd_PatrolPath
+    public class Designator_ZoneAdd_PatrolPath : Designator_ZoneAdd
     {
         protected override string NewZoneLabel => "PatrolPath".Translate();
 
-        public Designator_ZoneAdd_PatrolPath_Expand()
+        public Designator_ZoneAdd_PatrolPath()
         {
             this.zoneTypeToPlace = typeof(Zone_PatrolPath);
-            this.defaultLabel = "DesignatorPatrolPathExpand".Translate();
-            this.defaultDesc = "DesignatorPatrolPathExpandDesc".Translate();
-            this.icon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Stockpile", true);
+            this.defaultLabel = "DesignatorPatrolPath".Translate();
+            this.defaultDesc = "DesignatorPatrolPathDesc".Translate();
+            this.icon = TexCommand.GatherSpotActive;
             this.soundDragSustain = SoundDefOf.Designate_DragStandard;
             this.soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
             this.useMouseIcon = true;
@@ -28,29 +27,35 @@ namespace SquadBehaviour
             return new Zone_PatrolPath(Find.CurrentMap.zoneManager);
         }
 
+
+        public override void SelectedUpdate()
+        {
+            base.SelectedUpdate();
+        }
+
         public override AcceptanceReport CanDesignateCell(IntVec3 c)
         {
             if (!c.InBounds(this.Map))
                 return false;
-
             if (c.Fogged(this.Map))
                 return false;
-
             if (c.InNoBuildEdgeArea(this.Map))
                 return "TooCloseToMapEdge".Translate();
+            if (c.GetFirstBuilding(this.Map) != null)
+                return "Cant PAtrol over buildsings";
+
+            Zone zone = this.Map.zoneManager.ZoneAt(c);
+            if (zone != null && zone.GetType() != this.zoneTypeToPlace)
+                return false;
 
             return true;
         }
 
         public override void DesignateSingleCell(IntVec3 c)
         {
-            Zone existingZone = this.Map.zoneManager.ZoneAt(c);
-            Zone_PatrolPath existingPatrolZone = existingZone as Zone_PatrolPath;
             base.DesignateSingleCell(c);
-
-            Zone newZone = this.Map.zoneManager.ZoneAt(c);
-            Zone_PatrolPath patrolZone = newZone as Zone_PatrolPath;
-
+            Zone zone = this.Map.zoneManager.ZoneAt(c);
+            Zone_PatrolPath patrolZone = zone as Zone_PatrolPath;
             if (patrolZone != null)
             {
                 patrolZone.AddToPath(c);

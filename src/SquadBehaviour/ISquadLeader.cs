@@ -23,20 +23,12 @@ namespace SquadBehaviour
 
         SquadMemberState SquadState { get; }
 
-        //float AggresionDistance { get; }
-        //float FollowDistance { get; }
-        //bool InFormation { get; }
-
         bool ShowExtraOrders { get; set; }
-        //SquadHostility HostilityResponse { get; }
         void SetHositilityResponse(SquadHostility squadHostilityResponse);
 
         void SetFormation(FormationUtils.FormationType formationType);
         void SetFollowDistance(float distance);
         void SetInFormation(bool inFormation);
-
-
-        void ExecuteSquadOrder(SquadOrderDef orderDef, LocalTargetInfo target);
 
         bool AddToSquad(Pawn pawn);
         bool RemoveFromSquad(Pawn pawn, bool kill = true, bool alsoDestroy = false);
@@ -44,6 +36,9 @@ namespace SquadBehaviour
         void ToggleInFormation();
         bool IsPartOfSquad(Pawn pawn);
 
+
+        void IssueGlobalOrder(SquadOrderDef orderDef, LocalTargetInfo target);
+        void IssueSquadOrder(Squad squad, SquadOrderDef orderDef, LocalTargetInfo target);
 
         IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation);
         IntVec3 GetFormationPositionFor(Pawn pawn);

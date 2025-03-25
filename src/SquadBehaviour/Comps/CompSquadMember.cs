@@ -1,4 +1,6 @@
-﻿using Verse;
+﻿using System.Collections.Generic;
+using System.Text;
+using Verse;
 
 namespace SquadBehaviour
 {
@@ -42,6 +44,31 @@ namespace SquadBehaviour
         private Zone_PatrolPath _AssignedPatrol = null;
         Zone_PatrolPath ISquadMember.AssignedPatrol { get => _AssignedPatrol; set => _AssignedPatrol = value; }
 
+
+        private PatrolTracker _PatrolTracker = null;
+        public PatrolTracker PatrolTracker
+        {
+            get
+            {
+                if (_PatrolTracker == null)
+                {
+                    _PatrolTracker = new PatrolTracker(this);
+                }
+
+                return _PatrolTracker;
+            }
+        }
+
+        public void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target)
+        {
+            SquadOrderWorker squadOrderWorker = orderDef.CreateWorker(SquadLeader, this);
+
+            if (squadOrderWorker.CanExecuteOrder(target))
+            {
+                squadOrderWorker.ExecuteOrder(target);
+            }
+        }
+
         public void SetSquadLeader(Pawn squadLeader)
         {
             referencedPawn = squadLeader;
@@ -50,14 +77,11 @@ namespace SquadBehaviour
         public void SetDefendPoint(IntVec3 targetPoint)
         {
             defendPoint = targetPoint;
-            preDefendState = squadMemberState;
-            SetCurrentMemberState(SquadMemberState.DefendPoint);
         }
 
         public void ClearDefendPoint()
         {
             defendPoint = IntVec3.Invalid;
-            SetCurrentMemberState(preDefendState);
         }
 
         public void Notify_SquadMemberAttacked()
@@ -80,16 +104,35 @@ namespace SquadBehaviour
             }
         }
 
-        public override string CompInspectStringExtra()
+        public string GetStatusReport()
         {
-            string baseString = base.CompInspectStringExtra();
+            StringBuilder sb = new StringBuilder();
 
             if (SquadLeader != null && SquadLeader.SquadLeaderPawn != null)
             {
-                baseString += $"Squad Leader : {SquadLeader.SquadLeaderPawn.Name}";
+                sb.Append($"Squad Leader - {SquadLeader.SquadLeaderPawn.Name}");
             }
 
-            return baseString;
+            if (this._CurrentStance != null)
+            {
+                sb.Append($"Duty - {this._CurrentStance.label}");
+            }
+
+            return sb.ToString();
+        }
+
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            if (SquadLeader != null)
+            {
+                yield return new Gizmo_SquadMemberInfo(this);
+            }         
+        }
+
+        public override string CompInspectStringExtra()
+        {
+            string baseString = base.CompInspectStringExtra();
+            return baseString + GetStatusReport();
         }
 
         public override void PostExposeData()
@@ -102,5 +145,7 @@ namespace SquadBehaviour
             Scribe_Values.Look(ref preDefendState, "preDefendState");
             Scribe_Values.Look(ref defendPoint, "defendPoint");
         }
+
+
     }
 }

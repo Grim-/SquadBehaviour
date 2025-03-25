@@ -8,7 +8,7 @@ namespace SquadBehaviour
     {
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember) && squadMember.CurrentState == SquadMemberState.DefendPoint &&
+            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember) &&
                 squadMember.DefendPoint != IntVec3.Invalid)
             {
                 if (!pawn.CanReach(squadMember.DefendPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))

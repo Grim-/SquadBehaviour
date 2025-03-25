@@ -13,6 +13,7 @@ namespace SquadBehaviour
         public FormationUtils.FormationType FormationType = FormationUtils.FormationType.Column;
         public List<Pawn> Members = new List<Pawn>();
         public SquadHostility HostilityResponse = SquadHostility.Defensive;
+        public SquadDutyDef squadDuty;
         public float AggresionDistance = 10f;
         public float FollowDistance = 10f;
         public bool InFormation = true;
@@ -38,6 +39,24 @@ namespace SquadBehaviour
             FormationType = formationType;
             HostilityResponse = hostility;
         }
+        public void IssueSquadOrder(SquadOrderDef duty, LocalTargetInfo target)
+        {
+            foreach (var member in Members)
+            {
+                if (member.IsPartOfSquad(out ISquadMember squadMember))
+                {
+                    squadMember.IssueOrder(duty, target);
+                }
+            }
+        }
+
+        public void IssueMemberOrder(Pawn member, SquadOrderDef duty, LocalTargetInfo target)
+        {
+            if (!Members.Contains(member) || !member.IsPartOfSquad(out ISquadMember squadMember))
+                return;
+
+            squadMember.IssueOrder(duty, target);
+        }
 
         public void SetHositilityResponse(SquadHostility squadHostilityResponse)
         {
@@ -46,6 +65,11 @@ namespace SquadBehaviour
         public void SetFormation(FormationUtils.FormationType formationType)
         {
             FormationType = formationType;
+        }
+
+        public void SetSquadDuty(SquadDutyDef squadDuty)
+        {
+            this.squadDuty = squadDuty;
         }
 
         public void SetFollowDistance(float distance)
@@ -89,6 +113,7 @@ namespace SquadBehaviour
         public void ExposeData()
         {
             Scribe_References.Look(ref Leader, "Leader");
+            Scribe_Defs.Look(ref squadDuty, "squadDuty");
             Scribe_Collections.Look(ref Members, "Members", LookMode.Reference);
             Scribe_Values.Look(ref uniqueID, "uniqueID");
             Scribe_Values.Look(ref FormationType, "FormationType");

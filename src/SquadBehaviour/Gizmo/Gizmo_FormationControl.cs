@@ -25,7 +25,21 @@ namespace SquadBehaviour
 
         public override float GetWidth(float maxWidth)
         {
-            return BaseSize.x + (master.ShowExtraOrders ? ButtonGridWidth : 0);
+            float width = BaseSize.x;
+
+            // Add width for extra orders if showing
+            if (master.ShowExtraOrders)
+            {           
+                // Add width for each squad's container
+                if (master.ActiveSquads != null && master.ActiveSquads.Count > 0)
+                {
+                    width += master.ActiveSquads.Count * ButtonGridWidth;
+                }
+            }
+
+
+
+            return width;
         }
 
         public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
@@ -66,28 +80,44 @@ namespace SquadBehaviour
             }
 
 
-            //Widgets.DrawLineHorizontal(baseRect.x, formationRect.yMax + 4, GetWidth(maxWidth) - 8f);
-
             //next row
             Rect standardOrderGrid = new Rect(baseRect.x, formationRect.yMax + 10f, ButtonGridWidth, 40f);
             DrawStandardOrderGrid(standardOrderGrid);
 
-
             if (master.ShowExtraOrders)
             {
-                //grid to the far right
-                Rect RightButtonGrid = new Rect(baseRect.max.x, topLeft.y, ButtonGridWidth, BaseSize.y);
-                DrawGridButtons(RightButtonGrid);
+                if (master.ActiveSquads != null && master.ActiveSquads.Count > 0)
+                {
+                    float xPosition = baseRect.xMax;
+                    foreach (KeyValuePair<int, Squad> squad in master.ActiveSquads)
+                    {
+                        Rect squadRect = new Rect(xPosition, topLeft.y, ButtonGridWidth, BaseSize.y);
+                        DrawSquadContainer(squadRect, squad.Value);
+                        xPosition += ButtonGridWidth;
+                    }
+                }
             }
 
 
             return new GizmoResult(GizmoState.Clear);
         }
 
+        private void DrawSquadContainer(Rect rect, Squad squad)
+        {
+            GUI.DrawTexture(rect, Command.BGTex);
+            Widgets.Label(rect.TopHalf(), $"Squad {squad.squadID}");
+        }
+
         private void DrawStandardOrderGrid(Rect rect)
         {
-            GridLayout gridLayout = new GridLayout(rect, 4, 1);
+            GridLayout gridLayout = new GridLayout(rect, 3, 1);
             Rect cellRect = gridLayout.GetCellRect(0, 0);
+            DrawDutyFloatGrid(gridLayout);
+            DrawOrderFloatGrid(gridLayout);
+        }
+
+        private void DrawDutyFloatGrid(GridLayout gridLayout)
+        {
             List<FloatMenuGridOption> options = new List<FloatMenuGridOption>();
 
             GUI.DrawTexture(gridLayout.GetCellRect(0, 0), Command.BGTex);
@@ -99,24 +129,18 @@ namespace SquadBehaviour
 
                 }, null, new TipSignal(GetSquadStateString(SquadMemberState.CalledToArms))));
 
-
                 options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.AtEase), () =>
                 {
                     master.SetAllState(SquadMemberState.AtEase);
 
                 }, null, new TipSignal(GetSquadStateString(SquadMemberState.AtEase))));
 
-
-                options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.DoNothing), () =>
-                {
-                    master.SetAllState(SquadMemberState.DoNothing);
-                }, null, new TipSignal(GetSquadStateString(SquadMemberState.DoNothing))));
-
                 Find.WindowStack.Add(new FloatMenuGrid(options));
             }
+        }
 
-
-
+        private void DrawOrderFloatGrid(GridLayout gridLayout)
+        {
             GUI.DrawTexture(gridLayout.GetCellRect(1, 0), Command.BGTex);
             if (Widgets.ButtonImage(gridLayout.GetCellRect(1, 0), TexCommand.SquadAttack, true, "Extra Orders"))
             {
@@ -130,7 +154,7 @@ namespace SquadBehaviour
                         {
                             Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
                             {
-                                master.ExecuteSquadOrder(item, target);
+                                master.IssueGlobalOrder(item, target);
                             });
                         }, null, new TipSignal(item.defName)));
                     }
@@ -138,7 +162,7 @@ namespace SquadBehaviour
                     {
                         extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
                         {
-                            master.ExecuteSquadOrder(item, null);
+                            master.IssueGlobalOrder(item, null);
                         }));
 
                     }
@@ -159,10 +183,6 @@ namespace SquadBehaviour
                     return "Call to arms";
                 case SquadMemberState.AtEase:
                     return "Stand down";
-                case SquadMemberState.DefendPoint:
-                    return "Defend point";
-                case SquadMemberState.Patrol:
-                    return "Patrol";
                 default:
                     return "invalid state";
             }
@@ -179,56 +199,8 @@ namespace SquadBehaviour
                     return TexCommand.Draft;
                 case SquadMemberState.AtEase:
                     return TexCommand.HoldOpen;
-                case SquadMemberState.DefendPoint:
-                    return TexCommand.SquadAttack;
-                case SquadMemberState.Patrol:
-                    return TexCommand.SquadAttack;
                 default:
                     return TexCommand.DesirePower;
-            }
-
-        }
-
-        private void DrawGridButtons(Rect GridButtonRect)
-        {
-            GUI.DrawTexture(GridButtonRect, Command.BGTex);
-
-            GridLayout gridLayout = new GridLayout(GridButtonRect, 3, 2);
-            //DrawSquadOrders(gridLayout);
-        }
-
-        LocalTargetInfo selectedTarget = null;
-        private void DrawSquadOrders(GridLayout gridLayout)
-        {
-            int startX = 0;
-            int startY = 0;
-
-            foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
-            {
-                GUI.DrawTexture(gridLayout.GetCellRect(startX, startY), Command.BGTex);
-
-                if (Widgets.ButtonImage(gridLayout.GetCellRect(startX, startY), item.Icon, true, item.defName))
-                {
-                    if (item.requiresTarget)
-                    {
-                        Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
-                        {
-                            master.ExecuteSquadOrder(item, target);
-                        });
-                    }
-                    else
-                    {
-                        master.ExecuteSquadOrder(item, null);
-                    }
-                }
-
-                startX++;
-
-                if (startX == 3)
-                {
-                    startX = 0;
-                    startY++;
-                }
             }
         }
     }

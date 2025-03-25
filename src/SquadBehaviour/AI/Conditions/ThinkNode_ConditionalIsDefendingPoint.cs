@@ -7,7 +7,7 @@ namespace SquadBehaviour
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember) && squadMember.CurrentState == SquadMemberState.DefendPoint)
+            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember))
             {
                 return true;
             }
