@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadOrderDef>
+    <defName>AttackOrder</defName>
+    <label>Order : Attack</label>
+    <uiIconPath>UI/Commands/AttackMelee</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_Attack</workerClass>
+    <requiresTarget>true</requiresTarget>
+    <targetingParameters>
+      <canTargetPawns>true</canTargetPawns>
+      <canTargetBuildings>true</canTargetBuildings>
+      <canTargetAnimals>true</canTargetAnimals>
+      <mapObjectTargetsMustBeAutoAttackable>true</mapObjectTargetsMustBeAutoAttackable>
+    </targetingParameters>
+  </SquadBehaviour.SquadOrderDef>
+
+  <SquadBehaviour.SquadOrderDef>
+    <defName>PatrolOrder</defName>
+    <label>Order : Patrol</label>
+    <uiIconPath>UI/Commands/AttackMelee</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_PatrolZone</workerClass>
+    <requiresTarget>false</requiresTarget>
+  </SquadBehaviour.SquadOrderDef>
+
+  <SquadBehaviour.SquadOrderDef>
+    <defName>ClearDuty</defName>
+    <label>Order : Clear Duty</label>
+    <uiIconPath>UI/Commands/AttackMelee</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_ClearDuty</workerClass>
+    <requiresTarget>false</requiresTarget>
+  </SquadBehaviour.SquadOrderDef>
+</Defs>

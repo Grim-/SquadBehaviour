@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadDutyDef>
+    <defName>DefendPoint</defName>
+    <label>Defend Point</label>
+    <JobGiver Class="SquadBehaviour.JobGiver_SquadDefendPoint" />
+    <props>
+      <maintainsFormation>true</maintainsFormation>
+      <respondToThreats>true</respondToThreats>
+      <defensiveRadius>20</defensiveRadius>
+    </props>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+  </SquadBehaviour.SquadDutyDef>
+
+  <SquadBehaviour.SquadDutyDef>
+    <defName>PatrolArea</defName>
+    <label>Patrol Area</label>
+    <JobGiver Class="SquadBehaviour.JobGiver_SquadPatrol" />
+    <props>
+      <maintainsFormation>true</maintainsFormation>
+      <respondToThreats>false</respondToThreats>
+      <patrolLeashRadius>30</patrolLeashRadius>
+    </props>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+  </SquadBehaviour.SquadDutyDef>
+
+  <SquadBehaviour.SquadDutyDef>
+    <defName>OffDuty</defName>
+    <label>Off Duty</label>
+    <props>
+      <maintainsFormation>false</maintainsFormation>
+      <respondToThreats>false</respondToThreats>
+    </props>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+  </SquadBehaviour.SquadDutyDef>
+</Defs>

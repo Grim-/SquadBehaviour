@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <JobDef>
+    <defName>Squad_FormationFollow</defName>
+    <driverClass>SquadBehaviour.JobDriver_FormationFollow</driverClass>
+    <reportString>following in formation.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+</Defs>

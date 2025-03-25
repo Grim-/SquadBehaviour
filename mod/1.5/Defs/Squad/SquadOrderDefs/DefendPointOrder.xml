@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadOrderDef>
+    <defName>DefendPointOrder</defName>
+    <label>Order : Defend Point</label>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_DefendPoint</workerClass>
+    <requiresTarget>true</requiresTarget>
+    <targetingParameters>
+      <canTargetLocations>true</canTargetLocations>
+    </targetingParameters>
+  </SquadBehaviour.SquadOrderDef>
+</Defs>

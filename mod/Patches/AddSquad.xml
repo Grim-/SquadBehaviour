@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  <Operation Class="PatchOperationAdd">
+    <xpath>/Defs/ThingDef[@Name="BasePawn"]/inspectorTabs</xpath>
+    <value>
+      <li>SquadBehaviour.ITab_SquadManager</li>
+    </value>
+  </Operation>
+  <Operation Class="PatchOperationAdd">
+    <xpath>/Defs/ThingDef[defName="Human"]/comps</xpath>
+    <value>
+      <li><compClass>SquadBehaviour.CompSquadLeader</compClass></li>
+      <li><compClass>SquadBehaviour.CompSquadMember</compClass></li>
+    </value>
+</Operation>
+</Patch>

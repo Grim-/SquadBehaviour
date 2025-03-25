@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThinkTreeDef>
+    <defName>SquadThinkTree</defName>
+    <insertTag>Humanlike_PreMain</insertTag>
+    <thinkRoot Class="ThinkNode_Priority">
+      <subNodes>
+
+        <!-- 1 If they are part of a squad.... -->
+        <li Class="SquadBehaviour.ThinkNode_ConditionalIsPartOfASquad">
+          <subNodes>
+
+            <li Class="SquadBehaviour.ThinkNode_ConditionalIsPatrolling">
+              <subNodes>
+                <!-- 1.0.1 Check for enemies during patrol and react -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalEnemiesNearPatrol">
+                  <regions>3</regions>
+                  <subNodes>
+                      <li Class="SquadBehaviour.JobGiver_SummonedCreatureFightEnemy" />
+                  </subNodes>
+                </li>
+
+                  <li Class="SquadBehaviour.JobGiver_SquadPatrol" />
+              </subNodes>
+            </li>
+
+
+            <!--1.1 if they have a point to defend, do that above all -->
+            <li Class="SquadBehaviour.ThinkNode_ConditionalIsDefendingPoint">
+              <subNodes>
+
+                <!-- 1.1.1  move to defend point if not there -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtDefendPoint">
+                  <invert>true</invert>
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_MoveToDefendPoint" />
+                  </subNodes>
+                </li>
+
+                <!-- 1.1.2 if at defend position then defend it -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtDefendPoint">
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_SquadDefendPoint">
+                      <targetAcquireRadius>65</targetAcquireRadius>
+                      <targetKeepRadius>72</targetKeepRadius>
+                    </li>
+                  </subNodes>
+                </li>
+              </subNodes>
+            </li>
+
+            <!--2 Split between ToArms and Normal behavior -->
+            <li Class="SquadBehaviour.ThinkNode_ConditionalIsCalledToArms">
+              <!-- ToArms behaviors, fight, in formation, follow loosely -->
+              <subNodes>
+                <!--2.1 -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalSquadHasTarget">
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_SummonedCreatureFightEnemy" />
+                  </subNodes>
+                </li>
+
+                <!--2.2.1 if we should follow in formation -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
+                  <subNodes>
+                    <!-- <li Class="SquadBehaviour.JobGiver_SummonedCreatureFormationFollow" /> -->
+
+                    <!--2.2.1.1 if in formation position just stare -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtFormationPosition">
+                      <subNodes>
+                        <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                      </subNodes>
+                    </li>
+
+                    <!--2.2.1.2 if NOT in formation position move there -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtFormationPosition">
+                      <invert>true</invert>
+                      <subNodes>
+                        <li Class="SquadBehaviour.JobGiver_SquadMemberFollowInFormation" />
+                      </subNodes>
+                    </li>
+
+                  </subNodes>
+                </li>
+
+                <!--2.2.2 if we should NOT follow in formation -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
+                  <invert>true</invert>
+                  <subNodes>
+                    <!-- <li Class="SquadBehaviour.JobGiver_SummonedCreatureFollowMaster" /> -->
+
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalNearSquadLeader">
+                      <invert>true</invert>
+                      <subNodes>
+                        <li Class="SquadBehaviour.JobGiver_SquadMemberFollowLoose" />
+                      </subNodes>
+                    </li>
+
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalNearSquadLeader">
+                      <subNodes>
+                        <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                      </subNodes>
+                    </li>
+                  </subNodes>
+                </li>
+
+              </subNodes>
+            </li>
+
+            <!-- 3 do nothing if told to -->
+            <li Class="SquadBehaviour.ThinkNode_ConditionalShouldDoNothing">
+              <subNodes>
+                <!-- 3.1 -->
+                <li Class="SquadBehaviour.JobGiver_StandAndStareShort">
+                </li>
+              </subNodes>
+            </li>
+          </subNodes>
+        </li>
+      </subNodes>
+    </thinkRoot>
+  </ThinkTreeDef>
+
+</Defs>
