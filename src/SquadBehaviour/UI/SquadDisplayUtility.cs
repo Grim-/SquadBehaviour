@@ -6,124 +6,9 @@ using Verse;
 
 namespace SquadBehaviour
 {
-    // Static class to handle drag and drop operations - not using Unity's Input class
-    public static class DragDropManager
-    {
-        // The currently dragged pawn
-        public static Pawn DraggedPawn { get; private set; }
 
-        // The origin squad of the dragged pawn
-        public static Squad OriginSquad { get; private set; }
-
-        // Whether a drag operation is in progress
-        public static bool IsDragging => DraggedPawn != null;
-
-        // Mouse position where drag started
-        private static Vector2 dragStartPos;
-
-        // Whether we've moved enough to consider this a drag
-        private static bool isDragConfirmed;
-
-        // Minimum distance to move before considering it a drag
-        private const float MIN_DRAG_DISTANCE = 10f;
-
-        // Start drag operation
-        public static void StartDrag(Pawn pawn, Squad originSquad)
-        {
-            if (pawn == null) return;
-
-            DraggedPawn = pawn;
-            OriginSquad = originSquad;
-            dragStartPos = Event.current.mousePosition;
-            isDragConfirmed = false;
-        }
-
-        // Called every frame to update drag state
-        public static void UpdateDrag()
-        {
-            if (!IsDragging) return;
-
-            // Check if we've moved far enough to confirm this is a drag
-            if (!isDragConfirmed)
-            {
-                float distance = Vector2.Distance(dragStartPos, Event.current.mousePosition);
-                if (distance >= MIN_DRAG_DISTANCE)
-                {
-                    isDragConfirmed = true;
-                }
-            }
-
-            // Handle cancel events (right click or escape)
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
-            {
-                EndDrag();
-                Event.current.Use();
-            }
-            else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
-            {
-                EndDrag();
-                Event.current.Use();
-            }
-
-            // This global mouse up handler intentionally left empty
-            // We'll handle mouse up in the squad-specific drop zone checks
-            // and only cancel the drag if no squad processes it
-        }
-
-        // End the drag operation and reset state
-        public static void EndDrag()
-        {
-            DraggedPawn = null;
-            OriginSquad = null;
-            isDragConfirmed = false;
-        }
-
-        // Returns true if this is confirmed as a drag operation
-        public static bool IsDragConfirmed => IsDragging && isDragConfirmed;
-
-        // Try to drop the pawn into a target squad
-        public static bool TryDropOnSquad(Squad targetSquad, ISquadLeader leader)
-        {
-            if (!IsDragging || targetSquad == null || leader == null)
-                return false;
-
-            // Don't process the drop if the drag hasn't been confirmed yet
-            if (!isDragConfirmed)
-                return false;
-
-            if (OriginSquad != null && OriginSquad.squadID == targetSquad.squadID)
-                return false; // Same squad, no change needed
-
-            try
-            {
-                // Remove from original squad
-                if (OriginSquad != null)
-                {
-                    OriginSquad.RemoveMember(DraggedPawn);
-                }
-
-                // Add to new squad
-                targetSquad.AddMember(DraggedPawn);
-
-                Messages.Message($"Transferred {DraggedPawn.LabelShort} to Squad {targetSquad.squadID}", MessageTypeDefOf.TaskCompletion);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error transferring pawn between squads: {ex}");
-                return false;
-            }
-            finally
-            {
-                EndDrag();
-            }
-        }
-    }
-
-    // Modified version of SquadDisplayUtility to support drag and drop
     public class SquadDisplayUtility
     {
-        // Existing fields
         public float SquadRowHeight = 45f;
         public float MemberRowHeight = 24f;
         public float IconSize = 24f;
@@ -131,13 +16,10 @@ namespace SquadBehaviour
         public Dictionary<int, bool> squadFoldouts = new Dictionary<int, bool>();
         public Dictionary<int, bool> settingsFoldouts = new Dictionary<int, bool>();
 
-        // Visual feedback for drag and drop
         private const float DRAG_HIGHLIGHT_ALPHA = 0.3f;
 
-        // Track squad header rectangles for drop detection
         private Dictionary<int, Rect> squadHeaderRects = new Dictionary<int, Rect>();
 
-        // For tracking which pawn is being interacted with
         private Pawn interactingPawn = null;
         private Squad interactingSquad = null;
 
@@ -505,10 +387,10 @@ namespace SquadBehaviour
             if (Widgets.ButtonText(formationRect, "Formation: " + squad.FormationType.ToString()))
             {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (FormationUtils.FormationType formation in Enum.GetValues(typeof(FormationUtils.FormationType)))
+                foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
                 {
                     options.Add(new FloatMenuOption(
-                        formation.ToString(),
+                        formation.label,
                         delegate { squad.SetFormation(formation); }
                     ));
                 }

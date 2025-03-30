@@ -13,9 +13,7 @@ namespace SquadBehaviour
         private static readonly Vector2 BaseSize = new Vector2(140f, 80f);
         private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
         private const float ButtonGridWidth = 140f;
-
-        private Vector2 scrollPosition = new Vector2(0, 0);
-
+        private const float ButtonSize = 35f;
 
         public Gizmo_FormationControl(ISquadLeader master)
         {
@@ -26,19 +24,10 @@ namespace SquadBehaviour
         public override float GetWidth(float maxWidth)
         {
             float width = BaseSize.x;
-
-            // Add width for extra orders if showing
-            if (master.ShowExtraOrders)
-            {           
-                // Add width for each squad's container
-                if (master.ActiveSquads != null && master.ActiveSquads.Count > 0)
-                {
-                    width += master.ActiveSquads.Count * ButtonGridWidth;
-                }
+            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
+            {
+                width += master.ActiveSquads.Count * ButtonGridWidth;
             }
-
-
-
             return width;
         }
 
@@ -47,107 +36,75 @@ namespace SquadBehaviour
             Rect baseRect = new Rect(topLeft.x, topLeft.y, BaseSize.x, BaseSize.y);
             GUI.DrawTexture(baseRect, Command.BGTex);
 
+            float buttonY = topLeft.y;
+            float buttonX = topLeft.x;
 
-            Rect formationRect = new Rect(baseRect.x + 5f, baseRect.y + 5f, baseRect.width - 40f, 22f);
-            if (Widgets.ButtonText(formationRect, "Formation: " + master.FormationType.ToString()))
+            Rect toggleRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+            DrawShowSquadOverviewToggle(toggleRect);
+            buttonX += ButtonSize;
+
+            Rect formationRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+            SquadWidgets.DrawFormationSelector(master, formationRect);
+            buttonX += ButtonSize;
+
+            Rect dutyRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+            DrawDutyFloatGrid(dutyRect);
+            buttonX += ButtonSize;
+
+            Rect orderRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+            DrawOrderFloatGrid(orderRect);
+
+            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (FormationUtils.FormationType formation in Enum.GetValues(typeof(FormationUtils.FormationType)))
+                float xPosition = topLeft.x + BaseSize.x;
+                float extraWidth = master.ActiveSquads.Count * ButtonGridWidth;
+                Rect extraRect = new Rect(xPosition, topLeft.y, extraWidth, BaseSize.y);
+                GUI.DrawTexture(extraRect, Command.BGTex);
+
+                float squadButtonX = xPosition;
+                foreach (KeyValuePair<int, Squad> squad in master.ActiveSquads)
                 {
-                    options.Add(new FloatMenuOption(
-                        formation.ToString(),
-                        delegate { master.SetFormation(formation); }
-                    ));
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
-            if (Mouse.IsOver(formationRect))
-            {
-                TooltipHandler.TipRegion(formationRect, "Change formation");
-            }
-
-
-            //at side of formation button
-            Rect toggleRect = new Rect(formationRect.xMax + 4f, formationRect.y, 22f, 22f);
-            if (Widgets.ButtonImage(toggleRect, master.ShowExtraOrders ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
-            {
-                master.ShowExtraOrders = !master.ShowExtraOrders;
-            }
-
-            if (Mouse.IsOver(toggleRect))
-            {
-                TooltipHandler.TipRegion(toggleRect, "Show Extra");
-            }
-
-
-            //next row
-            Rect standardOrderGrid = new Rect(baseRect.x, formationRect.yMax + 10f, ButtonGridWidth, 40f);
-            DrawStandardOrderGrid(standardOrderGrid);
-
-            if (master.ShowExtraOrders)
-            {
-                if (master.ActiveSquads != null && master.ActiveSquads.Count > 0)
-                {
-                    float xPosition = baseRect.xMax;
-                    foreach (KeyValuePair<int, Squad> squad in master.ActiveSquads)
-                    {
-                        Rect squadRect = new Rect(xPosition, topLeft.y, ButtonGridWidth, BaseSize.y);
-                        DrawSquadContainer(squadRect, squad.Value);
-                        xPosition += ButtonGridWidth;
-                    }
+                    Rect squadCellRect = new Rect(squadButtonX, topLeft.y, ButtonGridWidth, BaseSize.y);
+                    DrawSquadContainer(squadCellRect, squad.Value);
+                    squadButtonX += ButtonGridWidth;
                 }
             }
-
 
             return new GizmoResult(GizmoState.Clear);
         }
 
-        private void DrawSquadContainer(Rect rect, Squad squad)
+        private void DrawShowSquadOverviewToggle(Rect rect)
         {
-            GUI.DrawTexture(rect, Command.BGTex);
-            Widgets.Label(rect.TopHalf(), $"Squad {squad.squadID}");
-        }
-
-        private void DrawStandardOrderGrid(Rect rect)
-        {
-            GridLayout gridLayout = new GridLayout(rect, 3, 1);
-            Rect cellRect = gridLayout.GetCellRect(0, 0);
-            DrawDutyFloatGrid(gridLayout);
-            DrawOrderFloatGrid(gridLayout);
-        }
-
-        private void DrawDutyFloatGrid(GridLayout gridLayout)
-        {
-            List<FloatMenuGridOption> options = new List<FloatMenuGridOption>();
-
-            GUI.DrawTexture(gridLayout.GetCellRect(0, 0), Command.BGTex);
-            if (Widgets.ButtonImage(gridLayout.GetCellRect(0, 0), GetCommandTexture(master.SquadState), true, GetSquadStateString(master.SquadState)))
+            if (Widgets.ButtonImage(rect, master.ShowExtraOrders ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
             {
-                options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.CalledToArms), () =>
-                {
-                    master.SetAllState(SquadMemberState.CalledToArms);
+                master.ShowExtraOrders = !master.ShowExtraOrders;
+            }
 
-                }, null, new TipSignal(GetSquadStateString(SquadMemberState.CalledToArms))));
-
-                options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.AtEase), () =>
-                {
-                    master.SetAllState(SquadMemberState.AtEase);
-
-                }, null, new TipSignal(GetSquadStateString(SquadMemberState.AtEase))));
-
-                Find.WindowStack.Add(new FloatMenuGrid(options));
+            if (Mouse.IsOver(rect))
+            {
+                TooltipHandler.TipRegion(rect, "Show Extra Orders");
             }
         }
 
-        private void DrawOrderFloatGrid(GridLayout gridLayout)
+        private void DrawSquadContainer(Rect rect, Squad squad)
         {
-            GUI.DrawTexture(gridLayout.GetCellRect(1, 0), Command.BGTex);
-            if (Widgets.ButtonImage(gridLayout.GetCellRect(1, 0), TexCommand.SquadAttack, true, "Extra Orders"))
+            Widgets.Label(rect, $"Squad {squad.squadID}");
+        }
+
+        private void DrawDutyFloatGrid(Rect rect)
+        {
+            SquadWidgets.DrawGlobalStateSelector(this.master, rect);
+        }
+
+        private void DrawOrderFloatGrid(Rect rect)
+        {
+            if (Widgets.ButtonImage(rect, TexCommand.SquadAttack, true, "Extra Orders"))
             {
                 List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
 
                 foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
                 {
+
                     if (item.requiresTarget)
                     {
                         extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
@@ -163,44 +120,11 @@ namespace SquadBehaviour
                         extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
                         {
                             master.IssueGlobalOrder(item, null);
-                        }));
-
+                        }, null, new TipSignal(item.defName)));
                     }
                 }
 
                 Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
-            }
-        }
-
-
-        private string GetSquadStateString(SquadMemberState CalledToArms)
-        {
-            switch (CalledToArms)
-            {
-                case SquadMemberState.DoNothing:
-                    return "Do nothin";
-                case SquadMemberState.CalledToArms:
-                    return "Call to arms";
-                case SquadMemberState.AtEase:
-                    return "Stand down";
-                default:
-                    return "invalid state";
-            }
-        }
-
-        private Texture2D GetCommandTexture(SquadMemberState CalledToArms)
-        {
-
-            switch (CalledToArms)
-            {
-                case SquadMemberState.DoNothing:
-                    return TexCommand.ForbidOn;
-                case SquadMemberState.CalledToArms:
-                    return TexCommand.Draft;
-                case SquadMemberState.AtEase:
-                    return TexCommand.HoldOpen;
-                default:
-                    return TexCommand.DesirePower;
             }
         }
     }

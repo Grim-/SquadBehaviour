@@ -13,7 +13,7 @@ namespace SquadBehaviour
         IntVec3 LeaderPosition { get; }
         List<Pawn> SquadMembersPawns { get; }
         List<ISquadMember> SquadMembers { get; }
-        FormationUtils.FormationType FormationType { get; }
+        FormationDef FormationType { get; }
 
 
         Dictionary<int, Squad> ActiveSquads { get; }
@@ -26,7 +26,7 @@ namespace SquadBehaviour
         bool ShowExtraOrders { get; set; }
         void SetHositilityResponse(SquadHostility squadHostilityResponse);
 
-        void SetFormation(FormationUtils.FormationType formationType);
+        void SetFormation(FormationDef formationType);
         void SetFollowDistance(float distance);
         void SetInFormation(bool inFormation);
 

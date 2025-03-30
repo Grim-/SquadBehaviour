@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 using Verse;
 
 namespace SquadBehaviour
@@ -101,6 +102,23 @@ namespace SquadBehaviour
             if (Pawn?.CurJob != null)
             {
                 Pawn.jobs.EndCurrentJob(Verse.AI.JobCondition.InterruptForced);
+            }
+        }
+
+        public override void PostDraw()
+        {
+            base.PostDraw();
+            if (squadMemberState == SquadMemberState.CalledToArms && _CurrentStance != null && _CurrentStance.Tex != null)
+            {
+                Vector3 overheadPos = Pawn.DrawPos;
+                overheadPos.y = AltitudeLayer.MetaOverlays.AltitudeFor();
+                overheadPos.y += 0.1f; // Adjust to avoid z-fighting.
+                overheadPos.z += 0.5f; // Adjust vertical position above the pawn.
+
+                Vector2 onScreenPos = overheadPos.MapToUIPosition();
+                Rect iconRect = new Rect(onScreenPos.x - 16f, onScreenPos.y - 32f, 32f, 32f); // Adjust size and position.
+
+                GUI.DrawTexture(iconRect, _CurrentStance.Tex);
             }
         }
 

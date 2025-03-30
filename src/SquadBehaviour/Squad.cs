@@ -9,8 +9,29 @@ namespace SquadBehaviour
         public int uniqueID = -1;
         public string squadName = "Squad";
         public Pawn Leader;
-        public ISquadLeader SquadLeader;
-        public FormationUtils.FormationType FormationType = FormationUtils.FormationType.Column;
+
+
+        private ISquadLeader _SquadLeader;
+        public ISquadLeader SquadLeader
+        {
+            get
+            {
+                if (_SquadLeader == null)
+                {
+                    if (Leader.TryGetSquadLeader(out ISquadLeader leader))
+                    {
+                        _SquadLeader = leader;
+                    }
+                }
+
+                return _SquadLeader;
+            }
+        }
+
+        public FormationDef FormationType = SquadDefOf.ColumnFormation;
+
+        private FormationWorker formationWorker;
+
         public List<Pawn> Members = new List<Pawn>();
         public SquadHostility HostilityResponse = SquadHostility.Defensive;
         public SquadDutyDef squadDuty;
@@ -23,20 +44,12 @@ namespace SquadBehaviour
 
         }
 
-        public Squad(int squadID, Pawn leader, FormationUtils.FormationType formationType, SquadHostility hostility)
+        public Squad(int squadID, Pawn leader, FormationDef formationType, SquadHostility hostility)
         {
             this.squadID = squadID;
             this.uniqueID = Find.UniqueIDsManager.GetNextThingID();
             Leader = leader;
-
-            if (!Leader.TryGetSquadLeader(out ISquadLeader squadLeader))
-            {
-                //Log.Error("Passed a pawn who is not a squad leader");
-                return;
-            }
-
-            SquadLeader = squadLeader;
-            FormationType = formationType;
+            SetFormation(formationType);
             HostilityResponse = hostility;
         }
         public void IssueSquadOrder(SquadOrderDef duty, LocalTargetInfo target)
@@ -62,9 +75,10 @@ namespace SquadBehaviour
         {
             HostilityResponse = squadHostilityResponse;
         }
-        public void SetFormation(FormationUtils.FormationType formationType)
+        public void SetFormation(FormationDef formationType)
         {
             FormationType = formationType;
+            formationWorker = formationType.CreateWorker();
         }
 
         public void SetSquadDuty(SquadDutyDef squadDuty)
@@ -102,12 +116,20 @@ namespace SquadBehaviour
                 return IntVec3.Invalid;
             }
 
-            return FormationUtils.GetFormationPosition(
-                FormationType,
-                Origin.ToVector3(),
-                OriginRotation,
-                Members.IndexOf(pawn),
-                Members.Count);
+            if (formationWorker != null)
+            {
+                return formationWorker.GetFormationPosition(Origin.ToVector3(), Members.IndexOf(pawn), OriginRotation, Members.Count);
+            }
+            else
+            {
+                return FormationUtils.GetFormationPosition(
+                    FormationUtils.FormationType.Column,
+                    Origin.ToVector3(),
+                    OriginRotation,
+                    Members.IndexOf(pawn),
+                    Members.Count);
+            }
+
         }
 
         public void ExposeData()
@@ -116,7 +138,7 @@ namespace SquadBehaviour
             Scribe_Defs.Look(ref squadDuty, "squadDuty");
             Scribe_Collections.Look(ref Members, "Members", LookMode.Reference);
             Scribe_Values.Look(ref uniqueID, "uniqueID");
-            Scribe_Values.Look(ref FormationType, "FormationType");
+            Scribe_Defs.Look(ref FormationType, "FormationType");
             Scribe_Values.Look(ref squadID, "squadID");
             Scribe_Values.Look(ref HostilityResponse, "HostilityResponse");
         }

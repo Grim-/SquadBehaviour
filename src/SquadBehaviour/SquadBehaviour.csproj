@@ -81,6 +81,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\SquadWidgets.cs" />
     <Compile Include="Duty\JobGiver_SquadDuty.cs" />
     <Compile Include="Duty\JobGiver_SquadPatrol.cs" />
     <Compile Include="Orders\SquadOrder_ClearDuty.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Gizmo\Gizmo_FormationControl.cs" />
     <Compile Include="Patrol\PatrolUtil.cs" />
     <Compile Include="ThinkNode_ConditionalHasNoLeader.cs" />
+    <Compile Include="UI\DragDropManager.cs" />
     <Compile Include="UI\ITab_SquadManager.cs" />
     <Compile Include="AI\JobDriver_FormationFollow.cs" />
     <Compile Include="AI\JobGiver_SummonedCreatureFightEnemy.cs" />

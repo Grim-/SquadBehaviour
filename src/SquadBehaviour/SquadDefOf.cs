@@ -12,5 +12,7 @@ namespace SquadBehaviour
 
         public static SquadDutyDef DefendPoint;
         public static SquadDutyDef PatrolArea;
+
+        public static FormationDef ColumnFormation;
     }
 }

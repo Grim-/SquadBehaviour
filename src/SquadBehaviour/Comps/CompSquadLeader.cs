@@ -10,7 +10,7 @@ namespace SquadBehaviour
         private HashSet<Pawn> activeSquadMembers = new HashSet<Pawn>();
         private List<ISquadMember> _SquadMembers = new List<ISquadMember>();
         private float _FollowDistance = 5f;
-        private FormationUtils.FormationType _FormationType = FormationUtils.FormationType.Column;
+        private FormationDef _FormationType = SquadDefOf.ColumnFormation;
         private bool InFormation = true;
         private bool ShowExtraOrders = true;
         private SquadHostility SquadHostilityResponse = SquadHostility.Aggressive;
@@ -21,7 +21,7 @@ namespace SquadBehaviour
         public IntVec3 LeaderPosition => SquadLeaderPawn.Position;
         public List<Pawn> SquadMembersPawns => activeSquadMembers.ToList();
         public List<ISquadMember> SquadMembers => _SquadMembers;
-        public FormationUtils.FormationType FormationType => _FormationType;
+        public FormationDef FormationType => _FormationType;
         public float FollowDistance => _FollowDistance;
         // bool ISquadLeader.InFormation => this.InFormation;
         bool ISquadLeader.ShowExtraOrders { get => this.ShowExtraOrders; set => this.ShowExtraOrders = value; }
@@ -36,17 +36,8 @@ namespace SquadBehaviour
         private Dictionary<int, Squad> _ActiveSquads = new Dictionary<int, Squad>();
         public Dictionary<int, Squad> ActiveSquads => _ActiveSquads;
 
-        public override void PostExposeData()
-        {
-            base.PostExposeData();
-            Scribe_Collections.Look(ref activeSquadMembers, "activeSquadMembers", LookMode.Reference);
-            Scribe_Values.Look(ref _FormationType, "formationType", FormationUtils.FormationType.Column);
-            Scribe_Values.Look(ref _FollowDistance, "followDistance", 5f);
-            Scribe_Values.Look(ref InFormation, "inFormation", true);
-            Scribe_Values.Look(ref SquadHostilityResponse, "SquadHostilityResponse");
-        }
 
-        public void SetFormation(FormationUtils.FormationType formationType) => _FormationType = formationType;
+        public void SetFormation(FormationDef formationType) => _FormationType = formationType;
         public void SetFollowDistance(float distance) => _FollowDistance = distance;
         public void SetInFormation(bool inFormation) => InFormation = inFormation;
         public void ToggleInFormation() => InFormation = !InFormation;
@@ -174,6 +165,18 @@ namespace SquadBehaviour
         public bool HasAnySquad()
         {
             return _ActiveSquads != null && _ActiveSquads.Count > 0;
+        }
+
+
+        public override void PostExposeData()
+        {
+            base.PostExposeData();
+            Scribe_Collections.Look(ref activeSquadMembers, "activeSquadMembers", LookMode.Reference);
+            Scribe_Collections.Look(ref _ActiveSquads, "activeSquads", LookMode.Value, LookMode.Deep);
+            Scribe_Defs.Look(ref _FormationType, "formationType");
+            Scribe_Values.Look(ref _FollowDistance, "followDistance", 5f);
+            Scribe_Values.Look(ref InFormation, "inFormation", true);
+            Scribe_Values.Look(ref SquadHostilityResponse, "SquadHostilityResponse");
         }
     }
 }

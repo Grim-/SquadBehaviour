@@ -218,17 +218,16 @@ namespace SquadBehaviour
 
                 // Formation type
                 Rect formationRect = headerLayout.NextRect(140f, 10f);
-                if (Widgets.ButtonText(formationRect, $"Formation: {squad.FormationType}"))
+                if (Widgets.ButtonImage(formationRect, currentLeader.FormationType.Icon))
                 {
                     List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-                    foreach (FormationUtils.FormationType formationType in Enum.GetValues(typeof(FormationUtils.FormationType)))
+                    foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
                     {
-                        options.Add(new FloatMenuOption(formationType.ToString(), () => {
-                            squad.SetFormation(formationType);
-                        }));
+                        options.Add(new FloatMenuOption(
+                            formation.label,
+                            delegate { currentLeader.SetFormation(formation); }
+                        ));
                     }
-
                     Find.WindowStack.Add(new FloatMenu(options));
                 }
 

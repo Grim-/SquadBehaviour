@@ -25,7 +25,7 @@ namespace SquadBehaviour
         }
 
         public bool requiresTarget = true;
-        public bool isGeneralOrder = false;
+        public OrderType orderType = OrderType.Unit;
         public TargetingParameters targetingParameters;
         public SquadOrderSettings orderSettings;
         public Type workerClass;
@@ -38,5 +38,13 @@ namespace SquadBehaviour
             SquadOrderWorker.SquadOrderSettings = orderSettings;
             return SquadOrderWorker;
         }
+    }
+
+    [Flags]
+    public enum OrderType
+    {
+        None = 0,
+        Global = 2,
+        Unit = 4
     }
 }
