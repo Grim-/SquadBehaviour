@@ -22,6 +22,14 @@
     <requiresTarget>false</requiresTarget>
   </SquadBehaviour.SquadOrderDef>
 
+  <!-- <SquadBehaviour.SquadOrderDef>
+    <defName>GlobalPatrolZoneOrder</defName>
+    <label>Global Order: Patrol Zone</label>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+    <workerClass>SquadBehaviour.GlobalSquadOrder_PatrolZone</workerClass>
+    <requiresTarget>false</requiresTarget>
+  </SquadBehaviour.SquadOrderDef> -->
+
   <SquadBehaviour.SquadOrderDef>
     <defName>ClearDuty</defName>
     <label>Order : Clear Duty</label>
