@@ -101,13 +101,27 @@ namespace SquadBehaviour
             if (!Members.Contains(pawn))
             {
                 Members.Add(pawn);
+                if (pawn.TryGetSquadMember(out ISquadMember squadMember))
+                {
+                    squadMember.AssignedSquad = this;
+                    squadMember.SetSquadLeader(this.SquadLeader.SquadLeaderPawn);
+                }
             }
         }
 
         public void RemoveMember(Pawn pawn)
         {
-            Members.Remove(pawn);
+            if (Members.Contains(pawn))
+            {
+                Members.Remove(pawn);
+                if (pawn.TryGetSquadMember(out ISquadMember squadMember))
+                {
+                    squadMember.SetSquadLeader(null);
+                    squadMember.AssignedSquad = null;
+                }
+            }        
         }
+
         public IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation)
         {
             if (!Members.Contains(pawn))

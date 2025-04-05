@@ -113,7 +113,7 @@
     <Compile Include="Orders\SquadOrder_RunToPointAndExplode.cs" />
     <Compile Include="Gizmo\Gizmo_FormationControl.cs" />
     <Compile Include="Patrol\PatrolUtil.cs" />
-    <Compile Include="ThinkNode_ConditionalHasNoLeader.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalHasNoLeader.cs" />
     <Compile Include="UI\DragDropManager.cs" />
     <Compile Include="UI\ITab_SquadManager.cs" />
     <Compile Include="AI\JobDriver_FormationFollow.cs" />
@@ -138,8 +138,8 @@
     <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldDoNothing.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalShouldFollowFormation.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadHasTarget.cs" />
-    <Compile Include="Comps\CompSquadLeader.cs" />
-    <Compile Include="Comps\CompSquadMember.cs" />
+    <Compile Include="Comps\Hediff_SquadLeader.cs" />
+    <Compile Include="Comps\Hediff_SquadMember.cs" />
     <Compile Include="SquadManagerWindow.cs" />
     <Compile Include="FormationUtils.cs" />
     <Compile Include="ISquadLeader.cs" />

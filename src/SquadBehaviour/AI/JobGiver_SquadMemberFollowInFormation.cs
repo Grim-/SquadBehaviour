@@ -51,7 +51,7 @@ namespace SquadBehaviour
                 return null;
             }
 
-            var activeUndead = memeber.SquadLeader.SquadMembersPawns;
+            var activeUndead = memeber.SquadLeader.AllSquadsPawns;
             if (activeUndead == null || !activeUndead.Contains(pawn))
             {
                 return null;

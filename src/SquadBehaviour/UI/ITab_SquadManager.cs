@@ -14,24 +14,36 @@ namespace SquadBehaviour
         private int CurrentTabIndex = 0;
         private SquadDisplayUtility squadDisplay;
 
-        private ISquadLeader _UndeadMaster;
-        private ISquadLeader UndeadMaster
+        private ISquadLeader _SquadLeader;
+        private ISquadLeader SquadLeader
         {
             get
             {
-                if (_UndeadMaster == null)
+                if (_SquadLeader == null)
                 {
-                    if (this.SelPawn.TryGetSquadLeader(out ISquadLeader squadLeader))
+                    if (this.SelPawn.TryGetSquadLeader(out ISquadLeader squadLeader) && squadLeader.ActiveSquads.Count > 0)
                     {
-                        _UndeadMaster = squadLeader;
+                        _SquadLeader = squadLeader;
                     }      
                 }
 
-                return _UndeadMaster;
+                return _SquadLeader;
             }
         }
 
-        public override bool IsVisible => base.IsVisible && this.SelPawn != null && this.SelPawn.TryGetSquadLeader(out ISquadLeader squadLeader);
+        public override bool IsVisible
+        {
+            get
+            {
+                if (SquadLeader == null)
+                {
+                    //Log.Message($"Squad leader not found for {SelPawn}");
+                    return false;
+                }
+
+                return base.IsVisible && this.SelPawn != null && SquadLeader != null;
+            }
+        }
 
         public ITab_SquadManager()
         {
@@ -47,7 +59,7 @@ namespace SquadBehaviour
             Rect rect = new Rect(0f, 0f, this.size.x, this.size.y).ContractedBy(10f);
             Pawn pawn = (Pawn)this.SelPawn;
 
-            if (pawn != null && UndeadMaster != null)
+            if (pawn != null && SquadLeader != null)
             {
                 float controlButtonsHeight = BUTTON_HEIGHT + SPACING;
                 float dividerHeight = 10f;
@@ -83,13 +95,13 @@ namespace SquadBehaviour
             Rect squadButtonRect = new Rect(willBarRect.xMax + buttonMargin, rect.y, squadButtonWidth, buttonHeight);
             if (Widgets.ButtonText(squadButtonRect, "Squad"))
             {
-                Find.WindowStack.Add(new SquadManagerWindow(this.UndeadMaster));
+                Find.WindowStack.Add(new SquadManagerWindow(this.SquadLeader));
             }
         }
 
         private void DrawSquadList(Rect rect)
         {
-            if (UndeadMaster.ActiveSquads == null || UndeadMaster.ActiveSquads.Count == 0)
+            if (SquadLeader.ActiveSquads == null || SquadLeader.ActiveSquads.Count == 0)
             {
                 Text.Anchor = TextAnchor.MiddleCenter;
                 Widgets.Label(rect, "No active squads. Create squads in the Squad Manager.");
@@ -98,7 +110,7 @@ namespace SquadBehaviour
             }
 
 
-            squadDisplay.DrawSquadsList(rect, ref scrollPosition, UndeadMaster.ActiveSquads, UndeadMaster);
+            squadDisplay.DrawSquadsList(rect, ref scrollPosition, SquadLeader.ActiveSquads, SquadLeader);
         }
     }
 }

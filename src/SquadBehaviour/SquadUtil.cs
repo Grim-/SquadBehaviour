@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using Verse;
 
 namespace SquadBehaviour
@@ -45,31 +46,57 @@ namespace SquadBehaviour
         }
 
 
+
+        private static Dictionary<Pawn, ISquadLeader> SquadLeaderCache = new Dictionary<Pawn, ISquadLeader>();
+
         public static bool TryGetSquadLeader(this Pawn pawn, out ISquadLeader SquadLeader)
         {
-            SquadLeader = null;
-            if (!CanEverBeSquadLeader(pawn))
+            if (SquadLeaderCache.ContainsKey(pawn) && SquadLeaderCache[pawn] != null)
             {
-                return false;
-            }
-
-            // Check for comp first
-            CompSquadLeader comp = pawn.GetComp<CompSquadLeader>();
-            if (comp != null && comp.HasAnySquad())
-            {
-                SquadLeader = comp;
+                SquadLeader = SquadLeaderCache[pawn];
                 return true;
             }
-
-            // Then check hediffs
-            foreach (var hediff in pawn.health.hediffSet.hediffs)
+            else
             {
-                if (hediff is ISquadLeader squadLeaderHediff && squadLeaderHediff.ActiveSquads != null && squadLeaderHediff.ActiveSquads.Count > 0)
+                SquadLeader = null;
+                foreach (var hediff in pawn.health.hediffSet.hediffs)
                 {
-                    SquadLeader = squadLeaderHediff;
-                    return true;
+                    if (hediff is ISquadLeader squadLeaderHediff)
+                    {
+                        SquadLeader = squadLeaderHediff;
+                        SquadLeaderCache.Add(pawn, SquadLeader);
+                        return true;
+                    }
                 }
             }
+            return false;
+        }
+
+
+        private static Dictionary<Pawn, ISquadMember> SquadMemberCache = new Dictionary<Pawn, ISquadMember>();
+
+        public static bool TryGetSquadMember(this Pawn pawn, out ISquadMember SquadMember)
+        {
+            if (SquadMemberCache.ContainsKey(pawn) && SquadMemberCache[pawn] != null)
+            {
+                SquadMember = SquadMemberCache[pawn];
+                return true;
+            }
+            else
+            {
+                SquadMember = null;
+                foreach (var hediff in pawn.health.hediffSet.hediffs)
+                {
+                    if (hediff is ISquadMember squadMemberHediff)
+                    {
+                        SquadMember = squadMemberHediff;
+                        SquadMemberCache.Add(pawn, SquadMember);
+                        return true;
+                    }
+                }
+            }
+
+
 
             return false;
         }
@@ -77,25 +104,11 @@ namespace SquadBehaviour
         public static bool IsPartOfSquad(this Pawn pawn, out ISquadMember SquadMember)
         {
             SquadMember = null;
-
-            // Check for comp first
-            CompSquadMember comp = pawn.GetComp<CompSquadMember>();
-            if (comp != null && comp.SquadLeader != null)
+            if (TryGetSquadMember(pawn, out ISquadMember foundMember) && foundMember.AssignedSquad != null)
             {
-                SquadMember = comp;
+                SquadMember = foundMember;
                 return true;
             }
-
-            // Then check hediffs
-            foreach (var hediff in pawn.health.hediffSet.hediffs)
-            {
-                if (hediff is ISquadMember squadMemberHediff && squadMemberHediff.SquadLeader != null)
-                {
-                    SquadMember = squadMemberHediff;
-                    return true;
-                }
-            }
-
             return false;
         }
 

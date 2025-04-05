@@ -5,20 +5,19 @@ using Verse;
 
 namespace SquadBehaviour
 {
-    public class CompSquadMember : ThingComp, ISquadMember
+    public class Hediff_SquadMember : HediffWithComps, ISquadMember
     {
-        private Pawn referencedPawn;
-        private SquadMemberState squadMemberState = SquadMemberState.CalledToArms;
-        private SquadMemberState preDefendState = SquadMemberState.CalledToArms;
-        private IntVec3 defendPoint = IntVec3.Invalid;
+        protected Pawn referencedPawn;
+        protected SquadMemberState squadMemberState = SquadMemberState.CalledToArms;
+        protected IntVec3 defendPoint = IntVec3.Invalid;
 
-        public IntVec3 DefendPoint => defendPoint;
+        public virtual IntVec3 DefendPoint => defendPoint;
         public bool HasDefendPoint => defendPoint != IntVec3.Invalid;
-        public Pawn Pawn => this.parent as Pawn;
+        public Pawn Pawn => this.pawn;
         public SquadMemberState CurrentState => squadMemberState;
 
         private ISquadLeader _SquadLeader;
-        public ISquadLeader SquadLeader
+        public virtual ISquadLeader SquadLeader
         {
             get
             {
@@ -26,7 +25,7 @@ namespace SquadBehaviour
                 {
                     if (referencedPawn.TryGetSquadLeader(out ISquadLeader squadLeader))
                     {
-                        _SquadLeader =  squadLeader;
+                        _SquadLeader = squadLeader;
                     }
                 }
                 return _SquadLeader;
@@ -105,23 +104,6 @@ namespace SquadBehaviour
             }
         }
 
-        public override void PostDraw()
-        {
-            base.PostDraw();
-            if (squadMemberState == SquadMemberState.CalledToArms && _CurrentStance != null && _CurrentStance.Tex != null)
-            {
-                Vector3 overheadPos = Pawn.DrawPos;
-                overheadPos.y = AltitudeLayer.MetaOverlays.AltitudeFor();
-                overheadPos.y += 0.1f; // Adjust to avoid z-fighting.
-                overheadPos.z += 0.5f; // Adjust vertical position above the pawn.
-
-                Vector2 onScreenPos = overheadPos.MapToUIPosition();
-                Rect iconRect = new Rect(onScreenPos.x - 16f, onScreenPos.y - 32f, 32f, 32f); // Adjust size and position.
-
-                GUI.DrawTexture(iconRect, _CurrentStance.Tex);
-            }
-        }
-
         public string GetStatusReport()
         {
             StringBuilder sb = new StringBuilder();
@@ -139,28 +121,51 @@ namespace SquadBehaviour
             return sb.ToString();
         }
 
-        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        public override IEnumerable<Gizmo> GetGizmos()
         {
             if (SquadLeader != null)
             {
                 yield return new Gizmo_SquadMemberInfo(this);
-            }         
+            }
+
+            yield return new Command_Action()
+            {
+                defaultLabel = $"Current State {this.CurrentState}",
+                action = () =>
+                {
+                    List<FloatMenuOption> gridOptions = new List<FloatMenuOption>();
+                    gridOptions.Add(new FloatMenuOption("Call To Arms", () =>
+                    {
+                        this.SetCurrentMemberState(SquadMemberState.CalledToArms);
+                    }));
+
+                    gridOptions.Add(new FloatMenuOption("At Ease", () =>
+                    {
+                        this.SetCurrentMemberState(SquadMemberState.AtEase);
+                    }));
+
+                    gridOptions.Add(new FloatMenuOption("Do Nothing", () =>
+                    {
+                        this.SetCurrentMemberState(SquadMemberState.DoNothing);
+                    }));
+
+                    Find.WindowStack.Add(new FloatMenu(gridOptions));
+                }
+            };
         }
 
-        public override string CompInspectStringExtra()
+        public override string GetInspectString()
         {
-            string baseString = base.CompInspectStringExtra();
+            string baseString = base.GetInspectString();
             return baseString + GetStatusReport();
         }
-
-        public override void PostExposeData()
+        public override void ExposeData()
         {
-            base.PostExposeData();
+            base.ExposeData();
 
             Scribe_References.Look(ref _AssignedSquad, "assignedSquad");
             Scribe_References.Look(ref referencedPawn, "referencedPawn");
             Scribe_Values.Look(ref squadMemberState, "squadMemberState");
-            Scribe_Values.Look(ref preDefendState, "preDefendState");
             Scribe_Values.Look(ref defendPoint, "defendPoint");
         }
 
