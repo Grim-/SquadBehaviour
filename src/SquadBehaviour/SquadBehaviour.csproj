@@ -81,7 +81,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comps\SquadWidgets.cs" />
+    <Compile Include="AI\AbilityUtility.cs" />
+    <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />
+    <Compile Include="UI\SquadWidgets.cs" />
     <Compile Include="Duty\JobGiver_SquadDuty.cs" />
     <Compile Include="Duty\JobGiver_SquadPatrol.cs" />
     <Compile Include="Orders\SquadOrder_ClearDuty.cs" />

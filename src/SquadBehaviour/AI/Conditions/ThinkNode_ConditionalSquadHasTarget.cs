@@ -9,57 +9,29 @@ namespace SquadBehaviour
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            if (pawn == null)
+            if (pawn == null || !pawn.Spawned || pawn.Dead || pawn.mindState == null)
             {
                 return false;
             }
 
-            if (!pawn.Spawned)
+            if (!pawn.IsPartOfSquad(out ISquadMember squadMember) || squadMember.AssignedSquad == null)
             {
                 return false;
             }
 
-            if (!pawn.IsPartOfSquad(out ISquadMember squadMember))
-            {
-                Log.Message("squadLeader is null");
-                return false;
-            }
-            if (pawn.mindState?.enemyTarget != null || squadMember.SquadLeader.SquadLeaderPawn.mindState?.enemyTarget != null)
+            if (squadMember.AssignedSquad.HasEnemiesNearby())
             {
                 return true;
             }
 
-            //not sure if should add this
-            //if (squadMember.SquadLeader.SquadMembersPawns != null)
-            //{
-            //    foreach (var item in squadMember.SquadLeader.SquadMembersPawns)
-            //    {
-            //        if (item.mindState?.enemyTarget != null || item.mindState?.meleeThreat != null)
-            //        {
-            //            return true;
-            //        }
-
-            //    }
-            //}
-
-            //if (squadMember.AssignedSquad != null)
-            //{
-            //    foreach (var item in squadMember.SquadLeader.SquadMembersPawns)
-            //    {
-            //        if (item.mindState?.enemyTarget != null || item.mindState?.meleeThreat != null)
-            //        {
-            //            return true;
-            //        }
-
-            //    }
-            //}
-
-            if (pawn.Spawned && squadMember.SquadLeader.SquadLeaderPawn.Spawned)
+            if (pawn.mindState.enemyTarget != null)
             {
-                if (PawnUtility.EnemiesAreNearby(pawn, Mathf.RoundToInt(squadMember.AssignedSquad.AggresionDistance), true))
-                {
-                    return true;
-                }
+                return true;
+            }
+
+            if (squadMember.AssignedSquad.LeaderHasValidTarget())
+            {
+                return true;
             }
 
             return false;

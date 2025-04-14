@@ -42,13 +42,11 @@ namespace SquadBehaviour
                 return;
             }
 
-            // Clear squad header rectangles for this frame
             squadHeaderRects.Clear();
 
             float viewHeight = CalculateTotalHeight(activeSquads);
             Rect viewRect = new Rect(0f, 0f, contentRect.width - 20f, viewHeight);
 
-            // Update drag state
             DragDropManager.UpdateDrag();
 
             Widgets.BeginScrollView(contentRect, ref scrollPosition, viewRect);
@@ -74,11 +72,10 @@ namespace SquadBehaviour
                 bool expanded = squadFoldouts[squadId];
                 bool settingsExpanded = settingsFoldouts[squadId];
 
-                // Draw squad header and store its rect for drop detection
+
                 Rect headerRect = new Rect(0f, curY, viewRect.width, SquadRowHeight);
                 squadHeaderRects[squadId] = headerRect;
 
-                // Draw drop zone highlight if dragging
                 if (DragDropManager.IsDragConfirmed &&
                     (DragDropManager.OriginSquad == null || DragDropManager.OriginSquad.squadID != squadId))
                 {
@@ -87,13 +84,11 @@ namespace SquadBehaviour
                     {
                         Widgets.DrawBoxSolid(headerRect, new Color(0f, 1f, 0f, DRAG_HIGHLIGHT_ALPHA));
 
-                        // Check for drop
                         if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                         {
                             bool success = DragDropManager.TryDropOnSquad(squad, leader);
                             if (success)
                             {
-                                // Only consume the event if the drop was successful
                                 Event.current.Use();
                             }
                         }
@@ -123,14 +118,11 @@ namespace SquadBehaviour
                         }
                     }
                 }
-
-                // Add spacing between squads
                 curY += 10f;
             }
 
             Widgets.EndScrollView();
 
-            // Draw the dragged pawn icon following the mouse
             DrawDraggedPawn();
         }
 
@@ -153,7 +145,6 @@ namespace SquadBehaviour
                 Widgets.Label(labelRect, "Drop on squad");
                 Text.Font = GameFont.Small;
 
-                // Force GUI to redraw each frame while dragging
                 GUI.changed = true;
             }
         }
@@ -164,7 +155,6 @@ namespace SquadBehaviour
         public float DrawSquadHeader(float width, float yPos, Squad squad, int squadId, ISquadLeader leader,
                                     ref bool expanded, ref bool settingsExpanded)
         {
-            // Existing implementation 
             float squadHeaderHeight = SquadRowHeight;
             Rect squadHeaderRect = new Rect(0f, yPos, width, squadHeaderHeight);
 
@@ -175,7 +165,6 @@ namespace SquadBehaviour
 
             RowLayoutManager headerLayout = new RowLayoutManager(squadHeaderRect, 5f);
 
-            // Foldout button
             Rect foldoutRect = headerLayout.NextRect(24f, 0f);
             if (Widgets.ButtonImage(foldoutRect, expanded ? TexButton.Collapse : TexButton.Reveal))
             {
@@ -215,14 +204,11 @@ namespace SquadBehaviour
         /// </summary>
         public float DrawMemberRow(Pawn pawn, float width, float yPos, ISquadLeader leader, Squad currentSquad, bool isLeader = false)
         {
-            // Indent for members
             Rect rowRect = new Rect(20f, yPos, width - 20f, MemberRowHeight);
 
-            // Skip if this is the pawn being dragged
             bool isBeingDragged = DragDropManager.DraggedPawn == pawn && DragDropManager.IsDragConfirmed;
             if (isBeingDragged)
             {
-                // Draw a placeholder row with reduced opacity
                 GUI.color = new Color(1f, 1f, 1f, 0.3f);
             }
 
@@ -236,7 +222,6 @@ namespace SquadBehaviour
             Rect portraitRect = memberLayout.NextRect(IconSize, 5f);
             Widgets.ThingIcon(portraitRect, pawn);
 
-            // Handle starting a drag operation using RimWorld's event system
             if (Mouse.IsOver(rowRect))
             {
                 if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
@@ -257,7 +242,6 @@ namespace SquadBehaviour
                 }
                 TooltipHandler.TipRegion(portraitRect, tooltip);
 
-                // Handle state change menu on right-click
                 if (Widgets.ButtonInvisible(portraitRect, true))
                 {
                     if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
@@ -268,19 +252,16 @@ namespace SquadBehaviour
                 }
             }
 
-            // Name and role
             string roleLabel = isLeader ? " (Leader)" : "";
             Rect nameRect = memberLayout.NextRect(150f, 5f);
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(nameRect, $"{pawn.LabelShort}{roleLabel}");
             Text.Anchor = TextAnchor.UpperLeft;
 
-            // Health status
             float healthPct = pawn.health.summaryHealth.SummaryHealthPercent;
             Rect healthRect = memberLayout.NextRect(150f, 5f);
             Widgets.FillableBar(healthRect, healthPct);
 
-            // Remove button
             Rect removeButtonRect = memberLayout.NextRect(60f);
             if (Widgets.ButtonText(removeButtonRect, "Remove"))
             {
@@ -290,7 +271,6 @@ namespace SquadBehaviour
                 }
             }
 
-            // Reset color
             if (isBeingDragged)
             {
                 GUI.color = Color.white;
@@ -304,14 +284,12 @@ namespace SquadBehaviour
         /// </summary>
         private float DrawSquadSettings(float width, float yPos, Squad squad)
         {
-            // Existing implementation remains the same
             float height = 100f;
             Rect settingsRect = new Rect(20f, yPos, width - 20f, height);
             Widgets.DrawLightHighlight(settingsRect);
 
             RowLayoutManager settingsLayout = new RowLayoutManager(settingsRect, 10f);
 
-            // Follow Distance
             Rect followDistanceRect = settingsLayout.NextRect(150f);
             Rect labelRect = followDistanceRect.LeftPart(0.4f);
             Rect sliderRect = followDistanceRect.RightPart(0.55f);
@@ -338,7 +316,7 @@ namespace SquadBehaviour
                 squad.SetFollowDistance(newFollowDistance);
             }
 
-            // Aggression Distance - similar layout improvements
+
             Rect aggressionDistanceRect = settingsLayout.NextRect(150f);
             labelRect = aggressionDistanceRect.LeftPart(0.4f);
             sliderRect = aggressionDistanceRect.RightPart(0.55f);
@@ -374,14 +352,12 @@ namespace SquadBehaviour
                 squad.SetInFormation(inFormation);
             }
 
-            // Reset text settings
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.UpperLeft;
 
             return height;
         }
 
-        // Original methods remain unchanged
         public static void DrawFormationSelector(Rect formationRect, Squad squad)
         {
             if (Widgets.ButtonText(formationRect, "Formation: " + squad.FormationType.ToString()))

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  <Operation Class="PatchOperationReplace">
+    <xpath>/Defs/ThinkTreeDef[defName="HumanlikeConstant"]/thinkRoot/subNodes/li/subNodes/li[@Class="JobGiver_ConfigurableHostilityResponse"]</xpath>
+    <value>
+      <li Class="SquadBehaviour.JobGiver_EnhancedHostilityResponse" />
+    </value>
+  </Operation>
+</Patch>

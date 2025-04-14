@@ -7,6 +7,9 @@ namespace SquadBehaviour
         IntVec3 DefendPoint { get; }
         bool HasDefendPoint { get; }
 
+
+        bool AbilitiesAllowed { get; set; }
+
         Pawn Pawn { get; }
 
         SquadMemberState CurrentState { get; }

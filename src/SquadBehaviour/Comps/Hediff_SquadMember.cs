@@ -59,6 +59,14 @@ namespace SquadBehaviour
             }
         }
 
+
+        protected bool _CanUseAbilities = false;
+        public bool AbilitiesAllowed
+        {
+            get => _CanUseAbilities;
+            set => _CanUseAbilities = value;
+        }
+
         public void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target)
         {
             SquadOrderWorker squadOrderWorker = orderDef.CreateWorker(SquadLeader, this);
