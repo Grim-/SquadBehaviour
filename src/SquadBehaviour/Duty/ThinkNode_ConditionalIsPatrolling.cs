@@ -7,9 +7,9 @@ namespace SquadBehaviour
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
-                return squadMember != null && squadMember.AssignedPatrol != null;
+                return squadMember != null && squadMember.PatrolTracker.PatrolZone != null;
             }
 
             return false;

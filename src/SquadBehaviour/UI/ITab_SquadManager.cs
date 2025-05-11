@@ -14,14 +14,14 @@ namespace SquadBehaviour
         private int CurrentTabIndex = 0;
         private SquadDisplayUtility squadDisplay;
 
-        private ISquadLeader _SquadLeader;
-        private ISquadLeader SquadLeader
+        private Comp_PawnSquadLeader _SquadLeader;
+        private Comp_PawnSquadLeader SquadLeader
         {
             get
             {
                 if (_SquadLeader == null)
                 {
-                    if (this.SelPawn.TryGetSquadLeader(out ISquadLeader squadLeader) && squadLeader.ActiveSquads.Count > 0)
+                    if (this.SelPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader) && squadLeader.ActiveSquads.Count > 0)
                     {
                         _SquadLeader = squadLeader;
                     }      
@@ -37,11 +37,10 @@ namespace SquadBehaviour
             {
                 if (SquadLeader == null)
                 {
-                    //Log.Message($"Squad leader not found for {SelPawn}");
                     return false;
                 }
 
-                return base.IsVisible && this.SelPawn != null && SquadLeader != null;
+                return base.IsVisible && this.SelPawn != null && SquadLeader != null && SquadLeader.ActiveSquads.Count > 0 && SquadLeader.SquadLeaderPawn == this.SelPawn;
             }
         }
 

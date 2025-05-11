@@ -8,10 +8,10 @@ namespace SquadBehaviour
     {
         public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
         {
-            if (!pawn.IsPartOfSquad(out ISquadMember squadMember) || squadMember.CurrentStance == null)
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) || squadMember._CurrentStance == null)
                 return ThinkResult.NoJob;
 
-            SquadDutyDef dutyDef = squadMember.CurrentStance;
+            SquadDutyDef dutyDef = squadMember._CurrentStance;
             if (dutyDef.JobGiver == null)
             {
                 Log.Error($"SquadDutyDef {dutyDef.defName} is missing a valid JobGiver.");

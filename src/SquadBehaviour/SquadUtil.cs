@@ -47,67 +47,109 @@ namespace SquadBehaviour
 
 
 
-        private static Dictionary<Pawn, ISquadLeader> SquadLeaderCache = new Dictionary<Pawn, ISquadLeader>();
+        private static Dictionary<Pawn, Comp_PawnSquadLeader> SquadLeaderCache = new Dictionary<Pawn, Comp_PawnSquadLeader>();
 
-        public static bool TryGetSquadLeader(this Pawn pawn, out ISquadLeader SquadLeader)
+        public static bool TryGetSquadLeader(this Pawn pawn, out Comp_PawnSquadLeader SquadLeader)
         {
-            if (SquadLeaderCache.ContainsKey(pawn) && SquadLeaderCache[pawn] != null)
+            if (pawn.TryGetComp(out Comp_PawnSquadLeader pawnSquadMember))
             {
-                SquadLeader = SquadLeaderCache[pawn];
+                SquadLeader = pawnSquadMember;
                 return true;
             }
-            else
-            {
-                SquadLeader = null;
-                foreach (var hediff in pawn.health.hediffSet.hediffs)
-                {
-                    if (hediff is ISquadLeader squadLeaderHediff)
-                    {
-                        SquadLeader = squadLeaderHediff;
-                        SquadLeaderCache.Add(pawn, SquadLeader);
-                        return true;
-                    }
-                }
-            }
+
+            //if (SquadLeaderCache.ContainsKey(pawn) && SquadLeaderCache[pawn] != null)
+            //{
+            //    SquadLeader = SquadLeaderCache[pawn];
+            //    return true;
+            //}
+            //else
+            //{
+            //    SquadLeader = null;
+
+            //    if (pawn.TryGetComp(out Comp_PawnSquadLeader pawnSquadMember))
+            //    {
+            //        if (pawnSquadMember.IsLeaderRoleActive)
+            //        {
+            //            SquadLeader = pawnSquadMember;
+            //            //SquadLeaderCache.Add(pawn, pawnSquadMember);
+            //            return true;
+            //        }
+
+            //    }
+            //        //foreach (var hediff in pawn.health.hediffSet.hediffs)
+            //        //{
+            //        //    if (hediff is ISquadLeader squadLeaderHediff)
+            //        //    {
+            //        //        SquadLeader = squadLeaderHediff;
+            //        //        SquadLeaderCache.Add(pawn, SquadLeader);
+            //        //        return true;
+            //        //    }
+            //        //}
+            //}
+            SquadLeader = null;
             return false;
         }
 
 
-        private static Dictionary<Pawn, ISquadMember> SquadMemberCache = new Dictionary<Pawn, ISquadMember>();
+        private static Dictionary<Pawn, Comp_PawnSquadMember> SquadMemberCache = new Dictionary<Pawn, Comp_PawnSquadMember>();
 
-        public static bool TryGetSquadMember(this Pawn pawn, out ISquadMember SquadMember)
+        public static bool TryGetSquadMember(this Pawn pawn, out Comp_PawnSquadMember SquadMember)
         {
-            if (SquadMemberCache.ContainsKey(pawn) && SquadMemberCache[pawn] != null)
+            if (pawn.TryGetComp(out Comp_PawnSquadMember pawnSquadMember))
             {
-                SquadMember = SquadMemberCache[pawn];
+                SquadMember = pawnSquadMember;
+                //SquadMemberCache.Add(pawn, pawnSquadMember);
                 return true;
-            }
-            else
-            {
-                SquadMember = null;
-                foreach (var hediff in pawn.health.hediffSet.hediffs)
-                {
-                    if (hediff is ISquadMember squadMemberHediff)
-                    {
-                        SquadMember = squadMemberHediff;
-                        SquadMemberCache.Add(pawn, SquadMember);
-                        return true;
-                    }
-                }
+
             }
 
 
+            //if (SquadMemberCache.ContainsKey(pawn) && SquadMemberCache[pawn] != null)
+            //{
+            //    SquadMember = SquadMemberCache[pawn];
+            //    return true;
+            //}
+            //else
+            //{
+            //    SquadMember = null;
 
+
+            //    if (pawn.TryGetComp(out Comp_PawnSquadMember pawnSquadMember))
+            //    {
+            //        if (pawnSquadMember.AssignedSquad != null)
+            //        {
+            //            SquadMember = pawnSquadMember;
+            //            SquadMemberCache.Add(pawn, pawnSquadMember);
+            //            return true;
+            //        }
+
+            //    }
+
+            //    //foreach (var hediff in pawn.health.hediffSet.hediffs)
+            //    //{
+            //    //    if (hediff is ISquadMember squadMemberHediff)
+            //    //    {
+            //    //        SquadMember = squadMemberHediff;
+            //    //        SquadMemberCache.Add(pawn, SquadMember);
+            //    //        return true;
+            //    //    }
+            //    //}
+            //}
+
+
+            SquadMember = null;
             return false;
         }
 
-        public static bool IsPartOfSquad(this Pawn pawn, out ISquadMember SquadMember)
+        public static bool IsPartOfSquad(this Pawn pawn, out Comp_PawnSquadMember SquadMember)
         {
             SquadMember = null;
-            if (TryGetSquadMember(pawn, out ISquadMember foundMember) && foundMember.AssignedSquad != null)
+            if (pawn.TryGetComp(out Comp_PawnSquadMember pawnSquadMember))
             {
-                SquadMember = foundMember;
+                //Log.Message($"Is part of a squad {pawn.Label}");
+                SquadMember = pawnSquadMember;
                 return true;
+
             }
             return false;
         }

@@ -9,20 +9,20 @@ namespace SquadBehaviour
     [StaticConstructorOnStartup]
     public class Gizmo_SquadMemberInfo : Gizmo
     {
-        private ISquadMember member;
+        private Comp_PawnSquadMember member;
         private static readonly Vector2 BaseSize = new Vector2(180f, 80f);
         private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
 
         // Cache icons for better performance
-        private static readonly Texture2D ClearDutyIcon = ContentFinder<Texture2D>.Get("UI/Commands/ClearPrioritizedWork", true);
-        private static readonly Texture2D StateIcon = ContentFinder<Texture2D>.Get("UI/Icons/MentalStateCategories/MentalStateCategorySafe", true);
+        private static readonly Texture2D ClearDutyIcon = TexCommand.ClearPrioritizedWork;
+        private static readonly Texture2D StateIcon = TexCommand.ClearPrioritizedWork;
         private static readonly Texture2D OrdersIcon = TexCommand.SquadAttack;
-        private static readonly Texture2D AbilitiesIcon = ContentFinder<Texture2D>.Get("UI/Commands/ActivateAbility", true);
+        private static readonly Texture2D AbilitiesIcon = TexCommand.DesirePower;
 
 
         private float margin = 8f;
 
-        public Gizmo_SquadMemberInfo(ISquadMember member)
+        public Gizmo_SquadMemberInfo(Comp_PawnSquadMember member)
         {
             this.member = member;
             Order = -99f;
@@ -45,7 +45,7 @@ namespace SquadBehaviour
             currentY += 18f;
 
             Rect dutyRect = new Rect(baseRect.x + margin / 2, currentY, baseRect.width - margin, 18f);
-            Widgets.Label(dutyRect, $"Duty: {member.CurrentStance?.defName ?? "None"}");
+            Widgets.Label(dutyRect, $"Duty: {member._CurrentStance?.defName ?? "None"}");
 
             currentY += 18f;
 
@@ -58,7 +58,7 @@ namespace SquadBehaviour
             Rect clearDutyRect = new Rect(startX, buttonY, buttonSize, buttonSize);
             if (Widgets.ButtonImage(clearDutyRect, ClearDutyIcon))
             {
-                member.CurrentStance = null;
+                member._CurrentStance = null;
                 member.ClearDefendPoint();
             }
             if (Mouse.IsOver(clearDutyRect))
@@ -90,7 +90,7 @@ namespace SquadBehaviour
                 TooltipHandler.TipRegion(stateRect, "Set member state");
             }
 
-            // Add the abilities toggle button
+
             Rect abilitiesRect = new Rect(stateRect.xMax + buttonPadding, buttonY, buttonSize, buttonSize);
             if (Widgets.ButtonImage(abilitiesRect, AbilitiesIcon))
             {
@@ -134,13 +134,13 @@ namespace SquadBehaviour
             Rect iconRect = new Rect(baseRect.x + padding, baseRect.y, iconSize, iconSize);
             Rect labelRect = new Rect(iconRect.xMax + padding, baseRect.y, baseRect.width - iconSize - padding * 2, baseRect.height);
 
-            if (member.CurrentStance != null && member.CurrentStance.Tex != null)
+            if (member._CurrentStance != null && member._CurrentStance.Tex != null)
             {
-                GUI.DrawTexture(iconRect, member.CurrentStance.Tex);
+                //GUI.DrawTexture(iconRect, member.CurrentStance.Tex);
 
                 if (Mouse.IsOver(iconRect))
                 {
-                    TooltipHandler.TipRegion(baseRect, member.CurrentStance.label);
+                    TooltipHandler.TipRegion(baseRect, member._CurrentStance.label);
                 }
             }
             else

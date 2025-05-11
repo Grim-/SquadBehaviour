@@ -15,7 +15,7 @@ namespace SquadBehaviour
         private string newSquadName = "New Squad";
         private Dictionary<int, string> editingSquadNames = new Dictionary<int, string>();
         private Dictionary<int, bool> editingSquad = new Dictionary<int, bool>();
-        private ISquadLeader currentLeader;
+        private Comp_PawnSquadLeader currentLeader;
         private float rowHeight = 30f;
         private float memberRowHeight = 24f;
         private float iconSize = 24f;
@@ -31,7 +31,7 @@ namespace SquadBehaviour
             absorbInputAroundWindow = true;
         }
 
-        public SquadManagerWindow(ISquadLeader squadLeader)
+        public SquadManagerWindow(Comp_PawnSquadLeader squadLeader)
         {
             currentLeader = squadLeader;
             forcePause = true;
@@ -41,28 +41,6 @@ namespace SquadBehaviour
             absorbInputAroundWindow = true;
         }
 
-
-        private void FindCurrentLeader()
-        {
-            Pawn selectedPawn = Find.Selector.SingleSelectedThing as Pawn;
-            if (selectedPawn != null && selectedPawn.Faction == Faction.OfPlayer)
-            {
-                currentLeader = selectedPawn as ISquadLeader;
-
-                if (currentLeader == null)
-                {
-                    var potentialLeaders = Find.CurrentMap.mapPawns.FreeColonists
-                        .Where(p => p is ISquadLeader)
-                        .Select(p => p as ISquadLeader)
-                        .ToList();
-
-                    if (potentialLeaders.Any())
-                    {
-                        currentLeader = potentialLeaders.First();
-                    }
-                }
-            }
-        }
 
         public override void DoWindowContents(Rect inRect)
         {
@@ -100,9 +78,9 @@ namespace SquadBehaviour
 
                 foreach (var pawn in Find.CurrentMap.mapPawns.FreeColonists)
                 {
-                    if (pawn is ISquadLeader leader)
+                    if (pawn.TryGetComp(out Comp_PawnSquadLeader squadLeader))
                     {
-                        options.Add(new FloatMenuOption(pawn.LabelShort, () => currentLeader = leader));
+                        options.Add(new FloatMenuOption(pawn.LabelShort, () => currentLeader = squadLeader));
                     }
                 }
 

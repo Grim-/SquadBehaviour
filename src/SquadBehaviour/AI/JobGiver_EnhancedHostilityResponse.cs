@@ -8,12 +8,7 @@ namespace SquadBehaviour
 	{
 		protected override Job TryGiveJob(Pawn pawn)
 		{
-			if (!pawn.IsPartOfSquad(out ISquadMember squadMember) || squadMember.AssignedSquad == null || !squadMember.AbilitiesAllowed)
-			{
-				return base.TryGiveJob(pawn);
-			}
-
-			if (pawn.abilities != null && !pawn.abilities.abilities.NullOrEmpty())
+			if (pawn.abilities != null && !pawn.abilities.abilities.NullOrEmpty() && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) && squadMember.AssignedSquad != null && squadMember.AbilitiesAllowed)
 			{
 				Thing threat = AbilityUtility.FindBestAbilityTarget(pawn);
 				if (threat != null)

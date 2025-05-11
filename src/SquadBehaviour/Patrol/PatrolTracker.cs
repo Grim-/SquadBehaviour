@@ -5,7 +5,7 @@ namespace SquadBehaviour
 {
     public class PatrolTracker : IExposable
     {
-        private ISquadMember squadMember;
+        private Comp_PawnSquadMember squadMember;
         private List<IntVec3> patrolPoints = new List<IntVec3>();
         private int currentIndex = 0;
         private bool isReversing = false;
@@ -21,7 +21,7 @@ namespace SquadBehaviour
         {
         }
 
-        public PatrolTracker(ISquadMember squadMember, PatrolMode mode = PatrolMode.Loop)
+        public PatrolTracker(Comp_PawnSquadMember squadMember, PatrolMode mode = PatrolMode.Loop)
         {
             patrolMode = mode;
             this.squadMember = squadMember;

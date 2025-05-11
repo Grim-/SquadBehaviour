@@ -9,13 +9,13 @@ namespace SquadBehaviour
     [StaticConstructorOnStartup]
     public class Gizmo_FormationControl : Gizmo
     {
-        private ISquadLeader master;
+        private Comp_PawnSquadLeader master;
         private static readonly Vector2 BaseSize = new Vector2(140f, 80f);
         private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
         private const float ButtonGridWidth = 140f;
         private const float ButtonSize = 35f;
 
-        public Gizmo_FormationControl(ISquadLeader master)
+        public Gizmo_FormationControl(Comp_PawnSquadLeader master)
         {
             this.master = master;
             Order = -100f;
@@ -52,7 +52,7 @@ namespace SquadBehaviour
             buttonX += ButtonSize;
 
             Rect orderRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            DrawOrderFloatGrid(orderRect);
+            SquadWidgets.DrawOrderFloatGrid(master, orderRect);
 
             if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
             {

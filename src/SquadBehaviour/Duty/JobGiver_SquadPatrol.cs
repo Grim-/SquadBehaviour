@@ -28,12 +28,12 @@ namespace SquadBehaviour
                 return null;
             }
 
-            if (!pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 return null;
             }
 
-            Zone_PatrolPath patrolZone = squadMember.AssignedPatrol as Zone_PatrolPath;
+            Zone_PatrolPath patrolZone = squadMember.PatrolTracker.PatrolZone as Zone_PatrolPath;
             if (patrolZone == null)
             {
                 return null;

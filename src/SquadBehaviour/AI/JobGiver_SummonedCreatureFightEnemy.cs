@@ -40,9 +40,9 @@ namespace SquadBehaviour
 				return null;
 			}
 
-			if (pawn.IsPartOfSquad(out ISquadMember squadMember) && !squadMember.AbilitiesAllowed)
+			if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) && !squadMember.AbilitiesAllowed)
 			{
-				return base.TryGiveJob(pawn);
+				return null;
 			}
 
 			this.UpdateEnemyTarget(pawn);
@@ -85,7 +85,7 @@ namespace SquadBehaviour
 
 		protected override Thing FindAttackTarget(Pawn pawn)
 		{
-			if (pawn.IsPartOfSquad(out ISquadMember squadMember) && squadMember.AssignedSquad != null)
+			if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) && squadMember.AssignedSquad != null)
 			{
 				return squadMember.AssignedSquad.FindTargetForMember(pawn);
 			}

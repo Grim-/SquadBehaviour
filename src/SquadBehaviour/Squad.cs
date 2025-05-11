@@ -11,14 +11,14 @@ namespace SquadBehaviour
         public int uniqueID = -1;
         public string squadName = "Squad";
         public Pawn Leader;
-        private ISquadLeader _SquadLeader;
-        public ISquadLeader SquadLeader
+        private Comp_PawnSquadLeader _SquadLeader;
+        public Comp_PawnSquadLeader SquadLeader
         {
             get
             {
                 if (_SquadLeader == null)
                 {
-                    if (Leader.TryGetSquadLeader(out ISquadLeader leader))
+                    if (Leader.TryGetSquadLeader(out Comp_PawnSquadLeader leader))
                     {
                         _SquadLeader = leader;
                     }
@@ -113,7 +113,7 @@ namespace SquadBehaviour
         {
             foreach (var member in Members)
             {
-                if (member.IsPartOfSquad(out ISquadMember squadMember))
+                if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
                 {
                     squadMember.IssueOrder(duty, target);
                 }
@@ -121,7 +121,7 @@ namespace SquadBehaviour
         }
         public void IssueMemberOrder(Pawn member, SquadOrderDef duty, LocalTargetInfo target)
         {
-            if (!Members.Contains(member) || !member.IsPartOfSquad(out ISquadMember squadMember))
+            if (!Members.Contains(member) || !member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
                 return;
             squadMember.IssueOrder(duty, target);
         }
@@ -151,10 +151,10 @@ namespace SquadBehaviour
             if (!Members.Contains(pawn))
             {
                 Members.Add(pawn);
-                if (pawn.TryGetSquadMember(out ISquadMember squadMember))
+                if (pawn.TryGetSquadMember(out Comp_PawnSquadMember squadMember))
                 {
                     squadMember.AssignedSquad = this;
-                    squadMember.SetSquadLeader(this.SquadLeader.SquadLeaderPawn);
+                    Log.Message($"Assigned {this.squadName} squad to {pawn.Label}");
                 }
             }
         }
@@ -163,7 +163,7 @@ namespace SquadBehaviour
             if (Members.Contains(pawn))
             {
                 Members.Remove(pawn);
-                if (pawn.TryGetSquadMember(out ISquadMember squadMember))
+                if (pawn.TryGetSquadMember(out Comp_PawnSquadMember squadMember))
                 {
                     squadMember.SetSquadLeader(null);
                     squadMember.AssignedSquad = null;

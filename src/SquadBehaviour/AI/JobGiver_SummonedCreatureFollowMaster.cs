@@ -10,7 +10,7 @@ namespace SquadBehaviour
 
         protected override Pawn GetFollowee(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 // Log.Error($"pawn is summon master is {pawn.GetMaster()}");
                 return squadMember.SquadLeader.SquadLeaderPawn;

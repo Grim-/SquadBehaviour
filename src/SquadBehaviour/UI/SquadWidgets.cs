@@ -9,7 +9,7 @@ namespace SquadBehaviour
     {
 
 
-        public static void DrawFormationSelector(ISquadLeader leader, Rect rect, string tooltip = "Change Formation")
+        public static void DrawFormationSelector(Comp_PawnSquadLeader leader, Rect rect, string tooltip = "Change Formation")
         {
             if (Widgets.ButtonImage(rect, leader.FormationType.Icon))
             {
@@ -30,7 +30,7 @@ namespace SquadBehaviour
             }
         }
 
-        public static void DrawGlobalStateSelector(ISquadLeader leader, Rect rect)
+        public static void DrawGlobalStateSelector(Comp_PawnSquadLeader leader, Rect rect)
         {
             if (Widgets.ButtonImage(rect, GetCommandTexture(leader.SquadState), true, GetSquadStateString(leader.SquadState)))
             {
@@ -46,6 +46,39 @@ namespace SquadBehaviour
                     leader.SetAllState(SquadMemberState.AtEase);
                 }, null, new TipSignal(GetSquadStateString(SquadMemberState.AtEase))));
                 Find.WindowStack.Add(new FloatMenuGrid(options));
+            }
+        }
+
+
+        public static void DrawOrderFloatGrid(Comp_PawnSquadLeader leader, Rect rect)
+        {
+            if (Widgets.ButtonImage(rect, TexCommand.SquadAttack, true, "Extra Orders"))
+            {
+                List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
+
+                foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
+                {
+
+                    if (item.requiresTarget)
+                    {
+                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
+                        {
+                            Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
+                            {
+                                leader.IssueGlobalOrder(item, target);
+                            });
+                        }, null, new TipSignal(item.defName)));
+                    }
+                    else
+                    {
+                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
+                        {
+                            leader.IssueGlobalOrder(item, null);
+                        }, null, new TipSignal(item.defName)));
+                    }
+                }
+
+                Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
             }
         }
 

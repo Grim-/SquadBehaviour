@@ -29,7 +29,7 @@ namespace SquadBehaviour
             IntVec3 defendPos = IntVec3.Invalid;
             float defendRadius = 0f;
 
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 if (squadMember.AssignedSquad.InFormation)
                 {
@@ -204,7 +204,7 @@ namespace SquadBehaviour
         // Helper to create a job to stay at defend point
         private Job StayAtDefendPointJob(Pawn pawn)
         {
-            if (pawn != null && pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 IntVec3 defendPos;
                 if (squadMember.AssignedSquad.InFormation)

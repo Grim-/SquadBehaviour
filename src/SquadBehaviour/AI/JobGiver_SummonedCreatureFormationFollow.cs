@@ -8,7 +8,7 @@ namespace SquadBehaviour
     {
         protected override Pawn GetFollowee(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember memeber))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember memeber))
             {
                 return memeber.SquadLeader.SquadLeaderPawn;
             }
@@ -17,7 +17,7 @@ namespace SquadBehaviour
 
         protected override float GetRadius(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember memeber))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember memeber))
             {
                 return memeber.AssignedSquad.FollowDistance;
             }
@@ -40,7 +40,7 @@ namespace SquadBehaviour
                 return null;
             }
 
-            if (!pawn.IsPartOfSquad(out ISquadMember memeber))
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember memeber))
             {
                 return null;
             }

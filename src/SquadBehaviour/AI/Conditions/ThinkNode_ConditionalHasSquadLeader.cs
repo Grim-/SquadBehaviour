@@ -9,7 +9,7 @@ namespace SquadBehaviour
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            return pawn != null && pawn.IsPartOfSquad(out ISquadMember squadLeader) && squadLeader.AssignedSquad.Leader != null;
+            return pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadLeader) && squadLeader.AssignedSquad.Leader != null;
         }
     }
 

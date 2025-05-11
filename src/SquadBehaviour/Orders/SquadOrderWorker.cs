@@ -4,8 +4,8 @@ namespace SquadBehaviour
 {
     public abstract class SquadOrderWorker
     {
-        public ISquadLeader SquadLeader;
-        public ISquadMember SquadMember;
+        public Comp_PawnSquadLeader SquadLeader;
+        public Comp_PawnSquadMember SquadMember;
 
         public SquadOrderSettings SquadOrderSettings;
         public abstract bool CanExecuteOrder(LocalTargetInfo Target);

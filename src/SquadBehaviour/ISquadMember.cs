@@ -2,35 +2,35 @@
 
 namespace SquadBehaviour
 {
-    public interface ISquadMember
-    {
-        IntVec3 DefendPoint { get; }
-        bool HasDefendPoint { get; }
+    //public interface ISquadMember
+    //{
+    //    IntVec3 DefendPoint { get; }
+    //    bool HasDefendPoint { get; }
 
 
-        bool AbilitiesAllowed { get; set; }
+    //    bool AbilitiesAllowed { get; set; }
 
-        Pawn Pawn { get; }
+    //    Pawn Pawn { get; }
 
-        SquadMemberState CurrentState { get; }
-        SquadDutyDef CurrentStance { get; set; }
+    //    SquadMemberState CurrentState { get; }
+    //    SquadDutyDef CurrentStance { get; set; }
 
-        Zone_PatrolPath AssignedPatrol { get; set; }
-        PatrolTracker PatrolTracker { get; }
+    //    Zone_PatrolPath AssignedPatrol { get; set; }
+    //    PatrolTracker PatrolTracker { get; }
 
-        Squad AssignedSquad { get; set; }
+    //    Squad AssignedSquad { get; set; }
 
 
-        void SetSquadLeader(Pawn squadLeader);
-        void SetDefendPoint(IntVec3 targetPoint);
-        void ClearDefendPoint();
-        void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target);
-        void Notify_SquadMemberAttacked();
-        void Notify_SquadChanged();
-        void SetCurrentMemberState(SquadMemberState newState);
+    //    void SetSquadLeader(Pawn squadLeader);
+    //    void SetDefendPoint(IntVec3 targetPoint);
+    //    void ClearDefendPoint();
+    //    void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target);
+    //    void Notify_SquadMemberAttacked();
+    //    void Notify_SquadChanged();
+    //    void SetCurrentMemberState(SquadMemberState newState);
 
-        string GetStatusReport();
+    //    string GetStatusReport();
 
-        ISquadLeader SquadLeader { get; }
-    }
+    //    ISquadLeader SquadLeader { get; }
+    //}
 }

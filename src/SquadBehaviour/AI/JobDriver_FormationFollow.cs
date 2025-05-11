@@ -19,7 +19,7 @@ namespace SquadBehaviour
 
                 if (!this.pawn.pather.Moving || this.pawn.IsHashIntervalTick(30))
                 {
-                    if (!this.pawn.IsPartOfSquad(out ISquadMember squadMember))
+                    if (!this.pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
                     {
                         Log.Message("Is not part of a squad.");
                         base.EndJobWith(JobCondition.Errored);
@@ -67,7 +67,7 @@ namespace SquadBehaviour
             return this.job.GetTarget(TargetIndex.A) == j.GetTarget(TargetIndex.A);
         }
 
-        public static bool FarEnoughAndPossibleToStartJob(Pawn follower, Pawn followee, ISquadLeader undeadMaster, float radius)
+        public static bool FarEnoughAndPossibleToStartJob(Pawn follower, Pawn followee, Comp_PawnSquadLeader undeadMaster, float radius)
         {
             if (radius <= 0f)
             {

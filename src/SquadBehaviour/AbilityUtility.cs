@@ -151,7 +151,7 @@ namespace SquadBehaviour
 				false,
 				true,
 				false,
-				true);h
+				true);
 		}
 	}
 }

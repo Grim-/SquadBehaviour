@@ -14,7 +14,7 @@ namespace SquadBehaviour
                 return false;
             }
 
-            if (!pawn.IsPartOfSquad(out ISquadMember squadMember) || squadMember.AssignedSquad == null)
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) || squadMember.AssignedSquad == null)
             {
                 return false;
             }

@@ -64,7 +64,7 @@ namespace SquadBehaviour
 
         public static bool IsDragConfirmed => IsDragging && isDragConfirmed;
 
-        public static bool TryDropOnSquad(Squad targetSquad, ISquadLeader leader)
+        public static bool TryDropOnSquad(Squad targetSquad, Comp_PawnSquadLeader leader)
         {
             if (!IsDragging || targetSquad == null || leader == null)
                 return false;

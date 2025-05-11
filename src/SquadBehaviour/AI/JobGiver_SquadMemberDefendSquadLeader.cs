@@ -38,7 +38,7 @@ namespace SquadBehaviour
 
         protected override Pawn GetDefendee(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember squadLeader))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadLeader))
             {
                 return squadLeader.SquadLeader.SquadLeaderPawn;
             }
@@ -47,7 +47,7 @@ namespace SquadBehaviour
 
         protected override float GetFlagRadius(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 return squadMember.AssignedSquad.FollowDistance;
             }
@@ -57,7 +57,7 @@ namespace SquadBehaviour
 
         protected override IntVec3 GetFlagPosition(Pawn pawn)
         {
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 return squadMember.SquadLeader.LeaderPosition;
             }

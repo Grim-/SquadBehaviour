@@ -12,7 +12,7 @@ namespace SquadBehaviour
                 return false;
             }
 
-            if (!pawn.IsPartOfSquad(out ISquadMember squadLeader))
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadLeader))
             {
                 return false;
             }

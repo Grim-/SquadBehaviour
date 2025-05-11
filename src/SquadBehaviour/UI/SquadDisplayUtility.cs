@@ -32,7 +32,7 @@ namespace SquadBehaviour
         /// <summary>
         /// Draws all squads and their members with drag and drop support
         /// </summary>
-        public void DrawSquadsList(Rect contentRect, ref Vector2 scrollPosition, Dictionary<int, Squad> activeSquads, ISquadLeader leader)
+        public void DrawSquadsList(Rect contentRect, ref Vector2 scrollPosition, Dictionary<int, Squad> activeSquads, Comp_PawnSquadLeader leader)
         {
             if (activeSquads == null || activeSquads.Count == 0)
             {
@@ -152,7 +152,7 @@ namespace SquadBehaviour
         /// <summary>
         /// Draws a single squad header row
         /// </summary>
-        public float DrawSquadHeader(float width, float yPos, Squad squad, int squadId, ISquadLeader leader,
+        public float DrawSquadHeader(float width, float yPos, Squad squad, int squadId, Comp_PawnSquadLeader leader,
                                     ref bool expanded, ref bool settingsExpanded)
         {
             float squadHeaderHeight = SquadRowHeight;
@@ -173,24 +173,26 @@ namespace SquadBehaviour
 
             Rect nameRect = headerLayout.NextRect(120f, 5f);
 
-            if (Widgets.ButtonText(nameRect, $"#{squadId}: {squad.squadName}", active: false))
-            {
-                //Find.WindowStack.Add(new Dialog_RenameSquad(squad));
-            }
+            Widgets.Label(nameRect, $"{squad.squadName}");
+
             if (Mouse.IsOver(nameRect))
             {
-                TooltipHandler.TipRegion(nameRect, "Click to rename squad");
                 Widgets.DrawHighlightIfMouseover(nameRect);
             }
 
-            Rect formationRect = headerLayout.NextRect(120f, 5f);
-            DrawFormationSelector(formationRect, squad);
+            Rect formationRect = headerLayout.NextRect(30f);
+            SquadWidgets.DrawFormationSelector(leader, formationRect);
 
-            Rect hostilityRect = headerLayout.NextRect(120f, 5f);
+
+            Rect hostilityRect = headerLayout.NextRect(80f, 5f);
             DrawHostilitySelector(hostilityRect, squad);
 
+            SquadWidgets.DrawGlobalStateSelector(leader, headerLayout.NextRect(20f, 5f));
+
+            SquadWidgets.DrawOrderFloatGrid(leader, headerLayout.NextRect(20f, 5f));
+
             Rect settingsRect = headerLayout.NextRect(24f, 5f);
-            if (Widgets.ButtonImage(settingsRect, settingsExpanded ? ContentFinder<Texture2D>.Get("UI/Buttons/Minus", true) : ContentFinder<Texture2D>.Get("UI/Buttons/Plus", true)))
+            if (Widgets.ButtonImage(settingsRect, settingsExpanded ? TexButton.Minus : TexButton.Plus))
             {
                 settingsExpanded = !settingsExpanded;
             }
@@ -202,7 +204,7 @@ namespace SquadBehaviour
         /// <summary>
         /// Draws a single member row with drag and drop support
         /// </summary>
-        public float DrawMemberRow(Pawn pawn, float width, float yPos, ISquadLeader leader, Squad currentSquad, bool isLeader = false)
+        public float DrawMemberRow(Pawn pawn, float width, float yPos, Comp_PawnSquadLeader leader, Squad currentSquad, bool isLeader = false)
         {
             Rect rowRect = new Rect(20f, yPos, width - 20f, MemberRowHeight);
 
@@ -233,7 +235,7 @@ namespace SquadBehaviour
                 }
             }
 
-            if (pawn.IsPartOfSquad(out ISquadMember squadMember))
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 string tooltip = squadMember.GetStatusReport();
                 if (!isBeingDragged)
@@ -401,7 +403,7 @@ namespace SquadBehaviour
         /// <summary>
         /// Shows the state change menu for undead pawns
         /// </summary>
-        private void ShowStateChangeMenu(ISquadMember squadMember)
+        private void ShowStateChangeMenu(Comp_PawnSquadMember squadMember)
         {
             List<FloatMenuOption> stateOptions = new List<FloatMenuOption>();
             stateOptions.Add(new FloatMenuOption("Call To Arms", () =>
