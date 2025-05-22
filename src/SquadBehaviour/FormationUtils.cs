@@ -16,49 +16,58 @@ namespace SquadBehaviour
             Phalanx
         }
 
-        public static IntVec3 GetFormationPosition(FormationType formation, Vector3 leaderPos, Rot4 rotation, int index, int totalUnits)
+        public static IntVec3 GetFormationPosition(FormationType formation, Vector3 leaderPos, Rot4 rotation, int index, int totalUnits, float spacing = 1f)
         {
             Vector3 rawPosition;
 
             switch (formation)
             {
                 case FormationType.Circle:
-                    rawPosition = CalculateCircleFormation(leaderPos, index, totalUnits, rotation);
+                    rawPosition = CalculateCircleFormation(leaderPos, index, totalUnits, rotation, spacing);
                     break;
                 case FormationType.Box:
-                    rawPosition = CalculateHollowSquareFormation(leaderPos, index, totalUnits, rotation);
+                    rawPosition = CalculateHollowSquareFormation(leaderPos, index, totalUnits, rotation, spacing);
                     break;
                 case FormationType.Column:
-                    rawPosition = CalculateColumnFormation(leaderPos, index, rotation);
+                    rawPosition = CalculateColumnFormation(leaderPos, index, rotation, spacing);
                     break;
                 case FormationType.Wedge:
-                    rawPosition = CalculateWedgeFormation(leaderPos, index, rotation);
+                    rawPosition = CalculateWedgeFormation(leaderPos, index, rotation, spacing);
                     break;
                 case FormationType.Line:
-                    rawPosition = CalculateLineFormation(leaderPos, index, totalUnits, rotation);
+                    rawPosition = CalculateLineFormation(leaderPos, index, totalUnits, rotation, spacing);
                     break;
                 case FormationType.Phalanx:
-                    rawPosition = CalculatePhalanxFormation(leaderPos, index, rotation);
+                    rawPosition = CalculatePhalanxFormation(leaderPos, index, rotation, spacing);
                     break;
                 default:
-                    rawPosition = CalculateColumnFormation(leaderPos, index, rotation);
+                    rawPosition = CalculateColumnFormation(leaderPos, index, rotation, spacing);
                     break;
             }
 
             return ValidateGridPosition(rawPosition).ToIntVec3();
         }
 
+        public static float GetPawnSpacing(Pawn pawn)
+        {
+            if (pawn?.Graphic?.drawSize != null)
+            {
+                return Mathf.Max(pawn.Graphic.drawSize.x, pawn.Graphic.drawSize.y);
+            }
+            return 1f;
+        }
+
         private static Vector3 RotateOffset(Vector3 offset, Rot4 rotation)
         {
             switch (rotation.AsInt)
             {
-                case 0: // North - default
+                case 0:
                     return offset;
-                case 1: // East
+                case 1:
                     return new Vector3(offset.z, 0, -offset.x);
-                case 2: // South
+                case 2:
                     return new Vector3(-offset.x, 0, -offset.z);
-                case 3: // West
+                case 3:
                     return new Vector3(-offset.z, 0, offset.x);
                 default:
                     return offset;
@@ -74,17 +83,17 @@ namespace SquadBehaviour
             );
         }
 
-        private static Vector3 CalculateColumnFormation(Vector3 leaderPos, int index, Rot4 rotation)
+        private static Vector3 CalculateColumnFormation(Vector3 leaderPos, int index, Rot4 rotation, float spacing)
         {
             int column = index / 3;
             int row = index % 3;
-            Vector3 offset = new Vector3(row - 1, 0, -column - 1);
+            Vector3 offset = new Vector3((row - 1) * spacing, 0, (-column - 1) * spacing);
             return leaderPos + RotateOffset(offset, rotation);
         }
 
-        private static Vector3 CalculateCircleFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation)
+        private static Vector3 CalculateCircleFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation, float spacing)
         {
-            float radius = 2f;
+            float radius = 2f * spacing;
             float angleStep = 360f / totalUnits;
             float angle = angleStep * index * Mathf.Deg2Rad;
 
@@ -97,44 +106,40 @@ namespace SquadBehaviour
             return leaderPos + RotateOffset(offset, rotation);
         }
 
-        private static Vector3 CalculateHollowSquareFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation)
+        private static Vector3 CalculateHollowSquareFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation, float spacing)
         {
             int sideLength = Mathf.CeilToInt((totalUnits + 4) / 4f);
-
-            // Minimum size should be 3 to make a proper hollow square
             sideLength = Mathf.Max(3, sideLength);
             int perimeterPositions = sideLength * 4 - 4;
 
-            // Calculate spacing to distribute units evenly
-            float spacing = 1.0f;
+            float unitSpacing = 1.0f;
             if (totalUnits < perimeterPositions)
             {
-                spacing = (float)perimeterPositions / totalUnits;
-                index = Mathf.FloorToInt(index * spacing);
+                unitSpacing = (float)perimeterPositions / totalUnits;
+                index = Mathf.FloorToInt(index * unitSpacing);
             }
 
-            // Ensure we don't exceed available positions
             index = index % perimeterPositions;
 
             int side = index / (sideLength - 1);
             int posOnSide = index % (sideLength - 1);
 
-            float offset = (sideLength - 1) / 2f;
+            float offset = (sideLength - 1) / 2f * spacing;
 
             Vector3 relativePos;
             switch (side)
             {
-                case 0: // Top side
-                    relativePos = new Vector3(posOnSide - offset, 0, -offset);
+                case 0:
+                    relativePos = new Vector3((posOnSide - (sideLength - 1) / 2f) * spacing, 0, -offset);
                     break;
-                case 1: // Right side
-                    relativePos = new Vector3(offset, 0, posOnSide - offset);
+                case 1:
+                    relativePos = new Vector3(offset, 0, (posOnSide - (sideLength - 1) / 2f) * spacing);
                     break;
-                case 2: // Bottom side
-                    relativePos = new Vector3(offset - posOnSide, 0, offset);
+                case 2:
+                    relativePos = new Vector3((((sideLength - 1) / 2f) - posOnSide) * spacing, 0, offset);
                     break;
-                case 3: // Left side
-                    relativePos = new Vector3(-offset, 0, offset - posOnSide);
+                case 3:
+                    relativePos = new Vector3(-offset, 0, (((sideLength - 1) / 2f) - posOnSide) * spacing);
                     break;
                 default:
                     relativePos = Vector3.zero;
@@ -144,38 +149,37 @@ namespace SquadBehaviour
             return leaderPos + RotateOffset(relativePos, rotation);
         }
 
-        private static Vector3 CalculateWedgeFormation(Vector3 leaderPos, int index, Rot4 rotation)
+        private static Vector3 CalculateWedgeFormation(Vector3 leaderPos, int index, Rot4 rotation, float spacing)
         {
             int row = index / 2;
             int side = index % 2;
             int spread = row + 1;
             int xPos = side == 0 ? -spread : spread;
 
-            Vector3 offset = new Vector3(xPos, 0, -row - 1);
+            Vector3 offset = new Vector3(xPos * spacing, 0, (-row - 1) * spacing);
             return leaderPos + RotateOffset(offset, rotation);
         }
 
-        private static Vector3 CalculateLineFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation)
+        private static Vector3 CalculateLineFormation(Vector3 leaderPos, int index, int totalUnits, Rot4 rotation, float spacing)
         {
             float offset = (totalUnits - 1) / 2f;
-            Vector3 relativePos = new Vector3(index - offset, 0, -1);
+            Vector3 relativePos = new Vector3((index - offset) * spacing, 0, -spacing);
 
             return leaderPos + RotateOffset(relativePos, rotation);
         }
 
-        private static Vector3 CalculatePhalanxFormation(Vector3 leaderPos, int index, Rot4 rotation)
+        private static Vector3 CalculatePhalanxFormation(Vector3 leaderPos, int index, Rot4 rotation, float spacing)
         {
             int unitsPerRow = 6;
             int row = index / unitsPerRow;
             int col = index % unitsPerRow;
 
             float colOffset = (unitsPerRow - 1) / 2f;
-            Vector3 offset = new Vector3(-row - 1, 0, col - colOffset);
+            Vector3 offset = new Vector3((-row - 1) * spacing, 0, (col - colOffset) * spacing);
 
             return leaderPos + RotateOffset(offset, rotation);
         }
     }
-
 
     public class FormationDef : Def
     {
@@ -207,7 +211,7 @@ namespace SquadBehaviour
 
     public abstract class FormationWorker
     {
-        public virtual IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public virtual IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
             return leaderPos.ToIntVec3();
         }
@@ -215,49 +219,55 @@ namespace SquadBehaviour
 
     public class ColumnFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Column, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Column, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 
     public class CircleFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Circle, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Circle, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 
     public class BoxFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Box, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Box, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 
     public class WedgeFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Wedge, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Wedge, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 
     public class LineFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Line, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Line, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 
     public class PhalanxFormationWorker : FormationWorker
     {
-        public override IntVec3 GetFormationPosition(Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
+        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
         {
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Phalanx, leaderPos, rotation, index, totalUnits);
+            float spacing = FormationUtils.GetPawnSpacing(pawn);
+            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Phalanx, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 }

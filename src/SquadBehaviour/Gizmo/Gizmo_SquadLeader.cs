@@ -7,7 +7,7 @@ using Verse;
 namespace SquadBehaviour
 {
     [StaticConstructorOnStartup]
-    public class Gizmo_FormationControl : Gizmo
+    public class Gizmo_SquadLeader : Gizmo
     {
         private Comp_PawnSquadLeader master;
         private static readonly Vector2 BaseSize = new Vector2(140f, 80f);
@@ -15,7 +15,7 @@ namespace SquadBehaviour
         private const float ButtonGridWidth = 140f;
         private const float ButtonSize = 35f;
 
-        public Gizmo_FormationControl(Comp_PawnSquadLeader master)
+        public Gizmo_SquadLeader(Comp_PawnSquadLeader master)
         {
             this.master = master;
             Order = -100f;
@@ -44,7 +44,7 @@ namespace SquadBehaviour
             buttonX += ButtonSize;
 
             Rect formationRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            SquadWidgets.DrawFormationSelector(master, formationRect);
+            SquadWidgets.DrawGlobalFormationSelector(master, formationRect);
             buttonX += ButtonSize;
 
             Rect dutyRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
@@ -52,7 +52,7 @@ namespace SquadBehaviour
             buttonX += ButtonSize;
 
             Rect orderRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            SquadWidgets.DrawOrderFloatGrid(master, orderRect);
+            SquadWidgets.DrawGlobalOrderFloatGrid(master, orderRect);
 
             if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
             {

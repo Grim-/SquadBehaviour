@@ -7,13 +7,12 @@ using Verse;
 namespace SquadBehaviour
 {
     [StaticConstructorOnStartup]
-    public class Gizmo_SquadMemberInfo : Gizmo
+    public class Gizmo_SquadMember : Gizmo
     {
         private Comp_PawnSquadMember member;
         private static readonly Vector2 BaseSize = new Vector2(180f, 80f);
         private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
 
-        // Cache icons for better performance
         private static readonly Texture2D ClearDutyIcon = TexCommand.ClearPrioritizedWork;
         private static readonly Texture2D StateIcon = TexCommand.ClearPrioritizedWork;
         private static readonly Texture2D OrdersIcon = TexCommand.SquadAttack;
@@ -22,7 +21,7 @@ namespace SquadBehaviour
 
         private float margin = 8f;
 
-        public Gizmo_SquadMemberInfo(Comp_PawnSquadMember member)
+        public Gizmo_SquadMember(Comp_PawnSquadMember member)
         {
             this.member = member;
             Order = -99f;

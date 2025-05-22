@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -30,7 +31,7 @@ namespace SquadBehaviour
         private FormationWorker formationWorker;
         public List<Pawn> Members = new List<Pawn>();
         public SquadHostility HostilityResponse = SquadHostility.Defensive;
-        public SquadDutyDef squadDuty;
+        public SquadDutyDef squadDuty = null;
         public float AggresionDistance = 10f;
         public float FollowDistance = 10f;
         public bool InFormation = true;
@@ -119,6 +120,19 @@ namespace SquadBehaviour
                 }
             }
         }
+
+
+        public void SetSquadState(SquadMemberState squadMemberState)
+        {
+            foreach (var member in Members)
+            {
+                if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+                {
+                    squadMember.SetCurrentMemberState(squadMemberState);
+                }
+            }
+        }
+
         public void IssueMemberOrder(Pawn member, SquadOrderDef duty, LocalTargetInfo target)
         {
             if (!Members.Contains(member) || !member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
@@ -153,7 +167,14 @@ namespace SquadBehaviour
                 Members.Add(pawn);
                 if (pawn.TryGetSquadMember(out Comp_PawnSquadMember squadMember))
                 {
+                    squadMember.SetSquadLeader(this.SquadLeader.SquadLeaderPawn);
                     squadMember.AssignedSquad = this;
+                    squadMember.CurrentStance = this.squadDuty;
+
+                    if (this.SquadLeader != null)
+                    {
+                        squadMember.SetCurrentMemberState(this.SquadLeader.SquadState);
+                    }
                     Log.Message($"Assigned {this.squadName} squad to {pawn.Label}");
                 }
             }
@@ -170,6 +191,17 @@ namespace SquadBehaviour
                 }
             }
         }
+
+
+        public void DisbandSquad()
+        {
+            foreach (var item in Members.ToArray())
+            {
+                this.RemoveMember(item);
+            }
+            this.Members.Clear();
+        }
+
         public IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation)
         {
             if (!Members.Contains(pawn))
@@ -179,7 +211,7 @@ namespace SquadBehaviour
             }
             if (formationWorker != null)
             {
-                return formationWorker.GetFormationPosition(Origin.ToVector3(), Members.IndexOf(pawn), OriginRotation, Members.Count);
+                return formationWorker.GetFormationPosition(pawn, Origin.ToVector3(), Members.IndexOf(pawn), OriginRotation, Members.Count);
             }
             else
             {

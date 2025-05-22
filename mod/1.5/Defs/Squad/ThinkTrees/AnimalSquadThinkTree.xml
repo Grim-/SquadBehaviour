@@ -1,30 +1,48 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <ThinkTreeDef>
-    <defName>SquadThinkTree</defName>
-    <insertTag>Humanlike_PreMain</insertTag>
+    <defName>AnimalSquadThinkTree</defName>
+    <insertTag>Animal_PreMain</insertTag>
     <thinkRoot Class="ThinkNode_Priority">
       <subNodes>
 
         <!-- 1. If pawn is in a squad -->
         <li Class="SquadBehaviour.ThinkNode_ConditionalIsPartOfASquad">
           <subNodes>
-
             <!-- 2. If squad is in "Called to Arms" mode -->
             <li Class="SquadBehaviour.ThinkNode_ConditionalIsCalledToArms">
               <subNodes>
-
                 <!-- 2.1 Fetch and execute squad duty -->
                 <li Class="SquadBehaviour.ThinkNode_SquadDuty" />
 
-                <!-- 2.2 If squad has a combat target, attack -->
+                <!-- if Hosility response is set to Aggresive, check for targets -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsAggresive">
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_ActivelySearchForTargets" />
+                  </subNodes>
+                </li>
+
+                <!-- 2.3 If squad has a combat target, attack -->
                 <li Class="SquadBehaviour.ThinkNode_ConditionalSquadHasTarget">
                   <subNodes>
+
+                    <!-- If squad member has any useable abilities, use them -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalSquadMemberCanUseAbilities">
+                      <subNodes>
+                        <li Class="SquadBehaviour.JobGiver_TryUseAbilities" />
+                      </subNodes>
+                    </li>
                     <li Class="SquadBehaviour.JobGiver_SummonedCreatureFightEnemy" />
                   </subNodes>
                 </li>
 
-                <!-- 2.3 Formation Behavior -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsAggresive">
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                  </subNodes>
+                </li>
+
+                <!-- 2.4 Formation Behavior -->
                 <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
                   <subNodes>
                     <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtFormationPosition">
@@ -42,7 +60,7 @@
                   </subNodes>
                 </li>
 
-                <!-- 2.4 Loose Formation (No strict formation) -->
+                <!-- 2.5 Loose Formation (No strict formation) -->
                 <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
                   <invert>true</invert>
                   <subNodes>
@@ -77,4 +95,6 @@
       </subNodes>
     </thinkRoot>
   </ThinkTreeDef>
+
+
 </Defs>

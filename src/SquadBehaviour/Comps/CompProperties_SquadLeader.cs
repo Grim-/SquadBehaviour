@@ -52,7 +52,6 @@ namespace SquadBehaviour
 
         public FormationDef FormationType => _FormationType;
         public float FollowDistance => _FollowDistance;
-       // public bool ShowExtraOrders { get => this.ShowExtraOrders; set => this.ShowExtraOrders = value; }
         public SquadHostility HostilityResponse => SquadHostilityResponse;
         public float AggresionDistance => FollowDistance;
         public SquadMemberState SquadState => _SquadState;
@@ -60,24 +59,67 @@ namespace SquadBehaviour
         #endregion
 
         #region Configuration Methods
+
+
+
+        public void SetAsActiveSquadLeader()
+        {
+            this.IsLeaderRoleActive = true;
+        }
+
+        public void SetAsInactiveSquadLeader()
+        {
+            if (this.IsLeaderRoleActive)
+            {
+                foreach (var squad in ActiveSquads.ToArray())
+                {
+                    squad.Value.DisbandSquad();
+                    RemoveSquad(squad.Key);
+                }
+            }
+
+            this.IsLeaderRoleActive = false;
+        }
+
+
         public virtual void SetFormation(FormationDef formationType)
         {
             _FormationType = formationType;
+
+            foreach (var squad in ActiveSquads)
+            {
+                squad.Value.SetFormation(FormationType);
+            }
         }
 
         public virtual void SetFollowDistance(float distance)
         {
             _FollowDistance = distance;
+
+            foreach (var squad in ActiveSquads)
+            {
+                squad.Value.SetFollowDistance(distance);
+            }
         }
 
         public virtual void SetInFormation(bool inFormation)
         {
             InFormation = inFormation;
+
+            foreach (var squad in ActiveSquads)
+            {
+                squad.Value.SetInFormation(InFormation);
+            }
         }
 
         public virtual void ToggleInFormation()
         {
             InFormation = !InFormation;
+
+            foreach (var squad in ActiveSquads)
+            {
+                squad.Value.SetInFormation(InFormation);
+            }
         }
 
         public virtual void SetHositilityResponse(SquadHostility squadHostilityResponse)
@@ -108,7 +150,11 @@ namespace SquadBehaviour
                 return false;
             }
 
-            if (!IsPartOfAnySquad(pawn, out Squad squad))
+            if (IsPartOfAnySquad(pawn, out Squad squad))
+            {
+                squad.SquadLeader.RemoveFromSquad(pawn);
+            }
+            else
             {
                 Squad newSquad = GetFirstOrAddSquad();
 
@@ -138,9 +184,10 @@ namespace SquadBehaviour
             }
 
             Squad foundSquad = GetSquadByID(squadID);
-
+       
             if (foundSquad != null)
             {
+                foundSquad.Leader = this.SquadLeaderPawn;
                 foundSquad.AddMember(pawn);
                 return true;
             }
@@ -297,18 +344,18 @@ namespace SquadBehaviour
             return false;
         }
         #endregion
-        public override IEnumerable<Gizmo> CompGetGizmosExtra()
-        {
-            foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-            {
-                yield return gizmo;
-            }
+        //public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        //{
+        //    foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+        //    {
+        //        yield return gizmo;
+        //    }
 
-            if (IsLeaderRoleActive)
-            {
-                yield return new Gizmo_FormationControl(this);
-            }
-        }
+        //    if (IsLeaderRoleActive)
+        //    {
+        //        yield return new Gizmo_SquadLeader(this);
+        //    }
+        //}
         #region Overrides
         public override void PostExposeData()
         {
@@ -317,6 +364,7 @@ namespace SquadBehaviour
             Scribe_Defs.Look(ref _FormationType, "formationType");
             Scribe_Values.Look(ref _FollowDistance, "followDistance", 5f);
             Scribe_Values.Look(ref InFormation, "inFormation", true);
+            Scribe_Values.Look(ref IsLeaderRoleActive, "IsLeaderRoleActive", false);
             Scribe_Values.Look(ref SquadHostilityResponse, "SquadHostilityResponse");
         }
         #endregion

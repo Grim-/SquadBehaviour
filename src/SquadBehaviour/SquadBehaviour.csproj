@@ -82,7 +82,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbilityUtility.cs" />
+    <Compile Include="AI\JobGiver_ActivelySearchForTargets.cs" />
     <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />
+    <Compile Include="AI\JobGiver_TryUseAbilities.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalIsAggresive.cs" />
+    <Compile Include="AI\ThinkNode_ConditionalSquadMemberCanUseAbilities.cs" />
     <Compile Include="Comps\CompProperties_SquadLeader.cs" />
     <Compile Include="Comps\CompProperties_SquadMember.cs" />
     <Compile Include="UI\SquadWidgets.cs" />
@@ -93,12 +97,12 @@
     <Compile Include="Duty\ThinkNode_ConditionalAlreadyPatrolling.cs" />
     <Compile Include="Duty\ThinkNode_ConditionalEnemiesNearPatrol.cs" />
     <Compile Include="Duty\ThinkNode_ConditionalIsPatrolling.cs" />
-    <Compile Include="Gizmo\Gizmo_SquadMemberInfo.cs" />
+    <Compile Include="Gizmo\Gizmo_SquadMember.cs" />
     <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath.cs" />
     <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath_Expand.cs" />
     <Compile Include="Patrol\PatrolTracker.cs" />
     <Compile Include="Patrol\PatrolPathManager.cs" />
-    <Compile Include="Duty\SquadBehaviourPatches.cs" />
+    <Compile Include="SquadBehaviourPatches.cs" />
     <Compile Include="Duty\SquadDutyDef.cs" />
     <Compile Include="Duty\ThinkNode_ConditionalHasDutyAssigned.cs" />
     <Compile Include="AI\JobGiver_MoveToDefendPoint.cs" />
@@ -115,7 +119,7 @@
     <Compile Include="Orders\SquadOrder_ClearDefendPoint.cs" />
     <Compile Include="Orders\SquadOrder_DefendPoint.cs" />
     <Compile Include="Orders\SquadOrder_RunToPointAndExplode.cs" />
-    <Compile Include="Gizmo\Gizmo_FormationControl.cs" />
+    <Compile Include="Gizmo\Gizmo_SquadLeader.cs" />
     <Compile Include="Patrol\PatrolUtil.cs" />
     <Compile Include="AI\ThinkNode_ConditionalHasNoLeader.cs" />
     <Compile Include="UI\DragDropManager.cs" />

@@ -76,24 +76,6 @@ namespace SquadBehaviour
                 Rect headerRect = new Rect(0f, curY, viewRect.width, SquadRowHeight);
                 squadHeaderRects[squadId] = headerRect;
 
-                if (DragDropManager.IsDragConfirmed &&
-                    (DragDropManager.OriginSquad == null || DragDropManager.OriginSquad.squadID != squadId))
-                {
-                    bool isHovering = Mouse.IsOver(headerRect);
-                    if (isHovering)
-                    {
-                        Widgets.DrawBoxSolid(headerRect, new Color(0f, 1f, 0f, DRAG_HIGHLIGHT_ALPHA));
-
-                        if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                        {
-                            bool success = DragDropManager.TryDropOnSquad(squad, leader);
-                            if (success)
-                            {
-                                Event.current.Use();
-                            }
-                        }
-                    }
-                }
 
                 curY += DrawSquadHeader(viewRect.width, curY, squad, squadId, leader, ref expanded, ref settingsExpanded);
 
@@ -109,7 +91,7 @@ namespace SquadBehaviour
                 {
                     if (squad.Members != null)
                     {
-                        foreach (Pawn member in squad.Members)
+                        foreach (Pawn member in squad.Members.ToArray())
                         {
                             if (member != squad.Leader)
                             {
@@ -165,38 +147,72 @@ namespace SquadBehaviour
 
             RowLayoutManager headerLayout = new RowLayoutManager(squadHeaderRect, 5f);
 
-            Rect foldoutRect = headerLayout.NextRect(24f, 0f);
+            Rect foldoutRect = headerLayout.NextRect(30f, 0f);
             if (Widgets.ButtonImage(foldoutRect, expanded ? TexButton.Collapse : TexButton.Reveal))
             {
                 expanded = !expanded;
             }
 
             Rect nameRect = headerLayout.NextRect(120f, 5f);
+            Widgets.DrawBoxSolidWithOutline(nameRect, Color.clear, Color.grey);
 
+            Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(nameRect, $"{squad.squadName}");
-
+            Text.Anchor = TextAnchor.UpperLeft;
             if (Mouse.IsOver(nameRect))
             {
                 Widgets.DrawHighlightIfMouseover(nameRect);
             }
 
             Rect formationRect = headerLayout.NextRect(30f);
-            SquadWidgets.DrawFormationSelector(leader, formationRect);
+            SquadWidgets.DrawSquadFormationSelector(squad, formationRect);
 
 
-            Rect hostilityRect = headerLayout.NextRect(80f, 5f);
-            DrawHostilitySelector(hostilityRect, squad);
+            Rect hostilityRect = headerLayout.NextRect(30f, 5f);
+            SquadWidgets.DrawSquadHostilitySelector(squad, hostilityRect);
 
-            SquadWidgets.DrawGlobalStateSelector(leader, headerLayout.NextRect(20f, 5f));
+            SquadWidgets.DrawSquadStateSelector(squad, headerLayout.NextRect(30f, 5f));
 
-            SquadWidgets.DrawOrderFloatGrid(leader, headerLayout.NextRect(20f, 5f));
+            SquadWidgets.DrawSquadOrderFloatGrid(squad, headerLayout.NextRect(30f, 5f));
 
-            Rect settingsRect = headerLayout.NextRect(24f, 5f);
+
+            Rect disbandSquadRect = headerLayout.NextRect(30f);
+            if (Widgets.ButtonImage(disbandSquadRect, TexCommand.DropCarriedPawn, true, "Disband Squad"))
+            {
+                squad.DisbandSquad();
+            }
+
+
+
+
+            Rect settingsRect = headerLayout.NextRect(30f, 5f);
             if (Widgets.ButtonImage(settingsRect, settingsExpanded ? TexButton.Minus : TexButton.Plus))
             {
                 settingsExpanded = !settingsExpanded;
             }
             TooltipHandler.TipRegion(settingsRect, "Advanced Settings");
+
+
+
+            if (DragDropManager.IsDragConfirmed &&
+                (DragDropManager.OriginSquad == null || DragDropManager.OriginSquad.squadID != squadId))
+            {
+                bool isHovering = Mouse.IsOver(squadHeaderRect);
+                if (isHovering)
+                {
+                    Widgets.DrawBoxSolid(squadHeaderRect, new Color(0f, 1f, 0f, DRAG_HIGHLIGHT_ALPHA));
+
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                    {
+                        bool success = DragDropManager.TryDropOnSquad(squad, leader);
+                        if (success)
+                        {
+                            Event.current.Use();
+                        }
+                    }
+                }
+            }
+
 
             return squadHeaderHeight;
         }
@@ -224,7 +240,7 @@ namespace SquadBehaviour
             Rect portraitRect = memberLayout.NextRect(IconSize, 5f);
             Widgets.ThingIcon(portraitRect, pawn);
 
-            if (Mouse.IsOver(rowRect))
+            if (Mouse.IsOver(portraitRect))
             {
                 if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
                 {
@@ -286,69 +302,58 @@ namespace SquadBehaviour
         /// </summary>
         private float DrawSquadSettings(float width, float yPos, Squad squad)
         {
-            float height = 100f;
+            float height = 120f;
             Rect settingsRect = new Rect(20f, yPos, width - 20f, height);
             Widgets.DrawLightHighlight(settingsRect);
 
-            RowLayoutManager settingsLayout = new RowLayoutManager(settingsRect, 10f);
+            float currentY = settingsRect.y + 10f;
+            float rowHeight = 30f;
 
-            Rect followDistanceRect = settingsLayout.NextRect(150f);
+            Rect followDistanceRect = new Rect(settingsRect.x + 10f, currentY, settingsRect.width - 20f, rowHeight);
             Rect labelRect = followDistanceRect.LeftPart(0.4f);
             Rect sliderRect = followDistanceRect.RightPart(0.55f);
-
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(labelRect, "Follow Distance:");
             Text.Anchor = TextAnchor.UpperLeft;
-
+            float oldFollowDistance = squad.FollowDistance;
             float newFollowDistance = squad.FollowDistance;
             Widgets.HorizontalSlider(
                 sliderRect,
-                newFollowDistance,
-                1f, 30f,
-                false,
+                ref newFollowDistance,
+                new FloatRange(1f, 30f),
                 $"{newFollowDistance:F1}",
-                leftAlignedLabel: null,
-                rightAlignedLabel: null,
                 roundTo: 0.5f
             );
-
-            if (newFollowDistance != squad.FollowDistance)
+            if (newFollowDistance != oldFollowDistance)
             {
                 squad.SetFollowDistance(newFollowDistance);
             }
 
-
-            Rect aggressionDistanceRect = settingsLayout.NextRect(150f);
+            currentY += rowHeight;
+            Rect aggressionDistanceRect = new Rect(settingsRect.x + 10f, currentY, settingsRect.width - 20f, rowHeight);
             labelRect = aggressionDistanceRect.LeftPart(0.4f);
             sliderRect = aggressionDistanceRect.RightPart(0.55f);
-
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(labelRect, "Aggression Distance:");
             Text.Anchor = TextAnchor.UpperLeft;
-
             float newAggressionDistance = squad.AggresionDistance;
             Widgets.HorizontalSlider(
                 sliderRect,
-                newAggressionDistance,
-                1f, 30f,
-                false,
+                ref newAggressionDistance,
+                new FloatRange(1f, 30f),
                 $"{newAggressionDistance:F1}",
-                leftAlignedLabel: null,
-                rightAlignedLabel: null,
                 roundTo: 0.5f
             );
-
             if (newAggressionDistance != squad.AggresionDistance)
             {
                 squad.AggresionDistance = newAggressionDistance;
             }
 
-            Rect formationCheckboxRect = settingsLayout.NextRect(90f);
-
+            currentY += rowHeight;
+            Rect formationCheckboxRect = new Rect(settingsRect.x + 10f, currentY, 200f, rowHeight);
             bool inFormation = squad.InFormation;
             Widgets.CheckboxLabeled(formationCheckboxRect, "Maintain Formation", ref inFormation);
-
             if (inFormation != squad.InFormation)
             {
                 squad.SetInFormation(inFormation);
@@ -356,10 +361,8 @@ namespace SquadBehaviour
 
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.UpperLeft;
-
             return height;
         }
-
         public static void DrawFormationSelector(Rect formationRect, Squad squad)
         {
             if (Widgets.ButtonText(formationRect, "Formation: " + squad.FormationType.ToString()))
@@ -380,25 +383,7 @@ namespace SquadBehaviour
             }
         }
 
-        public static void DrawHostilitySelector(Rect hostilityRect, Squad squad)
-        {
-            if (Widgets.ButtonText(hostilityRect, $"Hostility: {squad.HostilityResponse}"))
-            {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (SquadHostility formation in Enum.GetValues(typeof(SquadHostility)))
-                {
-                    options.Add(new FloatMenuOption(
-                        formation.ToString(),
-                        delegate { squad.SetHositilityResponse(formation); }
-                    ));
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
-            if (Mouse.IsOver(hostilityRect))
-            {
-                TooltipHandler.TipRegion(hostilityRect, "Change Squad Hostility");
-            }
-        }
+
 
         /// <summary>
         /// Shows the state change menu for undead pawns

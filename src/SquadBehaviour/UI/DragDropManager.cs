@@ -16,7 +16,6 @@ namespace SquadBehaviour
         private static bool isDragConfirmed;
         private const float MIN_DRAG_DISTANCE = 10f;
 
-        // Start drag operation
         public static void StartDrag(Pawn pawn, Squad originSquad)
         {
             if (pawn == null) return;
@@ -27,12 +26,10 @@ namespace SquadBehaviour
             isDragConfirmed = false;
         }
 
-        // Called every frame to update drag state
         public static void UpdateDrag()
         {
             if (!IsDragging) return;
 
-            // Check if we've moved far enough to confirm this is a drag
             if (!isDragConfirmed)
             {
                 float distance = Vector2.Distance(dragStartPos, Event.current.mousePosition);
@@ -48,6 +45,11 @@ namespace SquadBehaviour
                 EndDrag();
                 Event.current.Use();
             }
+            //else if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+            //{
+            //    EndDrag();
+            //    Event.current.Use();
+            //}
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
             {
                 EndDrag();
@@ -82,7 +84,6 @@ namespace SquadBehaviour
                     OriginSquad.RemoveMember(DraggedPawn);
                 }
 
-                // Add to new squad
                 targetSquad.AddMember(DraggedPawn);
 
                 Messages.Message($"Transferred {DraggedPawn.LabelShort} to Squad {targetSquad.squadID}", MessageTypeDefOf.TaskCompletion);

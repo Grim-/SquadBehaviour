@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -21,7 +22,7 @@ namespace SquadBehaviour
             {
                 if (_SquadLeader == null)
                 {
-                    if (this.SelPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader) && squadLeader.ActiveSquads.Count > 0)
+                    if (this.SelPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
                     {
                         _SquadLeader = squadLeader;
                     }      
@@ -40,7 +41,7 @@ namespace SquadBehaviour
                     return false;
                 }
 
-                return base.IsVisible && this.SelPawn != null && SquadLeader != null && SquadLeader.ActiveSquads.Count > 0 && SquadLeader.SquadLeaderPawn == this.SelPawn;
+                return this.SelPawn != null && SquadLeader != null && SquadLeader.IsLeaderRoleActive && SquadLeader.SquadLeaderPawn == this.SelPawn;
             }
         }
 
@@ -54,7 +55,6 @@ namespace SquadBehaviour
 
         protected override void FillTab()
         {
-            // Main container rectangle with padding
             Rect rect = new Rect(0f, 0f, this.size.x, this.size.y).ContractedBy(10f);
             Pawn pawn = (Pawn)this.SelPawn;
 
@@ -92,10 +92,29 @@ namespace SquadBehaviour
 
             Rect willBarRect = new Rect(rect.x, rect.y, willBarWidth, buttonHeight);
             Rect squadButtonRect = new Rect(willBarRect.xMax + buttonMargin, rect.y, squadButtonWidth, buttonHeight);
-            if (Widgets.ButtonText(squadButtonRect, "Squad"))
-            {
-                Find.WindowStack.Add(new SquadManagerWindow(this.SquadLeader));
-            }
+
+            //if (Widgets.ButtonText(squadButtonRect, "Squad"))
+            //{
+            //    Find.WindowStack.Add(new SquadManagerWindow(this.SquadLeader));
+            //}
+
+            //if (Widgets.ButtonText(squadButtonRect, "Add New Squad"))
+            //{
+            //    int newSquadId = SquadLeader.ActiveSquads.Count > 0
+            //        ? SquadLeader.ActiveSquads.Keys.Max() + 1
+            //        : 1;
+
+            //    if (SquadLeader.AddSquad(newSquadId))
+            //    {
+            //        Squad squad = SquadLeader.ActiveSquads[newSquadId];
+            //        squad.squadName = "Squad " + newSquadId;
+            //        Messages.Message("New squad created.", MessageTypeDefOf.PositiveEvent);
+            //    }
+            //    else
+            //    {
+            //        Messages.Message("Failed to create a new squad.", MessageTypeDefOf.RejectInput);
+            //    }
+            //}
         }
 
         private void DrawSquadList(Rect rect)

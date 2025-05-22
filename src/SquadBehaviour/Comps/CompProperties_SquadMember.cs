@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using System.Text;
 using Verse;
+using Verse.AI.Group;
 
 namespace SquadBehaviour
 {
@@ -67,11 +69,19 @@ namespace SquadBehaviour
         }
 
 
-        protected bool _CanUseAbilities = false;
+        protected bool _CanUseAbilities = true;
         public bool AbilitiesAllowed
         {
             get => _CanUseAbilities;
             set => _CanUseAbilities = value;
+        }
+
+
+        protected bool _IsDisobeyingOrders = false;
+        public bool IsDisobeyingOrders
+        {
+            get => _IsDisobeyingOrders;
+            set => _IsDisobeyingOrders = value;
         }
 
         public void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target)
@@ -81,6 +91,24 @@ namespace SquadBehaviour
             if (squadOrderWorker.CanExecuteOrder(target))
             {
                 squadOrderWorker.ExecuteOrder(target);
+            }
+        }
+
+
+
+        public void CheckShouldDisobeyOrder()
+        {
+
+        }
+
+        public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
+        {
+            base.Notify_Killed(prevMap, dinfo);
+
+            if (AssignedSquad != null)
+            {
+                Log.Message("Removed from squad due to being dead");
+                AssignedSquad.RemoveMember(this.Pawn);
             }
         }
 
@@ -105,6 +133,10 @@ namespace SquadBehaviour
         }
 
         public void Notify_SquadChanged()
+        {
+
+        }
+        public void Notify_OnPawnDeath()
         {
 
         }
@@ -136,37 +168,38 @@ namespace SquadBehaviour
             return sb.ToString();
         }
 
+        public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+        {
+            if (selPawn.HostileTo(this.Pawn) || selPawn.Faction != this.Pawn.Faction)
+            {
+                yield break;
+            }
+
+            if (AssignedSquad == null && selPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
+            {
+                foreach (var item in squadLeader.ActiveSquads)
+                {
+                    yield return new FloatMenuOption($"Add to squad [{item.Value.squadName}]", () =>
+                    {
+                        squadLeader.AddToSquad(this.Pawn, item.Key);
+                    });
+                }
+            }
+            else if (AssignedSquad != null)
+            {
+                yield return new FloatMenuOption($"Remove from squad [{AssignedSquad.squadName}]", () =>
+                {
+                    AssignedSquad.RemoveMember(this.Pawn);
+                });      
+            }
+        }
+
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             if (SquadLeader != null)
             {
-                yield return new Gizmo_SquadMemberInfo(this);
+                yield return new Gizmo_SquadMember(this);
             }
-
-            yield return new Command_Action()
-            {
-                defaultLabel = $"Current State {this.CurrentState}",
-                action = () =>
-                {
-                    List<FloatMenuOption> gridOptions = new List<FloatMenuOption>();
-                    gridOptions.Add(new FloatMenuOption("Call To Arms", () =>
-                    {
-                        this.SetCurrentMemberState(SquadMemberState.CalledToArms);
-                    }));
-
-                    gridOptions.Add(new FloatMenuOption("At Ease", () =>
-                    {
-                        this.SetCurrentMemberState(SquadMemberState.AtEase);
-                    }));
-
-                    gridOptions.Add(new FloatMenuOption("Do Nothing", () =>
-                    {
-                        this.SetCurrentMemberState(SquadMemberState.DoNothing);
-                    }));
-
-                    Find.WindowStack.Add(new FloatMenu(gridOptions));
-                }
-            };
         }
 
         public override string CompInspectStringExtra()
@@ -185,4 +218,20 @@ namespace SquadBehaviour
         }
 
     }
+
+
+
+    //public class DeathActionWorker_RemoveFromSquad : DeathActionWorker
+    //{
+    //    public override void PawnDied(Corpse corpse, Lord prevLord)
+    //    {
+    //        if (corpse.InnerPawn != null)
+    //        {
+    //            if (corpse.InnerPawn.TryGetComp(out Comp_PawnSquadMember squadMember))
+    //            {
+    //                squadMember.Notify_OnPawnDeath();
+    //            }
+    //        }
+    //    }
+    //}
 }

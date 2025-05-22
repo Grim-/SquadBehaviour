@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  <Operation Class="PatchOperationSequence">
+  <operations>
+    <li Class="PatchOperationTest">
+      <xpath>/Defs/ThingDef[@Name="BasePawn"]/comps</xpath>
+      <success>Always</success>
+    </li>
+    <li Class="PatchOperationConditional">
+      <xpath>/Defs/ThingDef[@Name="BasePawn"]/comps</xpath>
+      <match Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[@Name="BasePawn"]/comps</xpath>
+        <value>
+          <li Class="SquadBehaviour.CompProperties_SquadLeader" />
+          <li Class="SquadBehaviour.CompProperties_SquadMember" />
+        </value>
+      </match>
+      <nomatch Class="PatchOperationAdd">
+        <xpath>/Defs/ThingDef[@Name="BasePawn"]</xpath>
+        <value>
+          <comps>
+            <li Class="SquadBehaviour.CompProperties_SquadLeader" />
+            <li Class="SquadBehaviour.CompProperties_SquadMember" />
+          </comps>
+        </value>
+      </nomatch>
+    </li>
+  </operations>
+</Operation>
+
+</Patch>

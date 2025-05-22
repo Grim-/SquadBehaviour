@@ -103,7 +103,6 @@ namespace SquadBehaviour
             if (patrolPoints.Count <= 1)
                 return IntVec3.Invalid;
 
-            // Make sure our points are up to date with the zone
             if (patrolZone != null && patrolZone.orderedCells.Count != patrolPoints.Count)
             {
                 UpdateFromZone();

@@ -11,11 +11,8 @@ namespace SquadBehaviour
         {
         }
 
-
-        // Override the shooting position finder to use your squad system
         protected override bool TryFindShootingPosition(Pawn pawn, out IntVec3 dest, Verb verbToUse = null)
         {
-            // First check if there's an enemy to target
             Thing enemyTarget = pawn.mindState.enemyTarget;
             Verb verb = verbToUse ?? pawn.TryGetAttackVerb(enemyTarget, !pawn.IsColonist, false);
 
@@ -25,7 +22,6 @@ namespace SquadBehaviour
                 return false;
             }
 
-            // Get the defense position from squad system
             IntVec3 defendPos = IntVec3.Invalid;
             float defendRadius = 0f;
 
@@ -39,10 +35,9 @@ namespace SquadBehaviour
                 {
                     defendPos = squadMember.DefendPoint;
                 }
-                defendRadius = 5f; // Adjust as needed
+                defendRadius = 5f; 
             }
 
-            // Use the CastPositionFinder with our squad-based position
             if (defendPos.IsValid)
             {
                 return CastPositionFinder.TryFindCastPosition(new CastPositionRequest
@@ -62,23 +57,19 @@ namespace SquadBehaviour
         }
         protected override Job TryGiveJob(Pawn pawn)
         {
-            // Update enemy target (this is from the base class)
             this.UpdateEnemyTarget(pawn);
             Thing enemyTarget = pawn.mindState.enemyTarget;
 
             if (enemyTarget == null)
             {
-                // No enemy - fall back to wait at position
                 return StayAtDefendPointJob(pawn);
             }
 
-            // Check for psychologically invisible enemies
             if (enemyTarget is Pawn enemyPawn && enemyPawn.IsPsychologicallyInvisible())
             {
                 return StayAtDefendPointJob(pawn);
             }
 
-            // Try to use abilities regardless of colonist status
             if (pawn.abilities != null && !this.DisableAbilityVerbs)
             {
                 Job abilityJob = GetAbilityJob(pawn, enemyTarget);
@@ -88,7 +79,6 @@ namespace SquadBehaviour
                 }
             }
 
-            // Handle the rest just like the base class
             if (this.OnlyUseAbilityVerbs)
             {
                 IntVec3 intVec;
@@ -109,7 +99,6 @@ namespace SquadBehaviour
             }
             else
             {
-                // Check for valid attack verb (copied from base class)
                 bool allowAbilities = !this.DisableAbilityVerbs;
                 Verb verb = pawn.TryGetAttackVerb(enemyTarget, allowAbilities, this.allowTurrets);
 
@@ -123,7 +112,6 @@ namespace SquadBehaviour
                     return this.MeleeAttackJob(pawn, enemyTarget);
                 }
 
-                // Check if current position is good for shooting
                 bool hasCover = CoverUtility.CalculateOverallBlockChance(pawn, enemyTarget.Position, pawn.Map) > 0.01f;
                 bool canStand = pawn.Position.Standable(pawn.Map) && pawn.Map.pawnDestinationReservationManager.CanReserve(pawn.Position, pawn, pawn.Drafted);
                 bool canHitFromHere = verb.CanHitTarget(enemyTarget);
@@ -153,7 +141,6 @@ namespace SquadBehaviour
             }
         }
 
-        // Copy of the game's GetAbilityJob method but without the colonist check
         private Job GetAbilityJob(Pawn pawn, Thing enemyTarget)
         {
             if (pawn.abilities == null)
@@ -169,7 +156,6 @@ namespace SquadBehaviour
 
             if (pawn.Position.Standable(pawn.Map) && pawn.Map.pawnDestinationReservationManager.CanReserve(pawn.Position, pawn, pawn.Drafted))
             {
-                // Try abilities that can directly hit the target
                 for (int i = 0; i < castableAbilities.Count; i++)
                 {
                     if (castableAbilities[i].verb.CanHitTarget(enemyTarget))
@@ -178,7 +164,6 @@ namespace SquadBehaviour
                     }
                 }
 
-                // Try AOE abilities
                 for (int j = 0; j < castableAbilities.Count; j++)
                 {
                     LocalTargetInfo aoeTarget = castableAbilities[j].AIGetAOETarget();
@@ -201,7 +186,6 @@ namespace SquadBehaviour
             return null;
         }
 
-        // Helper to create a job to stay at defend point
         private Job StayAtDefendPointJob(Pawn pawn)
         {
             if (pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
@@ -216,7 +200,6 @@ namespace SquadBehaviour
                     defendPos = squadMember.DefendPoint;
                 }
 
-                // If not at defend position, go there
                 if (!pawn.Position.InHorDistOf(defendPos, 0.9f))
                 {
                     Job goToJob = JobMaker.MakeJob(JobDefOf.Goto, defendPos);
@@ -225,7 +208,6 @@ namespace SquadBehaviour
                     return goToJob;
                 }
 
-                // Wait in combat stance
                 Job waitJob = JobMaker.MakeJob(JobDefOf.Wait_Combat);
                 waitJob.expiryInterval = 120;
                 waitJob.checkOverrideOnExpire = true;

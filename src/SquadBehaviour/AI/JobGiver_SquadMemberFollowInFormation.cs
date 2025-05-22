@@ -30,24 +30,26 @@ namespace SquadBehaviour
             Pawn followee = GetFollowee(pawn);
             if (followee == null)
             {
-                Log.Error($"Followee is null for {pawn.LabelShort}");
+                Log.Error($" SquadMemberFollowInFormation : Followee is null for {pawn.LabelShort}");
                 return null;
             }
 
             if (!followee.Spawned)
             {
-                Log.Message($"Followee {followee.LabelShort} is not spawned");
+                Log.Message($"SquadMemberFollowInFormation : Followee {followee.LabelShort} is not spawned");
                 return null;
             }
 
             if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember memeber))
             {
+                Log.Message($"SquadMemberFollowInFormation : {followee.LabelShort} is not part of a squad.");
                 return null;
             }
 
 
             if (memeber.SquadLeader.SquadLeaderPawn == null)
             {
+                Log.Message($"SquadMemberFollowInFormation : {followee.LabelShort} has a null squad leader");
                 return null;
             }
 

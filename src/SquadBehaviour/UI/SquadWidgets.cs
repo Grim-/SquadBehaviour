@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -7,11 +8,49 @@ namespace SquadBehaviour
 {
     public static class SquadWidgets
     {
-
-
-        public static void DrawFormationSelector(Comp_PawnSquadLeader leader, Rect rect, string tooltip = "Change Formation")
+        public static void DrawGlobalHostilitySelector(Comp_PawnSquadLeader leader, Rect hostilityRect)
         {
-            if (Widgets.ButtonImage(rect, leader.FormationType.Icon))
+            if (Widgets.ButtonImage(hostilityRect, TexCommand.Attack, true, "Change Squad Hostility"))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                foreach (SquadHostility formation in Enum.GetValues(typeof(SquadHostility)))
+                {
+                    options.Add(new FloatMenuOption(
+                        formation.ToString(),
+                        delegate { leader.SetHositilityResponse(formation); }
+                    ));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+            if (Mouse.IsOver(hostilityRect))
+            {
+                TooltipHandler.TipRegion(hostilityRect, "Change Squad Hostility");
+            }
+        }
+
+        public static void DrawSquadHostilitySelector(Squad squad, Rect hostilityRect)
+        {
+            if (Widgets.ButtonImage(hostilityRect, TexCommand.Attack, true, "Change Squad Hostility"))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                foreach (SquadHostility formation in Enum.GetValues(typeof(SquadHostility)))
+                {
+                    options.Add(new FloatMenuOption(
+                        formation.ToString(),
+                        delegate { squad.SetHositilityResponse(formation); }
+                    ));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+            if (Mouse.IsOver(hostilityRect))
+            {
+                TooltipHandler.TipRegion(hostilityRect, "Change Squad Hostility");
+            }
+        }
+
+        public static void DrawGlobalFormationSelector(Comp_PawnSquadLeader leader, Rect rect, string tooltip = "Change Formation")
+        {
+            if (Widgets.ButtonImage(rect, leader.FormationType.Icon, true, tooltip))
             {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
                 foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
@@ -30,6 +69,46 @@ namespace SquadBehaviour
             }
         }
 
+        public static void DrawSquadFormationSelector(Squad squad, Rect rect, string tooltip = "Change Formation")
+        {
+            if (Widgets.ButtonImage(rect, squad.FormationType.Icon, true, tooltip))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
+                {
+                    options.Add(new FloatMenuOption(
+                        formation.label,
+                        delegate { squad.SetFormation(formation); }
+                    ));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            if (Mouse.IsOver(rect))
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+        }
+
+        public static void DrawSquadStateSelector(Squad squad, Rect rect)
+        {
+            if (Widgets.ButtonImage(rect, GetCommandTexture(SquadMemberState.CalledToArms), true, GetSquadStateString(SquadMemberState.CalledToArms)))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+
+                options.Add(new FloatMenuOption("Call to arms", () =>
+                {
+                    squad.SetSquadState(SquadMemberState.CalledToArms);
+                }));
+
+                options.Add(new FloatMenuOption("At Ease", () =>
+                {
+                    squad.SetSquadState(SquadMemberState.AtEase);
+                }));
+
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+        }
         public static void DrawGlobalStateSelector(Comp_PawnSquadLeader leader, Rect rect)
         {
             if (Widgets.ButtonImage(rect, GetCommandTexture(leader.SquadState), true, GetSquadStateString(leader.SquadState)))
@@ -45,12 +124,12 @@ namespace SquadBehaviour
                 {
                     leader.SetAllState(SquadMemberState.AtEase);
                 }, null, new TipSignal(GetSquadStateString(SquadMemberState.AtEase))));
+
                 Find.WindowStack.Add(new FloatMenuGrid(options));
             }
         }
 
-
-        public static void DrawOrderFloatGrid(Comp_PawnSquadLeader leader, Rect rect)
+        public static void DrawGlobalOrderFloatGrid(Comp_PawnSquadLeader leader, Rect rect)
         {
             if (Widgets.ButtonImage(rect, TexCommand.SquadAttack, true, "Extra Orders"))
             {
@@ -58,7 +137,6 @@ namespace SquadBehaviour
 
                 foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
                 {
-
                     if (item.requiresTarget)
                     {
                         extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
@@ -81,8 +159,36 @@ namespace SquadBehaviour
                 Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
             }
         }
+        public static void DrawSquadOrderFloatGrid(Squad squad, Rect rect)
+        {
+            if (Widgets.ButtonImage(rect, TexButton.ToggleDevPalette, true, "Extra Orders"))
+            {
+                List<FloatMenuOption> extraOrders = new List<FloatMenuOption>();
 
+                foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
+                {
+                    if (item.requiresTarget)
+                    {
+                        extraOrders.Add(new FloatMenuOption(item.label, () =>
+                        {
+                            Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
+                            {
+                                squad.IssueSquadOrder(item, target);
+                            });
+                        }));
+                    }
+                    else
+                    {
+                        extraOrders.Add(new FloatMenuOption(item.label, () =>
+                        {
+                            squad.IssueSquadOrder(item, null);
+                        }));
+                    }
+                }
 
+                Find.WindowStack.Add(new FloatMenu(extraOrders));
+            }
+        }
         public static string GetSquadStateString(SquadMemberState state)
         {
             switch (state)
