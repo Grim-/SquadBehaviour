@@ -98,23 +98,23 @@ namespace SquadBehaviour
             //    Find.WindowStack.Add(new SquadManagerWindow(this.SquadLeader));
             //}
 
-            //if (Widgets.ButtonText(squadButtonRect, "Add New Squad"))
-            //{
-            //    int newSquadId = SquadLeader.ActiveSquads.Count > 0
-            //        ? SquadLeader.ActiveSquads.Keys.Max() + 1
-            //        : 1;
+            if (Widgets.ButtonText(squadButtonRect, "Add New Squad"))
+            {
+                int newSquadId = SquadLeader.ActiveSquads.Count > 0
+                    ? SquadLeader.ActiveSquads.Keys.Max() + 1
+                    : 1;
 
-            //    if (SquadLeader.AddSquad(newSquadId))
-            //    {
-            //        Squad squad = SquadLeader.ActiveSquads[newSquadId];
-            //        squad.squadName = "Squad " + newSquadId;
-            //        Messages.Message("New squad created.", MessageTypeDefOf.PositiveEvent);
-            //    }
-            //    else
-            //    {
-            //        Messages.Message("Failed to create a new squad.", MessageTypeDefOf.RejectInput);
-            //    }
-            //}
+                if (SquadLeader.AddSquad(newSquadId))
+                {
+                    Squad squad = SquadLeader.ActiveSquads[newSquadId];
+                    squad.squadName = "Squad " + newSquadId;
+                    Messages.Message("New squad created.", MessageTypeDefOf.PositiveEvent);
+                }
+                else
+                {
+                    Messages.Message("Failed to create a new squad.", MessageTypeDefOf.RejectInput);
+                }
+            }
         }
 
         private void DrawSquadList(Rect rect)

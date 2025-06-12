@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbilityUtility.cs" />
+    <Compile Include="UI\AttackJobUtil.cs" />
     <Compile Include="AI\JobGiver_ActivelySearchForTargets.cs" />
     <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />
     <Compile Include="AI\JobGiver_TryUseAbilities.cs" />
