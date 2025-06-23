@@ -82,14 +82,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbilityUtility.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalCanCheckInterval.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPlayerFaction.cs" />
     <Compile Include="UI\AttackJobUtil.cs" />
     <Compile Include="AI\JobGiver_ActivelySearchForTargets.cs" />
     <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />
     <Compile Include="AI\JobGiver_TryUseAbilities.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalIsAggresive.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalSquadMemberCanUseAbilities.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsAggresive.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadMemberCanUseAbilities.cs" />
     <Compile Include="Comps\CompProperties_SquadLeader.cs" />
     <Compile Include="Comps\CompProperties_SquadMember.cs" />
+    <Compile Include="UI\Dialog_RenameSquad.cs" />
     <Compile Include="UI\SquadWidgets.cs" />
     <Compile Include="Duty\JobGiver_SquadDuty.cs" />
     <Compile Include="Duty\JobGiver_SquadPatrol.cs" />
@@ -122,7 +125,7 @@
     <Compile Include="Orders\SquadOrder_RunToPointAndExplode.cs" />
     <Compile Include="Gizmo\Gizmo_SquadLeader.cs" />
     <Compile Include="Patrol\PatrolUtil.cs" />
-    <Compile Include="AI\ThinkNode_ConditionalHasNoLeader.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalHasNoLeader.cs" />
     <Compile Include="UI\DragDropManager.cs" />
     <Compile Include="UI\ITab_SquadManager.cs" />
     <Compile Include="AI\JobDriver_FormationFollow.cs" />

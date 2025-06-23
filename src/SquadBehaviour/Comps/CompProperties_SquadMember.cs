@@ -16,7 +16,7 @@ namespace SquadBehaviour
 
     public class Comp_PawnSquadMember : ThingComp
     {
-        protected Pawn referencedPawn;
+        protected Pawn squadLeaderPawn;
         protected SquadMemberState squadMemberState = SquadMemberState.CalledToArms;
         protected IntVec3 defendPoint = IntVec3.Invalid;
 
@@ -30,14 +30,27 @@ namespace SquadBehaviour
         {
             get
             {
-                if (_SquadLeader == null)
+                if (squadLeaderPawn != null && squadLeaderPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
                 {
-                    if (referencedPawn != null && referencedPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
-                    {
-                        _SquadLeader = squadLeader;
-                    }
+                    return squadLeader;
                 }
-                return _SquadLeader;
+
+                return null;
+            }
+        }
+
+
+
+        public bool IsAnimalCommandable
+        {
+            get
+            {
+                if (this.Pawn.RaceProps.Animal && this.Pawn.def.race.trainability != TrainabilityDefOf.None)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -48,10 +61,6 @@ namespace SquadBehaviour
 
         public SquadDutyDef _CurrentStance = null;
         public SquadDutyDef CurrentStance { get => _CurrentStance; set => _CurrentStance = value; }
-
-
-        private Zone_PatrolPath _AssignedPatrol = null;
-        public Zone_PatrolPath AssignedPatrol { get => _AssignedPatrol; set => _AssignedPatrol = value; }
 
 
         private PatrolTracker _PatrolTracker = null;
@@ -84,10 +93,10 @@ namespace SquadBehaviour
             set => _IsDisobeyingOrders = value;
         }
 
-        public void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target)
+        public void IssueOrder(SquadOrderDef orderDef, LocalTargetInfo target, bool isGlobal = false)
         {
             SquadOrderWorker squadOrderWorker = orderDef.CreateWorker(SquadLeader, this);
-
+            squadOrderWorker.IsGlobalOrder = isGlobal;
             if (squadOrderWorker.CanExecuteOrder(target))
             {
                 squadOrderWorker.ExecuteOrder(target);
@@ -95,10 +104,66 @@ namespace SquadBehaviour
         }
 
 
+        public void ClearCurrentDuties()
+        {
+            this.CurrentStance = null;
+            this.PatrolTracker.ClearPatrol();
+        }
+
 
         public void CheckShouldDisobeyOrder()
         {
 
+        }
+
+
+        public virtual bool CanEverJoinSquadOf(Comp_PawnSquadLeader squadLeader)
+        {
+            Log.Message($"=== CanEverJoinSquadOf Debug ===");
+            Log.Message($"Pawn: {this.Pawn.Label}");
+            Log.Message($"Is Animal: {this.Pawn.RaceProps.Animal}");
+            Log.Message($"Is Mechanoid: {this.Pawn.RaceProps.IsMechanoid}");
+
+            if (this.Pawn.RaceProps.IsMechanoid)
+            {
+                bool canCommand = squadLeader.CanCommandMechs;
+                Log.Message($"Mech check - Can command mechs: {canCommand}");
+                return canCommand;
+            }
+
+            if (this.Pawn.RaceProps.Animal)
+            {
+                Log.Message($"Animal skill level: {squadLeader.SquadLeaderPawn.skills.GetSkill(SkillDefOf.Animals)?.levelInt ?? -1}");
+                Log.Message($"CanCommandAnimals: {squadLeader.CanCommandAnimals}");
+
+                if (!IsAnimalCommandable)
+                {
+                    Log.Message("Not commandable - returning false");
+                    return false;
+                }
+
+                if (!squadLeader.CanCommandAnimals)
+                {
+                    Log.Message("Leader cannot command animals - returning false");
+                    return false;
+                }
+
+                Log.Message("Leader CAN command animals - checking extension");
+                SquadAnimalExtension animalExtension = this.Pawn.def.GetModExtension<SquadAnimalExtension>();
+                if (animalExtension != null)
+                {
+                    bool canCommand = animalExtension.CanSquadLeaderCommand(squadLeader);
+                    Log.Message($"Extension check result: {canCommand}");
+                    return canCommand;
+                }
+
+                Log.Message("No extension - returning true");
+                return true;
+            }
+
+            bool sameFaction = this.Pawn.Faction == squadLeader.SquadLeaderPawn.Faction;
+            Log.Message($"Faction check - Same faction: {sameFaction}");
+            return sameFaction;
         }
 
         public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
@@ -114,7 +179,7 @@ namespace SquadBehaviour
 
         public void SetSquadLeader(Pawn squadLeader)
         {
-            referencedPawn = squadLeader;
+            squadLeaderPawn = squadLeader;
         }
 
         public void SetDefendPoint(IntVec3 targetPoint)
@@ -140,6 +205,18 @@ namespace SquadBehaviour
         {
 
         }
+
+
+        public void LeaveSquad()
+        {
+            if (AssignedSquad != null)
+            {
+                AssignedSquad.RemoveMember(Pawn);
+                AssignedSquad = null;
+                squadLeaderPawn = null;
+            }
+        }
+
 
         public void SetCurrentMemberState(SquadMemberState newState)
         {
@@ -168,39 +245,6 @@ namespace SquadBehaviour
             return sb.ToString();
         }
 
-        public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
-        {
-            if (selPawn.HostileTo(this.Pawn) || selPawn.Faction != this.Pawn.Faction)
-            {
-                yield break;
-            }
-
-            if (AssignedSquad == null && selPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
-            {
-                foreach (var item in squadLeader.ActiveSquads)
-                {
-                    yield return new FloatMenuOption($"Add to squad [{item.Value.squadName}]", () =>
-                    {
-                        squadLeader.AddToSquad(this.Pawn, item.Key);
-                    });
-                }
-            }
-            else if (AssignedSquad != null)
-            {
-                yield return new FloatMenuOption($"Remove from squad [{AssignedSquad.squadName}]", () =>
-                {
-                    AssignedSquad.RemoveMember(this.Pawn);
-                });      
-            }
-        }
-
-        public override IEnumerable<Gizmo> CompGetGizmosExtra()
-        {
-            if (SquadLeader != null)
-            {
-                yield return new Gizmo_SquadMember(this);
-            }
-        }
 
         public override string CompInspectStringExtra()
         {
@@ -212,26 +256,10 @@ namespace SquadBehaviour
             base.PostExposeData();
 
             Scribe_References.Look(ref _AssignedSquad, "assignedSquad");
-            Scribe_References.Look(ref referencedPawn, "referencedPawn");
+            Scribe_References.Look(ref squadLeaderPawn, "referencedPawn");
             Scribe_Values.Look(ref squadMemberState, "squadMemberState");
             Scribe_Values.Look(ref defendPoint, "defendPoint");
         }
 
     }
-
-
-
-    //public class DeathActionWorker_RemoveFromSquad : DeathActionWorker
-    //{
-    //    public override void PawnDied(Corpse corpse, Lord prevLord)
-    //    {
-    //        if (corpse.InnerPawn != null)
-    //        {
-    //            if (corpse.InnerPawn.TryGetComp(out Comp_PawnSquadMember squadMember))
-    //            {
-    //                squadMember.Notify_OnPawnDeath();
-    //            }
-    //        }
-    //    }
-    //}
 }

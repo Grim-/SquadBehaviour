@@ -7,7 +7,7 @@ namespace SquadBehaviour
 	{
 		protected override bool Satisfied(Pawn pawn)
 		{
-			if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) && squadMember.AssignedSquad != null)
+			if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
 			{
 				return squadMember.AssignedSquad.HostilityResponse == SquadHostility.Aggressive;
 			}

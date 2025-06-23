@@ -18,20 +18,8 @@ namespace SquadBehaviour
             {
                 return true;
             }
-
-            // Can potentially be a squad leader
             return true;
         }
-
-        //stub
-        public static bool CanEverBeSquadMember(this Pawn pawn)
-        {
-            if (pawn == null)
-                return false;
-            return true;
-        }
-
-
 
         private static Dictionary<Pawn, Comp_PawnSquadLeader> SquadLeaderCache = new Dictionary<Pawn, Comp_PawnSquadLeader>();
 
@@ -61,9 +49,18 @@ namespace SquadBehaviour
             return false;
         }
 
+
+
         public static bool IsPartOfSquad(this Pawn pawn, out Comp_PawnSquadMember SquadMember)
         {
             SquadMember = null;
+
+            //if (SquadMemberCache.ContainsKey(pawn) && SquadMemberCache[pawn] != null)
+            //{
+            //    SquadMember = SquadMemberCache[pawn];
+            //    return true;
+            //}
+
             if (pawn.TryGetComp(out Comp_PawnSquadMember pawnSquadMember) && pawnSquadMember.AssignedSquad != null)
             {
                 SquadMember = pawnSquadMember;

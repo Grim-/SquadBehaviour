@@ -14,7 +14,7 @@ namespace SquadBehaviour
         public override void ExecuteOrder(LocalTargetInfo Target)
         {
 
-            List<Zone> availablePatrolZones = this.SquadMember.SquadLeader.SquadLeaderPawn.Map.zoneManager.AllZones.Where(x => x is Zone_PatrolPath patrolPathZone).ToList();
+            List<Zone_PatrolPath> availablePatrolZones = this.SquadMember.SquadLeader.SquadLeaderPawn.Map.zoneManager.AllZones.Where(x => x is Zone_PatrolPath patrolPathZone).Cast<Zone_PatrolPath>().ToList();
 
             if (availablePatrolZones.Count == 0)
             {
@@ -25,10 +25,25 @@ namespace SquadBehaviour
 
             foreach (var item in availablePatrolZones)
             {
-                option.Add(new FloatMenuOption($"Patrol Zone {item.ID}.", () =>
+                option.Add(new FloatMenuOption($"Patrol Zone [{item.ID}].", () =>
                 {
-                    this.SquadMember.CurrentStance = SquadDefOf.PatrolArea;
-                    this.SquadMember.AssignedPatrol = (Zone_PatrolPath)item;
+                    if (IsGlobalOrder)
+                    {
+                        foreach (var member in this.SquadMember.AssignedSquad.Members)
+                        {
+                            if (member.IsPartOfSquad(out Comp_PawnSquadMember pawnSquadMember))
+                            {
+                                pawnSquadMember.CurrentStance = SquadDefOf.PatrolArea;
+                                pawnSquadMember.PatrolTracker.SetPatrolZone(item);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        this.SquadMember.CurrentStance = SquadDefOf.PatrolArea;
+                        this.SquadMember.PatrolTracker.SetPatrolZone(item);
+                    }
+
                 }));
             }
             Find.WindowStack.Add(new FloatMenu(option));

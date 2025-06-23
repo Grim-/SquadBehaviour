@@ -20,15 +20,12 @@ namespace SquadBehaviour
         {
             get
             {
-                if (_SquadLeader == null)
+                if (this.SelPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
                 {
-                    if (this.SelPawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader))
-                    {
-                        _SquadLeader = squadLeader;
-                    }      
+                    return squadLeader;
                 }
 
-                return _SquadLeader;
+                return null;
             }
         }
 
@@ -36,12 +33,7 @@ namespace SquadBehaviour
         {
             get
             {
-                if (SquadLeader == null)
-                {
-                    return false;
-                }
-
-                return this.SelPawn != null && SquadLeader != null && SquadLeader.IsLeaderRoleActive && SquadLeader.SquadLeaderPawn == this.SelPawn;
+                return this.SelPawn != null && SelPawn.IsColonist && SquadLeader != null && SquadLeader.IsLeaderRoleActive;
             }
         }
 
@@ -50,7 +42,19 @@ namespace SquadBehaviour
             this.labelKey = "SquadManager";
             this.tutorTag = "SquadManager";
             this.size = new Vector2(500f, 450f);
+   
+        }
+
+        public override void OnOpen()
+        {
             this.squadDisplay = new SquadDisplayUtility();
+            base.OnOpen();
+        }
+
+        protected override void CloseTab()
+        {
+            base.CloseTab();
+            _SquadLeader = null;
         }
 
         protected override void FillTab()
@@ -81,22 +85,16 @@ namespace SquadBehaviour
             }
         }
 
+
         private void DrawControlButtons(Rect rect)
         {
             float buttonHeight = BUTTON_HEIGHT;
             float buttonMargin = 10f;
             float availableWidth = rect.width;
-            float willBarWidth = availableWidth * 0.4f;
-            float squadButtonWidth = availableWidth * 0.2f;
+            float squadButtonWidth = availableWidth * 0.6f;
 
+            Rect squadButtonRect = new Rect(rect.xMax / 2  + buttonMargin - squadButtonWidth /2, rect.y, squadButtonWidth, buttonHeight);
 
-            Rect willBarRect = new Rect(rect.x, rect.y, willBarWidth, buttonHeight);
-            Rect squadButtonRect = new Rect(willBarRect.xMax + buttonMargin, rect.y, squadButtonWidth, buttonHeight);
-
-            //if (Widgets.ButtonText(squadButtonRect, "Squad"))
-            //{
-            //    Find.WindowStack.Add(new SquadManagerWindow(this.SquadLeader));
-            //}
 
             if (Widgets.ButtonText(squadButtonRect, "Add New Squad"))
             {

@@ -33,6 +33,7 @@ namespace SquadBehaviour
         public SquadOrderWorker CreateWorker(Comp_PawnSquadLeader SquadLeader, Comp_PawnSquadMember SquadMember)
         {
             SquadOrderWorker SquadOrderWorker = (SquadOrderWorker)Activator.CreateInstance(workerClass);
+            SquadOrderWorker.def = this;
             SquadOrderWorker.SquadMember = SquadMember;
             SquadOrderWorker.SquadLeader = SquadLeader;
             SquadOrderWorker.SquadOrderSettings = orderSettings;

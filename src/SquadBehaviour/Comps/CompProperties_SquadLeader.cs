@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -21,7 +22,7 @@ namespace SquadBehaviour
         protected FormationDef _FormationType = SquadDefOf.ColumnFormation;
         protected bool InFormation = true;
         public bool ShowExtraOrders = false;
-        protected SquadHostility SquadHostilityResponse = SquadHostility.Aggressive;
+        protected SquadHostility SquadHostilityResponse = SquadHostility.Defensive;
         protected Lord _SquadLord = null;
         protected SquadMemberState _SquadState = SquadMemberState.CalledToArms;
         protected Dictionary<int, Squad> _ActiveSquads = new Dictionary<int, Squad>();
@@ -48,6 +49,21 @@ namespace SquadBehaviour
         }
 
 
+        public bool CanCommandAnimals
+        {
+            get
+            {
+                var animalSkill = this.SquadLeaderPawn.skills.GetSkill(SkillDefOf.Animals);
+                if (animalSkill == null)
+                    return false;
+
+                Log.Message($"CanCommandAnimals check for {SquadLeaderPawn.Label}: level={animalSkill.Level}, levelInt={animalSkill.levelInt}");
+
+                return animalSkill.Level >= 8;
+            }
+        }
+        public bool CanCommandMechs => this.SquadLeaderPawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant);
+
         public bool IsLeaderRoleActive = false;
 
         public FormationDef FormationType => _FormationType;
@@ -62,25 +78,24 @@ namespace SquadBehaviour
 
 
 
-        public void SetAsActiveSquadLeader()
+        public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
         {
-            this.IsLeaderRoleActive = true;
+            DisbandAllSquads();
+            base.Notify_Killed(prevMap, dinfo);
         }
 
-        public void SetAsInactiveSquadLeader()
+        public void SetSquadLeader(bool isActive)
         {
-            if (this.IsLeaderRoleActive)
+            this.IsLeaderRoleActive = isActive;
+
+            if (!this.IsLeaderRoleActive)
             {
-                foreach (var squad in ActiveSquads.ToArray())
+                if (ActiveSquads.Count > 0)
                 {
-                    squad.Value.DisbandSquad();
-                    RemoveSquad(squad.Key);
-                }
-            }
-
-            this.IsLeaderRoleActive = false;
+                    DisbandAllSquads();
+                }    
+            }         
         }
-
 
         public virtual void SetFormation(FormationDef formationType)
         {
@@ -90,41 +105,6 @@ namespace SquadBehaviour
             {
                 squad.Value.SetFormation(FormationType);
             }
-        }
-
-        public virtual void SetFollowDistance(float distance)
-        {
-            _FollowDistance = distance;
-
-            foreach (var squad in ActiveSquads)
-            {
-                squad.Value.SetFollowDistance(distance);
-            }
-        }
-
-        public virtual void SetInFormation(bool inFormation)
-        {
-            InFormation = inFormation;
-
-            foreach (var squad in ActiveSquads)
-            {
-                squad.Value.SetInFormation(InFormation);
-            }
-        }
-
-        public virtual void ToggleInFormation()
-        {
-            InFormation = !InFormation;
-
-            foreach (var squad in ActiveSquads)
-            {
-                squad.Value.SetInFormation(InFormation);
-            }
-        }
-
-        public virtual void SetHositilityResponse(SquadHostility squadHostilityResponse)
-        {
-            SquadHostilityResponse = squadHostilityResponse;
         }
 
         public virtual void SetAllState(SquadMemberState squadMemberState)
@@ -141,103 +121,8 @@ namespace SquadBehaviour
         }
         #endregion
 
-        #region Squad Member Management
-        public virtual bool AddToSquad(Pawn pawn)
-        {
-            if (SquadLeaderPawn == null)
-            {
-                Log.Message($"CompSquadLeader Cannot add {pawn} to squad, SquadLeaderPawn is null.");
-                return false;
-            }
-
-            if (IsPartOfAnySquad(pawn, out Squad squad))
-            {
-                squad.SquadLeader.RemoveFromSquad(pawn);
-            }
-            else
-            {
-                Squad newSquad = GetFirstOrAddSquad();
-
-                return AddToSquad(pawn, newSquad.squadID);
-            }
-            return false;
-        }
-
-        public virtual bool AddToSquad(Pawn pawn, int squadID)
-        {
-            if (SquadLeaderPawn == null)
-            {
-                Log.Message($"CompSquadLeader Cannot add {pawn} to squad, SquadLeaderPawn is null.");
-                return false;
-            }
-
-            if (!HasSquadByID(squadID))
-            {
-                //no squad of that ID
-                return false;
-            }
-
-            //remove from any existing squad
-            if (IsPartOfAnySquad(pawn, out Squad squad))
-            {
-                squad.RemoveMember(pawn);
-            }
-
-            Squad foundSquad = GetSquadByID(squadID);
-       
-            if (foundSquad != null)
-            {
-                foundSquad.Leader = this.SquadLeaderPawn;
-                foundSquad.AddMember(pawn);
-                return true;
-            }
-
-            return false;
-        }
-
-        public virtual bool RemoveFromSquad(Pawn pawn, bool kill = false, bool alsoDestroy = false)
-        {
-            if (IsPartOfAnySquad(pawn, out Squad squad))
-            {
-                if (squad.Members.Contains(pawn))
-                {
-                    squad.RemoveMember(pawn);
-                }
-
-                if (kill && pawn.Spawned && !pawn.health.Dead)
-                {
-                    pawn.Kill(null);
-                }
-
-                if (alsoDestroy)
-                {
-                    if (!pawn.Destroyed)
-                    {
-                        pawn.Destroy();
-                    }
-                }
-
-                return true;
-            }
-            return false;
-        }
-        #endregion
 
         #region Squad Management
-        public virtual bool HasSquadByID(int squadID)
-        {
-            return _ActiveSquads.ContainsKey(squadID);
-        }
-
-        public virtual Squad GetSquadByID(int squadID)
-        {
-            if (HasSquadByID(squadID))
-            {
-                return _ActiveSquads[squadID];
-            }
-
-            return null;
-        }
 
         public virtual bool AddSquad(int squadID)
         {
@@ -286,6 +171,37 @@ namespace SquadBehaviour
             return new Squad(squadID, this.SquadLeaderPawn, FormationType, SquadHostilityResponse);
         }
 
+        public virtual void DisbandSquad(Squad squad)
+        {
+            if (ActiveSquads.ContainsKey(squad.squadID))
+            {
+                ActiveSquads[squad.squadID].DisbandSquad();
+                RemoveSquad(squad.squadID);
+            }
+        }
+
+        public virtual void DisbandAllSquads()
+        {
+            foreach (var squad in ActiveSquads.ToArray())
+            {
+                DisbandSquad(squad.Value);
+            }
+        }
+
+        public virtual bool HasSquadByID(int squadID)
+        {
+            return _ActiveSquads.ContainsKey(squadID);
+        }
+
+        public virtual Squad GetSquadByID(int squadID)
+        {
+            if (HasSquadByID(squadID))
+            {
+                return _ActiveSquads[squadID];
+            }
+
+            return null;
+        }
         public virtual bool HasAnySquad()
         {
             return _ActiveSquads != null && _ActiveSquads.Count > 0;
@@ -317,14 +233,6 @@ namespace SquadBehaviour
                 squad.Value.IssueSquadOrder(orderDef, target);
             }
         }
-
-        public virtual void IssueSquadOrder(Squad squad, SquadOrderDef orderDef, LocalTargetInfo target)
-        {
-            if (squad != null)
-            {
-                squad.IssueSquadOrder(orderDef, target);
-            }
-        }
         #endregion
 
         #region Utility Methods
@@ -344,18 +252,8 @@ namespace SquadBehaviour
             return false;
         }
         #endregion
-        //public override IEnumerable<Gizmo> CompGetGizmosExtra()
-        //{
-        //    foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-        //    {
-        //        yield return gizmo;
-        //    }
 
-        //    if (IsLeaderRoleActive)
-        //    {
-        //        yield return new Gizmo_SquadLeader(this);
-        //    }
-        //}
+
         #region Overrides
         public override void PostExposeData()
         {

@@ -1,131 +1,132 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using Verse;
+﻿//using RimWorld;
+//using System;
+//using System.Collections.Generic;
+//using UnityEngine;
+//using Verse;
 
-namespace SquadBehaviour
-{
-    [StaticConstructorOnStartup]
-    public class Gizmo_SquadLeader : Gizmo
-    {
-        private Comp_PawnSquadLeader master;
-        private static readonly Vector2 BaseSize = new Vector2(140f, 80f);
-        private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-        private const float ButtonGridWidth = 140f;
-        private const float ButtonSize = 35f;
+//namespace SquadBehaviour
+//{
+//    [StaticConstructorOnStartup]
+//    public class Gizmo_SquadLeader : Gizmo
+//    {
+//        private Comp_PawnSquadLeader master;
+//        private static readonly Vector2 BaseSize = new Vector2(140f, 80f);
+//        private static readonly Color BackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+//        private const float ButtonGridWidth = 140f;
+//        private const float ButtonSize = 35f;
 
-        public Gizmo_SquadLeader(Comp_PawnSquadLeader master)
-        {
-            this.master = master;
-            Order = -100f;
-        }
+//        public Gizmo_SquadLeader(Comp_PawnSquadLeader master)
+//        {
+//            this.master = master;
+//            Order = -100f;
+//        }
 
-        public override float GetWidth(float maxWidth)
-        {
-            float width = BaseSize.x;
-            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
-            {
-                width += master.ActiveSquads.Count * ButtonGridWidth;
-            }
-            return width;
-        }
+//        public override float GetWidth(float maxWidth)
+//        {
+//            float width = BaseSize.x;
+//            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
+//            {
+//                width += master.ActiveSquads.Count * ButtonGridWidth;
+//            }
+//            return width;
+//        }
 
-        public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
-        {
-            Rect baseRect = new Rect(topLeft.x, topLeft.y, BaseSize.x, BaseSize.y);
-            GUI.DrawTexture(baseRect, Command.BGTex);
+//        public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
+//        {
+//            Rect baseRect = new Rect(topLeft.x, topLeft.y, BaseSize.x, BaseSize.y);
+//            GUI.DrawTexture(baseRect, Command.BGTex);
 
-            float buttonY = topLeft.y;
-            float buttonX = topLeft.x;
+//            float buttonY = topLeft.y;
+//            float buttonX = topLeft.x;
 
-            Rect toggleRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            DrawShowSquadOverviewToggle(toggleRect);
-            buttonX += ButtonSize;
+//            Rect toggleRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+//            DrawShowSquadOverviewToggle(toggleRect);
+//            buttonX += ButtonSize;
 
-            Rect formationRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            SquadWidgets.DrawGlobalFormationSelector(master, formationRect);
-            buttonX += ButtonSize;
+//            Rect formationRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+//            SquadWidgets.DrawFormationSelector(formationRect, master.FormationType.Icon, master.SetFormation);
+//            buttonX += ButtonSize;
 
-            Rect dutyRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            DrawDutyFloatGrid(dutyRect);
-            buttonX += ButtonSize;
+//            Rect dutyRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
+//            DrawDutyFloatGrid(dutyRect);
+//            buttonX += ButtonSize;
 
-            Rect orderRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
-            SquadWidgets.DrawGlobalOrderFloatGrid(master, orderRect);
+//            Rect orderRect = new Rect(buttonX, buttonY, ButtonSize, ButtonSize);
 
-            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
-            {
-                float xPosition = topLeft.x + BaseSize.x;
-                float extraWidth = master.ActiveSquads.Count * ButtonGridWidth;
-                Rect extraRect = new Rect(xPosition, topLeft.y, extraWidth, BaseSize.y);
-                GUI.DrawTexture(extraRect, Command.BGTex);
+//            SquadWidgets.DrawOrderFloatGrid(orderRect, master. master.IssueGlobalOrder);
 
-                float squadButtonX = xPosition;
-                foreach (KeyValuePair<int, Squad> squad in master.ActiveSquads)
-                {
-                    Rect squadCellRect = new Rect(squadButtonX, topLeft.y, ButtonGridWidth, BaseSize.y);
-                    DrawSquadContainer(squadCellRect, squad.Value);
-                    squadButtonX += ButtonGridWidth;
-                }
-            }
+//            if (master.ShowExtraOrders && master.ActiveSquads != null && master.ActiveSquads.Count > 0)
+//            {
+//                float xPosition = topLeft.x + BaseSize.x;
+//                float extraWidth = master.ActiveSquads.Count * ButtonGridWidth;
+//                Rect extraRect = new Rect(xPosition, topLeft.y, extraWidth, BaseSize.y);
+//                GUI.DrawTexture(extraRect, Command.BGTex);
 
-            return new GizmoResult(GizmoState.Clear);
-        }
+//                float squadButtonX = xPosition;
+//                foreach (KeyValuePair<int, Squad> squad in master.ActiveSquads)
+//                {
+//                    Rect squadCellRect = new Rect(squadButtonX, topLeft.y, ButtonGridWidth, BaseSize.y);
+//                    DrawSquadContainer(squadCellRect, squad.Value);
+//                    squadButtonX += ButtonGridWidth;
+//                }
+//            }
 
-        private void DrawShowSquadOverviewToggle(Rect rect)
-        {
-            if (Widgets.ButtonImage(rect, master.ShowExtraOrders ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
-            {
-                master.ShowExtraOrders = !master.ShowExtraOrders;
-            }
+//            return new GizmoResult(GizmoState.Clear);
+//        }
 
-            if (Mouse.IsOver(rect))
-            {
-                TooltipHandler.TipRegion(rect, "Show Extra Orders");
-            }
-        }
+//        private void DrawShowSquadOverviewToggle(Rect rect)
+//        {
+//            if (Widgets.ButtonImage(rect, master.ShowExtraOrders ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
+//            {
+//                master.ShowExtraOrders = !master.ShowExtraOrders;
+//            }
 
-        private void DrawSquadContainer(Rect rect, Squad squad)
-        {
-            Widgets.Label(rect, $"Squad {squad.squadID}");
-        }
+//            if (Mouse.IsOver(rect))
+//            {
+//                TooltipHandler.TipRegion(rect, "Show Extra Orders");
+//            }
+//        }
 
-        private void DrawDutyFloatGrid(Rect rect)
-        {
-            SquadWidgets.DrawGlobalStateSelector(this.master, rect);
-        }
+//        private void DrawSquadContainer(Rect rect, Squad squad)
+//        {
+//            Widgets.Label(rect, $"Squad {squad.squadID}");
+//        }
 
-        private void DrawOrderFloatGrid(Rect rect)
-        {
-            if (Widgets.ButtonImage(rect, TexCommand.SquadAttack, true, "Extra Orders"))
-            {
-                List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
+//        private void DrawDutyFloatGrid(Rect rect)
+//        {
+//            SquadWidgets.DrawStateSelector(rect, master.SquadState, master.SetAllState, true);
+//        }
 
-                foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
-                {
+//        private void DrawOrderFloatGrid(Rect rect)
+//        {
+//            if (Widgets.ButtonImage(rect, TexCommand.SquadAttack, true, "Extra Orders"))
+//            {
+//                List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
 
-                    if (item.requiresTarget)
-                    {
-                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
-                        {
-                            Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
-                            {
-                                master.IssueGlobalOrder(item, target);
-                            });
-                        }, null, new TipSignal(item.defName)));
-                    }
-                    else
-                    {
-                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
-                        {
-                            master.IssueGlobalOrder(item, null);
-                        }, null, new TipSignal(item.defName)));
-                    }
-                }
+//                foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
+//                {
 
-                Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
-            }
-        }
-    }
-}
+//                    if (item.requiresTarget)
+//                    {
+//                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
+//                        {
+//                            Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
+//                            {
+//                                master.IssueGlobalOrder(item, target);
+//                            });
+//                        }, null, new TipSignal(item.defName)));
+//                    }
+//                    else
+//                    {
+//                        extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
+//                        {
+//                            master.IssueGlobalOrder(item, null);
+//                        }, null, new TipSignal(item.defName)));
+//                    }
+//                }
+
+//                Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
+//            }
+//        }
+//    }
+//}

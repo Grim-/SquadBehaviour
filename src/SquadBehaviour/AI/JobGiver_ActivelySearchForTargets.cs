@@ -14,16 +14,19 @@ namespace SquadBehaviour
 				return null;
 			}
 
-			LastCheckTick = Current.Game.tickManager.TicksAbs;
-
-			Thing thing = (Thing)AttackTargetFinder.BestAttackTarget(pawn,
-				TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable,
-				null, 0f, 8f, default(IntVec3), float.MaxValue, false, true, false, false);
-
-            if (thing != null && thing.Position.DistanceTo(pawn.Position) < squadMember.AssignedSquad.AggresionDistance)
+            if (Current.Game.tickManager.TicksGame + 150 > LastCheckTick)
             {
-				return AttackJobUtil.TryGetAttackNearbyEnemyJob(pawn);
-            }
+				LastCheckTick = Current.Game.tickManager.TicksGame;
+
+				Thing thing = (Thing)AttackTargetFinder.BestAttackTarget(pawn,
+					TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable,
+					null, 0f, 8f, default(IntVec3), float.MaxValue, false, true, false, false);
+
+				if (thing != null && thing.Position.DistanceTo(pawn.Position) < squadMember.AssignedSquad.AggresionDistance)
+				{
+					return AttackJobUtil.TryGetAttackNearbyEnemyJob(pawn);
+				}
+			}
 
 			return null;
 		}

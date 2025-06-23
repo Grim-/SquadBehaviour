@@ -50,11 +50,7 @@ namespace SquadBehaviour
 
         public static float GetPawnSpacing(Pawn pawn)
         {
-            if (pawn?.Graphic?.drawSize != null)
-            {
-                return Mathf.Max(pawn.Graphic.drawSize.x, pawn.Graphic.drawSize.y);
-            }
-            return 1f;
+            return pawn.def.Size.x;
         }
 
         private static Vector3 RotateOffset(Vector3 offset, Rot4 rotation)

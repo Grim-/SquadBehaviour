@@ -11,7 +11,7 @@ namespace SquadBehaviour
             if (pawn == null || !pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
                 return false;
 
-            SquadDutyDef stance = squadMember._CurrentStance;
+            SquadDutyDef stance = squadMember.CurrentStance;
             return stance != null;
         }
     }

@@ -13,7 +13,7 @@ namespace SquadBehaviour
 
         public override void ExecuteOrder(LocalTargetInfo Target)
         {
-            SquadMember.CurrentStance = null;
+            SquadMember.ClearCurrentDuties();
         }
     }
 }

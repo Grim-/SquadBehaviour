@@ -54,6 +54,8 @@ namespace SquadBehaviour
             {
                 orderedCells.Add(c);
             }
+
+            orderedCells.OrderBy(x => x.DistanceTo(this.Position));
         }
 
         public override void RemoveCell(IntVec3 c)
@@ -98,17 +100,17 @@ namespace SquadBehaviour
 
         public override string GetInspectString()
         {
-            StringBuilder stringBuilder = new StringBuilder(base.GetInspectString());
+            StringBuilder stringBuilder = new StringBuilder();
             List<IntVec3> pathCells = GetPatrolCells();
 
             if (pathCells.Count > 0)
             {
-                stringBuilder.AppendLine("PatrolPathLength".Translate() + ": " + pathCells.Count + " " + "Cells".Translate());
+                stringBuilder.AppendLine("PatrolPathLength".Translate().Trim() + ": " + pathCells.Count + " " + "Cells".Translate().Trim());
 
                 if (pathCells.Count > 1)
                 {
                     float totalDistance = CalculatePathDistance(pathCells);
-                    stringBuilder.AppendLine("Total Patrol Distance".Translate() + ": " + totalDistance.ToString("F1") + " m");
+                    stringBuilder.AppendLine("TotalPatrolDistance".Translate().Trim() + ": " + totalDistance.ToString("F1") + " m");
                 }
             }
 

@@ -39,7 +39,6 @@ namespace SquadBehaviour
                 return null;
             }
 
-            // Make sure the patrol tracker is using the current zone
             if (squadMember.PatrolTracker.PatrolZone != patrolZone)
             {
                 squadMember.PatrolTracker.SetPatrolZone(patrolZone);
