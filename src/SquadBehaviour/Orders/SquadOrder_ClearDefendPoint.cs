@@ -20,5 +20,10 @@ namespace SquadBehaviour
         {
             SquadMember.ClearDefendPoint();
         }
+
+        public override void ExecuteOrderGlobal(LocalTargetInfo Target)
+        {
+            SquadMember.ClearDefendPoint();
+        }
     }
 }

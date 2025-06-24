@@ -10,7 +10,7 @@ namespace SquadBehaviour
         {
             if (pawn.IsPartOfSquad(out Comp_PawnSquadMember memeber))
             {
-                return memeber.SquadLeader.SquadLeaderPawn;
+                return memeber.SquadLeader.Pawn;
             }
             return null;
         }
@@ -47,7 +47,7 @@ namespace SquadBehaviour
             }
 
 
-            if (memeber.SquadLeader.SquadLeaderPawn == null)
+            if (memeber.SquadLeader.Pawn == null)
             {
                 Log.Message($"SquadMemberFollowInFormation : {followee.LabelShort} has a null squad leader");
                 return null;
@@ -67,7 +67,7 @@ namespace SquadBehaviour
             job.expiryInterval = 200;
             job.followRadius = memeber.AssignedSquad.FollowDistance;
             job.SetTarget(TargetIndex.A, followee);
-            job.reportStringOverride = $"Following {memeber.SquadLeader.SquadLeaderPawn.LabelCap} in formation";
+            job.reportStringOverride = $"Following {memeber.SquadLeader.Pawn.LabelCap} in formation";
             return job;
         }
 

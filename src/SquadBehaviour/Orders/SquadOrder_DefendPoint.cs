@@ -25,5 +25,10 @@ namespace SquadBehaviour
             SquadMember.SetDefendPoint(Target.Cell);
             SquadMember.CurrentStance = SquadDefOf.DefendPoint;
         }
+
+        public override void ExecuteOrderGlobal(LocalTargetInfo Target)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

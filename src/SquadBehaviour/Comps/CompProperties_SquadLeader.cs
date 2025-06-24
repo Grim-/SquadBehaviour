@@ -29,9 +29,9 @@ namespace SquadBehaviour
         #endregion
 
         #region Properties
-        public Pawn SquadLeaderPawn => this.parent as Pawn;
+        public Pawn Pawn => this.parent as Pawn;
         public Lord SquadLord { get => this._SquadLord; set => this._SquadLord = value; }
-        public virtual IntVec3 LeaderPosition => SquadLeaderPawn.Position;
+        public virtual IntVec3 LeaderPosition => Pawn.Position;
         public virtual List<Pawn> AllSquadsPawns
         {
             get
@@ -53,16 +53,16 @@ namespace SquadBehaviour
         {
             get
             {
-                var animalSkill = this.SquadLeaderPawn.skills.GetSkill(SkillDefOf.Animals);
+                var animalSkill = this.Pawn.skills.GetSkill(SkillDefOf.Animals);
                 if (animalSkill == null)
                     return false;
 
-                Log.Message($"CanCommandAnimals check for {SquadLeaderPawn.Label}: level={animalSkill.Level}, levelInt={animalSkill.levelInt}");
+                Log.Message($"CanCommandAnimals check for {Pawn.Label}: level={animalSkill.Level}, levelInt={animalSkill.levelInt}");
 
                 return animalSkill.Level >= 8;
             }
         }
-        public bool CanCommandMechs => this.SquadLeaderPawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant);
+        public bool CanCommandMechs => this.Pawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant);
 
         public bool IsLeaderRoleActive = false;
 
@@ -168,7 +168,7 @@ namespace SquadBehaviour
 
         public virtual Squad CreateSquad(int squadID)
         {
-            return new Squad(squadID, this.SquadLeaderPawn, FormationType, SquadHostilityResponse);
+            return new Squad(squadID, this.Pawn, FormationType, SquadHostilityResponse);
         }
 
         public virtual void DisbandSquad(Squad squad)
@@ -222,7 +222,7 @@ namespace SquadBehaviour
             return IntVec3.Invalid;
         }
 
-        public virtual IntVec3 GetFormationPositionFor(Pawn pawn) => GetFormationPositionFor(pawn, SquadLeaderPawn.Position, SquadLeaderPawn.Rotation);
+        public virtual IntVec3 GetFormationPositionFor(Pawn pawn) => GetFormationPositionFor(pawn, Pawn.Position, Pawn.Rotation);
         #endregion
 
         #region Order Management

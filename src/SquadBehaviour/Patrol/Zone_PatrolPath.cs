@@ -114,7 +114,7 @@ namespace SquadBehaviour
                 }
             }
 
-            return stringBuilder.ToString();
+            return stringBuilder.ToString().TrimEndNewlines();
         }
 
         private float CalculatePathDistance(List<IntVec3> path)

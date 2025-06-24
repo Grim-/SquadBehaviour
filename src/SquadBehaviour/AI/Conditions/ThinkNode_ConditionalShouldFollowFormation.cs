@@ -13,12 +13,12 @@ namespace SquadBehaviour
             }
 
 
-            if (squadMember.SquadLeader == null || squadMember.SquadLeader.SquadLeaderPawn == null)
+            if (squadMember.SquadLeader == null || squadMember.SquadLeader.Pawn == null)
             {
                 return false;
             }
 
-            Pawn SquadLeader = squadMember.SquadLeader.SquadLeaderPawn;
+            Pawn SquadLeader = squadMember.SquadLeader.Pawn;
 
             if (SquadLeader == null)
             {

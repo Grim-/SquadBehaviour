@@ -12,7 +12,7 @@ namespace SquadBehaviour
         {
             if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
-                return squadMember.SquadLeader.SquadLeaderPawn;
+                return squadMember.SquadLeader.Pawn;
             }
             return null;
         }

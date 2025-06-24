@@ -49,10 +49,12 @@ namespace SquadBehaviour
         {
 
         }
-        public Squad(int squadID, Pawn leader, FormationDef formationType, SquadHostility hostility)
+
+        public Squad(int squadID, Pawn leader, FormationDef formationType, SquadHostility hostility = SquadHostility.Defensive)
         {
             this.squadID = squadID;
             this.uniqueID = Find.UniqueIDsManager.GetNextThingID();
+            this.squadName = NameGenerator.GenerateName(RulePackDefOf.NamerArtWeaponMelee);
             Leader = leader;
             SetFormation(formationType);
             HostilityResponse = hostility;
@@ -183,7 +185,7 @@ namespace SquadBehaviour
         {
             if (pawn.TryGetSquadLeader(out Comp_PawnSquadLeader pawnSquadLeader) && pawnSquadLeader.IsLeaderRoleActive)
             {
-                Messages.Message($"Cannot add {pawnSquadLeader.SquadLeaderPawn.Label} to squad, since they are a squad leader.", MessageTypeDefOf.RejectInput);
+                Messages.Message($"Cannot add {pawnSquadLeader.Pawn.Label} to squad, since they are a squad leader.", MessageTypeDefOf.RejectInput);
                 return;
             }
 
@@ -219,9 +221,7 @@ namespace SquadBehaviour
                     squadMember.LeaveSquad();
                 }
 
-                squadMember.SetSquadLeader(this.SquadLeader.SquadLeaderPawn);
-                squadMember.AssignedSquad = this;
-                squadMember.CurrentStance = this.squadDuty;
+                squadMember.AssignToSquad(this);
 
                 if (this.SquadLeader != null)
                 {
@@ -238,9 +238,7 @@ namespace SquadBehaviour
             if (Members.Contains(pawn) && pawn.TryGetSquadMember(out Comp_PawnSquadMember squadMember))
             {
                 Members.Remove(pawn);
-                squadMember.SetSquadLeader(null);
-                squadMember.AssignedSquad = null;
-                squadMember.CurrentStance = null;
+                squadMember.UnAssignSquad();
             }
         }
         public bool TryMergeFrom(Squad OtherSquad)
@@ -304,90 +302,6 @@ namespace SquadBehaviour
         public string GetUniqueLoadID()
         {
             return "Squad_" + this.uniqueID;
-        }
-    }
-
-    public class SquadAnimalExtension : DefModExtension
-    {
-        public bool canEverJoinSquad = false;
-
-        public List<SquadSkillRequirements> skillRequirements;
-        public List<TraitDef> traitsRequired;
-        public List<HediffDef> hediffRequired;
-        public List<GeneDef> genesRequired;
-
-        public bool CanSquadLeaderCommand(Comp_PawnSquadLeader squadLeader)
-        {
-            if (!canEverJoinSquad)
-            {
-                return false;
-            }
-
-            if (!squadLeader.CanCommandAnimals)
-            {
-                return false;
-            }
-
-            if (skillRequirements.NullOrEmpty() && traitsRequired.NullOrEmpty() && hediffRequired.NullOrEmpty() && genesRequired.NullOrEmpty())
-            {
-                return true;
-            }
-
-            if (!skillRequirements.NullOrEmpty())
-            {
-                if (squadLeader.SquadLeaderPawn.skills == null) 
-                    return false;
-                foreach (SquadSkillRequirements req in skillRequirements)
-                {
-                    SkillRecord skill = squadLeader.SquadLeaderPawn.skills.GetSkill(req.skillDef);
-                    if (skill == null || skill.Level < req.minLevel)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (!traitsRequired.NullOrEmpty())
-            {
-                if (squadLeader.SquadLeaderPawn.story == null || squadLeader.SquadLeaderPawn.story.traits == null) 
-                    return false;
-                foreach (TraitDef traitDef in traitsRequired)
-                {
-                    if (!squadLeader.SquadLeaderPawn.story.traits.HasTrait(traitDef))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (!hediffRequired.NullOrEmpty())
-            {
-                if (squadLeader.SquadLeaderPawn.health == null || squadLeader.SquadLeaderPawn.health.hediffSet == null) 
-                    return false;
-                foreach (HediffDef hediffDef in hediffRequired)
-                {
-                    if (!squadLeader.SquadLeaderPawn.health.hediffSet.HasHediff(hediffDef))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (!genesRequired.NullOrEmpty())
-            {
-                if (!ModLister.BiotechInstalled || squadLeader.SquadLeaderPawn.genes == null) 
-                    return false;
-
-                foreach (GeneDef geneDef in genesRequired)
-                {
-                    if (!squadLeader.SquadLeaderPawn.genes.HasActiveGene(geneDef))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
     }
 

@@ -13,7 +13,7 @@ namespace SquadBehaviour
             if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
                 // Log.Error($"pawn is summon master is {pawn.GetMaster()}");
-                return squadMember.SquadLeader.SquadLeaderPawn;
+                return squadMember.SquadLeader.Pawn;
             }
             return null;
         }

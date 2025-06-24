@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadOrderDef>
+    <defName>PatrolOrder</defName>
+    <label>Order : Patrol</label>
+    <uiIconPath>PatrolOrderUIIcon</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_PatrolZone</workerClass>
+    <requiresTarget>false</requiresTarget>
+  </SquadBehaviour.SquadOrderDef>
+</Defs>

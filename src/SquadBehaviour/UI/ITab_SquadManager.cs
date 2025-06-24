@@ -7,6 +7,8 @@ namespace SquadBehaviour
 {
 
     //show if the pawn in question is a Squad Leader
+
+    [StaticConstructorOnStartup]
     public class ITab_SquadManager : ITab
     {
         private Vector2 scrollPosition = Vector2.zero;
@@ -36,6 +38,7 @@ namespace SquadBehaviour
                 return this.SelPawn != null && SelPawn.IsColonist && SquadLeader != null && SquadLeader.IsLeaderRoleActive;
             }
         }
+
 
         public ITab_SquadManager()
         {

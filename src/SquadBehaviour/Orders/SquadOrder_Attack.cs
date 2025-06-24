@@ -25,5 +25,10 @@ namespace SquadBehaviour
             job.killIncappedTarget = true;
             SquadMember.Pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
         }
+
+        public override void ExecuteOrderGlobal(LocalTargetInfo Target)
+        {
+           
+        }
     }
 }

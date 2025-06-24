@@ -72,7 +72,7 @@ namespace SquadBehaviour
 
 
             Rect leaderSelectRect = toolbarLayout.NextRect(200f, 20f);
-            if (Widgets.ButtonText(leaderSelectRect, currentLeader.SquadLeaderPawn.LabelShort))
+            if (Widgets.ButtonText(leaderSelectRect, currentLeader.Pawn.LabelShort))
             {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
 

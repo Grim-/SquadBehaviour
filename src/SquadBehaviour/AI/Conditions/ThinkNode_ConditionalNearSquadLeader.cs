@@ -7,9 +7,9 @@ namespace SquadBehaviour
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            if (pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadLeader) && squadLeader != null && squadLeader.SquadLeader != null && squadLeader.SquadLeader.SquadLeaderPawn != null && squadLeader.AssignedSquad != null)
+            if (pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadLeader) && squadLeader != null && squadLeader.SquadLeader != null && squadLeader.SquadLeader.Pawn != null && squadLeader.AssignedSquad != null)
             {
-                return pawn.Position.DistanceTo(squadLeader.SquadLeader.SquadLeaderPawn.Position) <= squadLeader.AssignedSquad.FollowDistance;
+                return pawn.Position.DistanceTo(squadLeader.SquadLeader.Pawn.Position) <= squadLeader.AssignedSquad.FollowDistance;
             }
             return false;
         }

@@ -56,7 +56,7 @@ namespace SquadBehaviour
 
 
         private Squad _AssignedSquad = null;
-        public Squad AssignedSquad { get => _AssignedSquad; set => _AssignedSquad = value; }
+        public Squad AssignedSquad { get => _AssignedSquad; }
 
 
         public SquadDutyDef _CurrentStance = null;
@@ -133,7 +133,7 @@ namespace SquadBehaviour
 
             if (this.Pawn.RaceProps.Animal)
             {
-                Log.Message($"Animal skill level: {squadLeader.SquadLeaderPawn.skills.GetSkill(SkillDefOf.Animals)?.levelInt ?? -1}");
+                Log.Message($"Animal skill level: {squadLeader.Pawn.skills.GetSkill(SkillDefOf.Animals)?.levelInt ?? -1}");
                 Log.Message($"CanCommandAnimals: {squadLeader.CanCommandAnimals}");
 
                 if (!IsAnimalCommandable)
@@ -161,7 +161,7 @@ namespace SquadBehaviour
                 return true;
             }
 
-            bool sameFaction = this.Pawn.Faction == squadLeader.SquadLeaderPawn.Faction;
+            bool sameFaction = this.Pawn.Faction == squadLeader.Pawn.Faction;
             Log.Message($"Faction check - Same faction: {sameFaction}");
             return sameFaction;
         }
@@ -170,16 +170,34 @@ namespace SquadBehaviour
         {
             base.Notify_Killed(prevMap, dinfo);
 
-            if (AssignedSquad != null)
+            if (_AssignedSquad != null)
             {
                 Log.Message("Removed from squad due to being dead");
-                AssignedSquad.RemoveMember(this.Pawn);
+                _AssignedSquad.RemoveMember(this.Pawn);
             }
         }
 
         public void SetSquadLeader(Pawn squadLeader)
         {
             squadLeaderPawn = squadLeader;
+        }
+
+
+        public void AssignToSquad(Squad squad)
+        {
+            _AssignedSquad = squad;
+            SetSquadLeader(_AssignedSquad.SquadLeader.Pawn);
+            CurrentStance = squad.squadDuty;
+        }
+
+        public void UnAssignSquad()
+        {
+            if (_AssignedSquad != null)
+            {
+                _AssignedSquad = null;
+                SetSquadLeader(null);
+                CurrentStance = null;
+            }
         }
 
         public void SetDefendPoint(IntVec3 targetPoint)
@@ -209,10 +227,10 @@ namespace SquadBehaviour
 
         public void LeaveSquad()
         {
-            if (AssignedSquad != null)
+            if (_AssignedSquad != null)
             {
-                AssignedSquad.RemoveMember(Pawn);
-                AssignedSquad = null;
+               _AssignedSquad.RemoveMember(Pawn);
+                _AssignedSquad = null;
                 squadLeaderPawn = null;
             }
         }
@@ -232,9 +250,9 @@ namespace SquadBehaviour
         {
             StringBuilder sb = new StringBuilder();
 
-            if (SquadLeader != null && SquadLeader.SquadLeaderPawn != null)
+            if (SquadLeader != null && SquadLeader.Pawn != null)
             {
-                sb.Append($"Squad Leader - {SquadLeader.SquadLeaderPawn.Name}");
+                sb.Append($"Squad Leader - {SquadLeader.Pawn.Name}");
             }
 
             if (this._CurrentStance != null)

@@ -13,9 +13,7 @@ namespace SquadBehaviour
 
         public override void ExecuteOrder(LocalTargetInfo Target)
         {
-
-            List<Zone_PatrolPath> availablePatrolZones = this.SquadMember.SquadLeader.SquadLeaderPawn.Map.zoneManager.AllZones.Where(x => x is Zone_PatrolPath patrolPathZone).Cast<Zone_PatrolPath>().ToList();
-
+            List<Zone_PatrolPath> availablePatrolZones = this.SquadMember.SquadLeader.Pawn.Map.zoneManager.AllZones.Where(x => x is Zone_PatrolPath patrolPathZone).Cast<Zone_PatrolPath>().ToList();
             if (availablePatrolZones.Count == 0)
             {
                 return;
@@ -27,25 +25,39 @@ namespace SquadBehaviour
             {
                 option.Add(new FloatMenuOption($"Patrol Zone [{item.ID}].", () =>
                 {
-                    if (IsGlobalOrder)
+                    this.SquadMember.CurrentStance = SquadDefOf.PatrolArea;
+                    this.SquadMember.PatrolTracker.SetPatrolZone(item);
+                }));
+            }
+            Find.WindowStack.Add(new FloatMenu(option));
+        }
+
+        public override void ExecuteOrderGlobal(LocalTargetInfo Target)
+        {
+            List<Zone_PatrolPath> availablePatrolZones = this.SquadMember.SquadLeader.Pawn.Map.zoneManager.AllZones.Where(x => x is Zone_PatrolPath patrolPathZone).Cast<Zone_PatrolPath>().ToList();
+
+            if (availablePatrolZones.Count == 0)
+            {
+                return;
+            }
+
+            List<FloatMenuOption> option = new List<FloatMenuOption>();
+            foreach (var item in availablePatrolZones)
+            {
+                option.Add(new FloatMenuOption($"Patrol Zone [{item.ID}].", () =>
+                {
+                    foreach (var member in this.SquadMember.AssignedSquad.Members)
                     {
-                        foreach (var member in this.SquadMember.AssignedSquad.Members)
+                        if (member.IsPartOfSquad(out Comp_PawnSquadMember pawnSquadMember))
                         {
-                            if (member.IsPartOfSquad(out Comp_PawnSquadMember pawnSquadMember))
-                            {
-                                pawnSquadMember.CurrentStance = SquadDefOf.PatrolArea;
-                                pawnSquadMember.PatrolTracker.SetPatrolZone(item);
-                            }
+                            pawnSquadMember.CurrentStance = SquadDefOf.PatrolArea;
+                            pawnSquadMember.PatrolTracker.SetPatrolZone(item);
                         }
-                    }
-                    else
-                    {
-                        this.SquadMember.CurrentStance = SquadDefOf.PatrolArea;
-                        this.SquadMember.PatrolTracker.SetPatrolZone(item);
                     }
 
                 }));
             }
+
             Find.WindowStack.Add(new FloatMenu(option));
         }
     }

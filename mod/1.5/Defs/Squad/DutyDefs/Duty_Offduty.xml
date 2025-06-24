@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadDutyDef>
+    <defName>OffDuty</defName>
+    <label>Off Duty</label>
+    <props>
+      <maintainsFormation>false</maintainsFormation>
+      <respondToThreats>false</respondToThreats>
+    </props>
+    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+  </SquadBehaviour.SquadDutyDef>
+</Defs>

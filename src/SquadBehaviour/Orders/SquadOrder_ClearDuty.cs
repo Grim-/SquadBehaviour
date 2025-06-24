@@ -15,5 +15,10 @@ namespace SquadBehaviour
         {
             SquadMember.ClearCurrentDuties();
         }
+
+        public override void ExecuteOrderGlobal(LocalTargetInfo Target)
+        {
+            SquadMember.ClearCurrentDuties();
+        }
     }
 }

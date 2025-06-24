@@ -84,6 +84,7 @@
     <Compile Include="AbilityUtility.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalCanCheckInterval.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPlayerFaction.cs" />
+    <Compile Include="SquadAnimalExtension.cs" />
     <Compile Include="UI\AttackJobUtil.cs" />
     <Compile Include="AI\JobGiver_ActivelySearchForTargets.cs" />
     <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />

@@ -6,8 +6,17 @@ using Verse;
 
 namespace SquadBehaviour
 {
+
+    [StaticConstructorOnStartup]
     public static class SquadWidgets
     {
+
+        private static Texture2D AtEaseTex = ContentFinder<Texture2D>.Get("AtEaseUIIcon");
+        private static Texture2D CalledToArmsTex = ContentFinder<Texture2D>.Get("CalledToArmsUIIcon");
+        private static Texture2D DefensiveTex = ContentFinder<Texture2D>.Get("DefensiveUIIcon");
+        private static Texture2D AggresiveTex = ContentFinder<Texture2D>.Get("AggresiveUIIcon");
+
+
         public static void DrawHostilitySelector(Rect hostilityRect, Texture2D icon, Action<SquadHostility> setHostilityAction)
         {
             Widgets.DrawBoxSolidWithOutline(hostilityRect, Color.clear, Color.white * 0.6f);
@@ -146,9 +155,9 @@ namespace SquadBehaviour
                 case SquadHostility.None:
                     return TexCommand.ForbidOn;
                 case SquadHostility.Aggressive:
-                    return TexCommand.Draft;
+                    return AggresiveTex;
                 case SquadHostility.Defensive:
-                    return TexCommand.Draft;
+                    return DefensiveTex;
                 default:
                     return TexCommand.Draft;
             }
@@ -160,11 +169,11 @@ namespace SquadBehaviour
                 case SquadMemberState.DoNothing:
                     return TexCommand.ForbidOn;
                 case SquadMemberState.CalledToArms:
-                    return TexCommand.Draft;
+                    return CalledToArmsTex;
                 case SquadMemberState.AtEase:
-                    return TexCommand.HoldOpen;
+                    return AtEaseTex;
                 default:
-                    return TexCommand.DesirePower;
+                    return AtEaseTex;
             }
         }
     }

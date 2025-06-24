@@ -49,6 +49,7 @@ namespace SquadBehaviour
         private const float BUTTON_MARGIN = 5f;
 
 
+
         private Dictionary<int, Rect> squadHeaderRects = new Dictionary<int, Rect>();
 
         private Pawn interactingPawn = null;
