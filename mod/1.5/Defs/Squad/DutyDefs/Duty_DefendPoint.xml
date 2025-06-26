@@ -9,6 +9,6 @@
       <respondToThreats>true</respondToThreats>
       <defensiveRadius>20</defensiveRadius>
     </props>
-    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+    <uiIconPath>DefendPointOrderUIIcon</uiIconPath>
   </SquadBehaviour.SquadDutyDef>
 </Defs>

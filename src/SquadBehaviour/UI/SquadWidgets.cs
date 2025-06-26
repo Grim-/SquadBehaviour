@@ -11,12 +11,26 @@ namespace SquadBehaviour
     public static class SquadWidgets
     {
 
-        private static Texture2D AtEaseTex = ContentFinder<Texture2D>.Get("AtEaseUIIcon");
-        private static Texture2D CalledToArmsTex = ContentFinder<Texture2D>.Get("CalledToArmsUIIcon");
-        private static Texture2D DefensiveTex = ContentFinder<Texture2D>.Get("DefensiveUIIcon");
-        private static Texture2D AggresiveTex = ContentFinder<Texture2D>.Get("AggresiveUIIcon");
+        public static Texture2D AtEaseTex = ContentFinder<Texture2D>.Get("AtEaseUIIcon");
+        public static Texture2D CalledToArmsTex = ContentFinder<Texture2D>.Get("CalledToArmsUIIcon");
+        public static Texture2D DefensiveTex = ContentFinder<Texture2D>.Get("DefensiveUIIcon");
+        public static Texture2D AggresiveTex = ContentFinder<Texture2D>.Get("AggresiveUIIcon");
+
+        public static Texture2D SettingsMinimize = ContentFinder<Texture2D>.Get("MinimizeUIIcon");
+        public static Texture2D SettingsMaimize = ContentFinder<Texture2D>.Get("MaximizeUIIcon");
 
 
+        public static Texture2D OrdersUIIcon = ContentFinder<Texture2D>.Get("OrdersUIIcon");
+
+
+        public static Texture2D SquadUIIcon = ContentFinder<Texture2D>.Get("SquadUIIcon");
+        public static Texture2D ArrowDownUIIcon = ContentFinder<Texture2D>.Get("ArrowDownUIIcon");
+        public static Texture2D ArrowRightUIIcon = ContentFinder<Texture2D>.Get("ArrowRightUIIcon");
+        public static Texture2D DisbandUIIcon = ContentFinder<Texture2D>.Get("DisbandUIIcon");
+        public static Texture2D MergeUIIcon = ContentFinder<Texture2D>.Get("MergeUIIcon");
+
+        public static Texture2D HoldFormationUIIcon = ContentFinder<Texture2D>.Get("HoldFormationUIIcon");
+        public static Texture2D BreakFormationUIIcon = ContentFinder<Texture2D>.Get("BreakFormationUIIcon");
         public static void DrawHostilitySelector(Rect hostilityRect, Texture2D icon, Action<SquadHostility> setHostilityAction)
         {
             Widgets.DrawBoxSolidWithOutline(hostilityRect, Color.clear, Color.white * 0.6f);
@@ -51,6 +65,26 @@ namespace SquadBehaviour
                         delegate { setFormationAction(formation); }
                     ));
                 }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            if (Mouse.IsOver(rect))
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+        }
+        public static void DrawAttackModeSelector(Rect rect, Texture2D icon, Action<SquadMemberAllowedAttacks> toggleAttackMode, string tooltip = "Change Allowed Attack")
+        {
+            Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.white * 0.6f);
+            if (Widgets.ButtonImage(rect, icon, true, tooltip))
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+
+                options.Add(new FloatMenuOption(SquadMemberAllowedAttacks.ALL.ToString(), () => toggleAttackMode(SquadMemberAllowedAttacks.ALL)));
+                options.Add(new FloatMenuOption(SquadMemberAllowedAttacks.MELEE.ToString(), () => toggleAttackMode(SquadMemberAllowedAttacks.MELEE)));
+                options.Add(new FloatMenuOption(SquadMemberAllowedAttacks.RANGED.ToString(), () => toggleAttackMode(SquadMemberAllowedAttacks.RANGED)));
+
+
                 Find.WindowStack.Add(new FloatMenu(options));
             }
 
@@ -105,7 +139,7 @@ namespace SquadBehaviour
         {
             Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.white * 0.6f);
 
-            if (Widgets.ButtonImage(rect, icon, true, "Extra Orders"))
+            if (Widgets.ButtonImage(rect, icon, true, "Orders"))
             {
                 List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
 
@@ -119,14 +153,14 @@ namespace SquadBehaviour
                             {
                                 onClickAction?.Invoke(item, target);
                             });
-                        }, null, new TipSignal(item.defName)));
+                        }, null, new TipSignal(item.LabelCap)));
                     }
                     else
                     {
                         extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
                         {
                             onClickAction?.Invoke(item, null);
-                        }, null, new TipSignal(item.defName)));
+                        }, null, new TipSignal(item.LabelCap)));
                     }
                 }
 
@@ -177,193 +211,4 @@ namespace SquadBehaviour
             }
         }
     }
-
-    //public static class SquadWidgets
-    //{
-    //    public static void DrawGlobalHostilitySelector(Comp_PawnSquadLeader leader, Rect hostilityRect)
-    //    {
-    //        if (Widgets.ButtonImage(hostilityRect, TexCommand.Attack, true, "Change Squad Hostility"))
-    //        {
-    //            List<FloatMenuOption> options = new List<FloatMenuOption>();
-    //            foreach (SquadHostility formation in Enum.GetValues(typeof(SquadHostility)))
-    //            {
-    //                options.Add(new FloatMenuOption(
-    //                    formation.ToString(),
-    //                    delegate { leader.SetHositilityResponse(formation); }
-    //                ));
-    //            }
-    //            Find.WindowStack.Add(new FloatMenu(options));
-    //        }
-    //        if (Mouse.IsOver(hostilityRect))
-    //        {
-    //            TooltipHandler.TipRegion(hostilityRect, "Change Squad Hostility");
-    //        }
-    //    }
-
-    //    public static void DrawSquadHostilitySelector(Squad squad, Rect hostilityRect)
-    //    {
-    //        if (Widgets.ButtonImage(hostilityRect, TexCommand.AttackMelee, true, "Change Squad Hostility"))
-    //        {
-    //            List<FloatMenuOption> options = new List<FloatMenuOption>();
-    //            foreach (SquadHostility formation in Enum.GetValues(typeof(SquadHostility)))
-    //            {
-    //                options.Add(new FloatMenuOption(
-    //                    formation.ToString(),
-    //                    delegate { squad.SetHositilityResponse(formation); }
-    //                ));
-    //            }
-    //            Find.WindowStack.Add(new FloatMenu(options));
-    //        }
-    //        if (Mouse.IsOver(hostilityRect))
-    //        {
-    //            TooltipHandler.TipRegion(hostilityRect, "Change Squad Hostility");
-    //        }
-    //    }
-
-    //    public static void DrawGlobalFormationSelector(Comp_PawnSquadLeader leader, Rect rect, string tooltip = "Change Formation")
-    //    {
-    //        if (Widgets.ButtonImage(rect, leader.FormationType.Icon, true, tooltip))
-    //        {
-    //            List<FloatMenuOption> options = new List<FloatMenuOption>();
-    //            foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
-    //            {
-    //                options.Add(new FloatMenuOption(
-    //                    formation.label,
-    //                    delegate { leader.SetFormation(formation); }
-    //                ));
-    //            }
-    //            Find.WindowStack.Add(new FloatMenu(options));
-    //        }
-
-    //        if (Mouse.IsOver(rect))
-    //        {
-    //            TooltipHandler.TipRegion(rect, tooltip);
-    //        }
-    //    }
-
-    //    public static void DrawSquadFormationSelector(Squad squad, Rect rect, string tooltip = "Change Formation")
-    //    {
-    //        if (Widgets.ButtonImage(rect, squad.FormationType.Icon, true, tooltip))
-    //        {
-    //            List<FloatMenuOption> options = new List<FloatMenuOption>();
-    //            foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
-    //            {
-    //                options.Add(new FloatMenuOption(
-    //                    formation.label,
-    //                    delegate { squad.SetFormation(formation); }
-    //                ));
-    //            }
-    //            Find.WindowStack.Add(new FloatMenu(options));
-    //        }
-
-    //        if (Mouse.IsOver(rect))
-    //        {
-    //            TooltipHandler.TipRegion(rect, tooltip);
-    //        }
-    //    }
-
-    //    public static void DrawSquadStateSelector(Squad squad, Rect rect)
-    //    {
-    //        if (Widgets.ButtonImage(rect, GetCommandTexture(SquadMemberState.CalledToArms), true, GetSquadStateString(SquadMemberState.CalledToArms)))
-    //        {
-    //            List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-    //            options.Add(new FloatMenuOption("Call to arms", () =>
-    //            {
-    //                squad.SetSquadState(SquadMemberState.CalledToArms);
-    //            }));
-
-    //            options.Add(new FloatMenuOption("At Ease", () =>
-    //            {
-    //                squad.SetSquadState(SquadMemberState.AtEase);
-    //            }));
-
-    //            Find.WindowStack.Add(new FloatMenu(options));
-    //        }
-    //    }
-    //    public static void DrawGlobalStateSelector(Comp_PawnSquadLeader leader, Rect rect)
-    //    {            Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.white * 0.6f);
-    //        if (Widgets.ButtonImage(rect, GetCommandTexture(leader.SquadState), true, GetSquadStateString(leader.SquadState)))
-    //        {
-    //            List<FloatMenuGridOption> options = new List<FloatMenuGridOption>();
-
-    //            options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.CalledToArms), () =>
-    //            {
-    //                leader.SetAllState(SquadMemberState.CalledToArms);
-    //            }, null, new TipSignal(GetSquadStateString(SquadMemberState.CalledToArms))));
-
-    //            options.Add(new FloatMenuGridOption(GetCommandTexture(SquadMemberState.AtEase), () =>
-    //            {
-    //                leader.SetAllState(SquadMemberState.AtEase);
-    //            }, null, new TipSignal(GetSquadStateString(SquadMemberState.AtEase))));
-
-    //            Find.WindowStack.Add(new FloatMenuGrid(options));
-    //        }
-    //    }
-
-    //    public static void DrawGlobalOrderFloatGrid(Comp_PawnSquadLeader leader, Rect rect, Action<Comp_PawnSquadLeader, SquadOrderDef, LocalTargetInfo> onClickAction )
-    //    {
-    //        Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.white * 0.6f);
-
-    //        if (Widgets.ButtonImage(rect, TexCommand.Attack, true, "Extra Orders"))
-    //        {
-    //            List<FloatMenuGridOption> extraOrders = new List<FloatMenuGridOption>();
-
-    //            foreach (var item in DefDatabase<SquadOrderDef>.AllDefsListForReading)
-    //            {
-    //                if (item.requiresTarget)
-    //                {
-    //                    extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
-    //                    {
-    //                        Find.Targeter.BeginTargeting(item.targetingParameters, (LocalTargetInfo target) =>
-    //                        {
-    //                            onClickAction?.Invoke(leader, item, target);
-    //                            //leader.IssueGlobalOrder(item, target);
-    //                        });
-    //                    }, null, new TipSignal(item.defName)));
-    //                }
-    //                else
-    //                {
-    //                    extraOrders.Add(new FloatMenuGridOption(item.Icon, () =>
-    //                    {
-    //                        onClickAction?.Invoke(leader, item, null);
-    //                        //leader.IssueGlobalOrder(item, null);
-    //                    }, null, new TipSignal(item.defName)));
-    //                }
-    //            }
-
-    //            Find.WindowStack.Add(new FloatMenuGrid(extraOrders));
-    //        }
-    //    }
-
-    //    public static string GetSquadStateString(SquadMemberState state)
-    //    {
-    //        switch (state)
-    //        {
-    //            case SquadMemberState.DoNothing:
-    //                return "Do nothin";
-    //            case SquadMemberState.CalledToArms:
-    //                return "Call to arms";
-    //            case SquadMemberState.AtEase:
-    //                return "Stand down";
-    //            default:
-    //                return "invalid state";
-    //        }
-    //    }
-
-    //    public static Texture2D GetCommandTexture(SquadMemberState state)
-    //    {
-    //        switch (state)
-    //        {
-    //            case SquadMemberState.DoNothing:
-    //                return TexCommand.ForbidOn;
-    //            case SquadMemberState.CalledToArms:
-    //                return TexCommand.Draft;
-    //            case SquadMemberState.AtEase:
-    //                return TexCommand.HoldOpen;
-    //            default:
-    //                return TexCommand.DesirePower;
-    //        }
-    //    }
-    //}
 }

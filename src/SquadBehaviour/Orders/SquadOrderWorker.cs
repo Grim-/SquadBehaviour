@@ -7,7 +7,6 @@ namespace SquadBehaviour
         public Comp_PawnSquadLeader SquadLeader;
         public Comp_PawnSquadMember SquadMember;
         public SquadOrderDef def;
-        public bool IsGlobalOrder = false;
 
         public SquadOrderSettings SquadOrderSettings;
         public abstract bool CanExecuteOrder(LocalTargetInfo Target);

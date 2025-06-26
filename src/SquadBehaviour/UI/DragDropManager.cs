@@ -28,7 +28,14 @@ namespace SquadBehaviour
 
         public static void UpdateDrag()
         {
-            if (!IsDragging) return;
+            if (!IsDragging) 
+                return;
+
+            if (Event.current.keyCode == KeyCode.LeftShift && Event.current.type == EventType.KeyUp)
+            {
+                EndDrag();
+                Event.current.Use();
+            }
 
             if (!isDragConfirmed)
             {
@@ -45,11 +52,6 @@ namespace SquadBehaviour
                 EndDrag();
                 Event.current.Use();
             }
-            //else if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-            //{
-            //    EndDrag();
-            //    Event.current.Use();
-            //}
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
             {
                 EndDrag();

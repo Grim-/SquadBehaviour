@@ -27,7 +27,7 @@ namespace SquadBehaviour
 			{
 				if (!ability.OnCooldown &&
 					ability.def.verbProperties != null &&
-					ability.def.verbProperties.targetParams.CanTarget(target, null) &&
+					ability.def.verbProperties.targetParams.CanTarget(target, ability.verb) &&
 					ability.CanApplyOn(target))
 				{
 					potentialAbilities.Add(ability);
@@ -42,10 +42,9 @@ namespace SquadBehaviour
 			float distanceToTarget = pawn.Position.DistanceTo(target.Cell);
 
 			Ability bestAbility = potentialAbilities
-				.Where(a => a.def.verbProperties.range >= distanceToTarget)
+				.Where(a => a.def.verbProperties.range >= distanceToTarget && !a.OnCooldown)
 				.OrderBy(a => a.def.verbProperties.range)
-				.ThenBy(a => a.CooldownTicksRemaining)
-				.FirstOrDefault();
+				.RandomElement();
 
 			return bestAbility;
 		}
@@ -62,12 +61,24 @@ namespace SquadBehaviour
 				return false;
 			}
 
+			return TryFindCastPosition(pawn, target, ability.verb, out position);
+		}
+
+		public static bool TryFindCastPosition(Pawn pawn, Thing target, Verb verb, out IntVec3 position)
+		{
+			position = IntVec3.Invalid;
+
+			if (pawn == null || target == null || verb == null)
+			{
+				return false;
+			}
+
 			return CastPositionFinder.TryFindCastPosition(new CastPositionRequest
 			{
 				caster = pawn,
 				target = target,
-				verb = ability.verb,
-				maxRangeFromTarget = ability.verb.verbProps.range,
+				verb = verb,
+				maxRangeFromTarget = verb.verbProps.range,
 				wantCoverFromTarget = false,
 				preferredCastPosition = new IntVec3?(pawn.Position)
 			}, out position);
@@ -141,8 +152,10 @@ namespace SquadBehaviour
 			return (Thing)AttackTargetFinder.BestAttackTarget(
 				pawn,
 				TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns |
-				TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat |
-				TargetScanFlags.NeedAutoTargetable,
+				TargetScanFlags.NeedReachableIfCantHitFromMyPos |
+				TargetScanFlags.NeedAutoTargetable | 
+				TargetScanFlags.LOSBlockableByGas | 
+				TargetScanFlags.NeedActiveThreat,
 				(Thing x) => CanUseAbilitiesOnTarget(pawn, x),
 				0f,
 				maxRange,
@@ -151,7 +164,7 @@ namespace SquadBehaviour
 				false,
 				true,
 				false,
-				true);
+				false);
 		}
 	}
 }

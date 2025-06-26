@@ -34,4 +34,11 @@
     <formationWorker>SquadBehaviour.LineFormationWorker</formationWorker>
     <uiIconPath>FormationLine</uiIconPath>
   </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>CustomFormation</defName>
+    <label>Custom</label>
+    <formationWorker>SquadBehaviour.CustomFormationWorker</formationWorker>
+    <uiIconPath>FormationBox</uiIconPath>
+  </SquadBehaviour.FormationDef>
 </Defs>

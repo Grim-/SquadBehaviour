@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace SquadBehaviour
 {
@@ -37,14 +38,39 @@ namespace SquadBehaviour
         public FormationDef FormationType = SquadDefOf.ColumnFormation;
         private FormationWorker formationWorker;
         public List<Pawn> Members = new List<Pawn>();
-        public SquadHostility HostilityResponse = SquadHostility.None;
+        public SquadHostility HostilityResponse = SquadHostility.Defensive;
         public SquadMemberState SquadState = SquadMemberState.CalledToArms;
+        //public SquadMemberAllowedAttacks SquadAttackState = SquadMemberAllowedAttacks.ALL;
         public SquadDutyDef squadDuty = null;
-        public float AggresionDistance = 10f;
+        public float AggresionDistance = 30f;
         public float FollowDistance = 10f;
         public bool InFormation = true;
         public bool IsVisible = true;
+        public bool IsHoldingFormation = false;
 
+        public float MaxFormationDistance = 3f;
+
+
+
+        public IntVec3 SquadOffset = IntVec3.Zero;
+
+
+        public float MaxAttackDistanceFor(Pawn pawn)
+        {
+            //if (pawn.CurrentEffectiveVerb != null)
+            //{
+            //    if (IsHoldingFormation && pawn.CurrentEffectiveVerb.IsMeleeAttack)
+            //    {
+            //        return MaxFormationDistance;
+            //    }
+
+            //    return pawn.CurrentEffectiveVerb.EffectiveRange;
+            //}
+            return AggresionDistance;
+        }
+
+
+        protected Thing SquadTarget = null;
         public Squad()
         {
 
@@ -62,7 +88,7 @@ namespace SquadBehaviour
 
 
         #region Target
-        public Thing FindTargetForMember(Pawn member)
+        public Thing FindTargetForMember(Pawn member, float maxRange = -1f)
         {
             if (!Members.Contains(member))
             {
@@ -70,35 +96,184 @@ namespace SquadBehaviour
                 return null;
             }
 
-            if (Leader != null && Leader.Spawned && !Leader.Dead && Leader.mindState != null &&
-                Leader.mindState.enemyTarget != null && IsValidTarget(member, Leader.mindState.enemyTarget))
+            if (maxRange < 0)
             {
-                return Leader.mindState.enemyTarget;
+                maxRange = MaxAttackDistanceFor(member);
             }
 
-            if (member.Spawned &&
-                PawnUtility.EnemiesAreNearby(member, 9, true, Mathf.RoundToInt(AggresionDistance)))
+            Thing foundTarget = null;
+
+            // First priority: Check if squad has a valid cached target
+            if (SquadTarget != null && SquadTarget.Spawned && !SquadTarget.Destroyed && IsValidTarget(member, SquadTarget))
             {
-                return AbilityUtility.FindBestAbilityTarget(member);
+                float distToSquadTarget = member.Position.DistanceTo(SquadTarget.Position);
+                if (distToSquadTarget <= maxRange)
+                {
+                    foundTarget = SquadTarget;
+                    //if (Prefs.DevMode) Log.Message($"[Squad] {member.LabelShort} using squad target: {SquadTarget.LabelShort}");
+                }
             }
 
-            return AbilityUtility.FindBestAbilityTarget(member);
+            // Second priority: Check leader's target
+            if (foundTarget == null && Leader != null && Leader.Spawned && !Leader.Dead &&
+                Leader.mindState != null && Leader.mindState.enemyTarget != null)
+            {
+                Thing leaderTarget = Leader.mindState.enemyTarget;
+                if (IsValidTarget(member, leaderTarget))
+                {
+                    float distToLeaderTarget = member.Position.DistanceTo(leaderTarget.Position);
+                    if (distToLeaderTarget <= maxRange)
+                    {
+                        foundTarget = leaderTarget;
+                        SquadTarget = leaderTarget; // Cache it
+                       // if (Prefs.DevMode) Log.Message($"[Squad] {member.LabelShort} using leader's target: {leaderTarget.LabelShort}");
+                    }
+                }
+            }
+
+            // Third priority: Check member's own enemy target
+            if (foundTarget == null && member.mindState != null && member.mindState.enemyTarget != null)
+            {
+                Thing memberTarget = member.mindState.enemyTarget;
+                if (IsValidTarget(member, memberTarget))
+                {
+                    float distToMemberTarget = member.Position.DistanceTo(memberTarget.Position);
+                    if (distToMemberTarget <= maxRange)
+                    {
+                        foundTarget = memberTarget;
+                        SquadTarget = memberTarget; // Cache it
+                        //if (Prefs.DevMode) Log.Message($"[Squad] {member.LabelShort} using own enemy target: {memberTarget.LabelShort}");
+                    }
+                }
+            }
+
+            // Fourth priority: Search for nearby enemies
+            if (foundTarget == null)
+            {
+                // Use RimWorld's standard attack target finder
+                Thing searchTarget = (Thing)AttackTargetFinder.BestAttackTarget(
+                    member,
+                    TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns |
+                    TargetScanFlags.NeedReachableIfCantHitFromMyPos |
+                    TargetScanFlags.NeedAutoTargetable |
+                    TargetScanFlags.LOSBlockableByGas |
+                    TargetScanFlags.NeedActiveThreat,
+                    (Thing t) => IsValidTarget(member, t),
+                    0f,
+                    maxRange,
+                    default(IntVec3),
+                    float.MaxValue,
+                    true
+                );
+
+                if (searchTarget != null)
+                {
+                    foundTarget = searchTarget;
+                    SquadTarget = searchTarget; // Cache it
+                    //if (Prefs.DevMode) Log.Message($"[Squad] {member.LabelShort} found new target: {searchTarget.LabelShort}");
+                }
+            }
+
+            if (foundTarget == null && Prefs.DevMode)
+            {
+                //Log.Message($"[Squad] {member.LabelShort} could not find any valid target within range {maxRange}");
+            }
+
+            return foundTarget;
         }
+
+
+        public bool HasSquadTarget()
+        {
+            return GetSquadTarget() != null;
+        }
+
+
+
+        public bool TryFindCastPositionFor(Pawn pawn, Thing target, Verb verb, IntVec3 defendPos, float maxRange, out IntVec3 dest)
+        {
+           return CastPositionFinder.TryFindCastPosition(new CastPositionRequest
+            {
+                caster = pawn,
+                target = target,
+                verb = verb,
+                //10% less than verb can reach
+                maxRangeFromTarget = verb.verbProps.range - (verb.verbProps.range > 0 ? verb.verbProps.range * 0.1f : 0),
+                locus = defendPos,
+                maxRangeFromLocus = maxRange,
+                wantCoverFromTarget = (verb.verbProps.range > 7f)
+            }, out dest);
+        }
+
+        public void ValidateSquadTarget()
+        {
+            if (SquadTarget != null && (!SquadTarget.Spawned || SquadTarget.Destroyed))
+            {
+                SquadTarget = null;
+            }
+        }
+
+        public Thing GetSquadTarget(float maxRange = -1f)
+        {
+            ValidateSquadTarget();
+
+            if (SquadTarget != null)
+            {
+                return SquadTarget;
+            }
+
+            foreach (var item in Members)
+            {
+                Thing validTarget = FindTargetForMember(item, maxRange);
+
+                if (validTarget != null)
+                {
+                    SquadTarget = validTarget;
+                    break;
+                }
+            }
+
+            return SquadTarget;
+        }
+
 
         public bool IsValidTarget(Pawn member, Thing target)
         {
-            return target != null && target.Spawned && !target.Destroyed &&
-                   AbilityUtility.CanUseAbilitiesOnTarget(member, target);
+            if (target == null)
+            {
+                return false;
+            }
+
+            if (!target.Spawned || target.DestroyedOrNull())
+            {
+                return false;
+            }
+
+            if (target is Pawn pawn && pawn.DeadOrDowned)
+            {
+                return false;
+            }
+
+            if (target.Faction == null || target.Faction == member.Faction)
+            {
+                return false;
+            }
+
+            if (HostilityResponse == SquadHostility.Aggressive)
+            {
+                return target.Faction != Leader.Faction;
+            }
+
+            return target.Faction.HostileTo(member.Faction);
         }
 
         public bool LeaderHasValidTarget()
         {
-            if (Leader != null &&
-                Leader.Spawned &&
-                !Leader.Dead &&
+            if (Leader != null && Leader.Spawned && !Leader.Dead &&
                 Leader.mindState != null &&
                 Leader.mindState.enemyTarget != null &&
-                Leader.mindState.enemyTarget.Spawned)
+                Leader.mindState.enemyTarget.Spawned &&
+                IsValidTarget(Leader, Leader.mindState.enemyTarget))
             {
                 return true;
             }
@@ -115,8 +290,8 @@ namespace SquadBehaviour
 
             foreach (var member in Members)
             {
-                if (member.Spawned &&
-                    PawnUtility.EnemiesAreNearby(member, 9, true, Mathf.RoundToInt(AggresionDistance)))
+                Thing target = FindTargetForMember(member, AggresionDistance);
+                if (IsValidTarget(member, target))
                 {
                     return true;
                 }
@@ -128,22 +303,6 @@ namespace SquadBehaviour
 
 
         #region Orders
-        public void IssueMemberOrder(Pawn member, SquadOrderDef duty, LocalTargetInfo target)
-        {
-            if (!Members.Contains(member) || !member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
-                return;
-            squadMember.IssueOrder(duty, target);
-        }
-        public void IssueSquadOrder(SquadOrderDef duty, LocalTargetInfo target, bool isGlobal = false)
-        {
-            foreach (var member in Members)
-            {
-                if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
-                {
-                    squadMember.IssueOrder(duty, target, isGlobal);
-                }
-            }
-        }
 
         public void SetHositilityResponse(SquadHostility squadHostilityResponse)
         {
@@ -166,6 +325,19 @@ namespace SquadBehaviour
                 }
             }
         }
+
+        //public void ToggleAttackState(SquadMemberAllowedAttacks attack)
+        //{
+        //    this.SquadAttackState = attack;
+        //    foreach (var member in Members)
+        //    {
+        //        if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+        //        {
+        //            squadMember.SetAttackMode(attack);
+        //        }
+        //    }
+        //}
+
         public void SetSquadDuty(SquadDutyDef squadDuty)
         {
             this.squadDuty = squadDuty;
@@ -177,6 +349,11 @@ namespace SquadBehaviour
         public void SetInFormation(bool inFormation)
         {
             InFormation = inFormation;
+        }
+
+        public void SetIsHoldingFormation(bool shouldHoldPosition)
+        {
+            IsHoldingFormation = shouldHoldPosition;
         }
         #endregion
 
@@ -196,25 +373,11 @@ namespace SquadBehaviour
                     return;
                 }
 
-                // Check if the pawn is an animal and apply conditions
-                if (pawn.RaceProps.Animal)
+                if (!squadMember.CanEverJoinSquadOf(this.SquadLeader, out string reason))
                 {
-                    if (!squadMember.CanEverJoinSquadOf(this.SquadLeader))
-                    {
-                        Messages.Message($"Cannot add animal {pawn.Label} to squad. It is explicitly disallowed by its definition.", MessageTypeDefOf.RejectInput);
-                        return;
-                    }
+                    Messages.Message(reason, MessageTypeDefOf.RejectInput);
+                    return;
                 }
-
-                if (pawn.RaceProps.IsMechanoid)
-                {
-                    if (!squadMember.CanEverJoinSquadOf(this.SquadLeader))
-                    {
-                        Messages.Message($"Cannot add mech {pawn.Label} to squad. Squad Leader must be mechanitor.", MessageTypeDefOf.RejectInput);
-                        return;
-                    }
-                }
-
 
                 if (squadMember.AssignedSquad != null)
                 {
@@ -241,6 +404,30 @@ namespace SquadBehaviour
                 squadMember.UnAssignSquad();
             }
         }
+        public bool ReorderMember(Pawn pawn, int newIndex)
+        {
+            if (!Members.Contains(pawn))
+            {
+                Log.Warning($"Tried to reorder {pawn} but they are not a member of the squad");
+                return false;
+            }
+
+            if (newIndex < 0 || newIndex >= Members.Count)
+            {
+                Log.Warning($"Invalid index {newIndex} for squad with {Members.Count} members");
+                return false;
+            }
+
+            int currentIndex = Members.IndexOf(pawn);
+            if (currentIndex == newIndex)
+            {
+                return true;
+            }
+
+            Members.RemoveAt(currentIndex);
+            Members.Insert(newIndex, pawn);
+            return true;
+        }
         public bool TryMergeFrom(Squad OtherSquad)
         {
             if (OtherSquad == null || OtherSquad.Members == null || OtherSquad.Members.Count == 0 || OtherSquad.squadID == this.squadID)
@@ -253,6 +440,8 @@ namespace SquadBehaviour
             {
                 AddMember(item);
             }
+
+            OtherSquad.DisbandSquad();
 
             return true;
         }
@@ -268,7 +457,7 @@ namespace SquadBehaviour
         #endregion
 
 
-        public IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation)
+        public IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation, IntVec2 unitSize = default(IntVec2))
         {
             if (!Members.Contains(pawn))
             {
@@ -277,7 +466,7 @@ namespace SquadBehaviour
             }
             if (formationWorker != null)
             {
-                return formationWorker.GetFormationPosition(pawn, Origin.ToVector3(), Members.IndexOf(pawn), OriginRotation, Members.Count);
+                return formationWorker.GetFormationPosition(pawn, (SquadOffset + Origin).ToVector3(), Members.IndexOf(pawn), OriginRotation, Members.Count);
             }
             else
             {
@@ -291,13 +480,25 @@ namespace SquadBehaviour
         }
         public void ExposeData()
         {
+            Scribe_Collections.Look(ref Members, "Members", LookMode.Reference);
             Scribe_References.Look(ref Leader, "Leader");
             Scribe_Defs.Look(ref squadDuty, "squadDuty");
-            Scribe_Collections.Look(ref Members, "Members", LookMode.Reference);
-            Scribe_Values.Look(ref uniqueID, "uniqueID");
             Scribe_Defs.Look(ref FormationType, "FormationType");
+            Scribe_Values.Look(ref uniqueID, "uniqueID");
             Scribe_Values.Look(ref squadID, "squadID");
+            Scribe_Values.Look(ref SquadOffset, "SquadOffset");
+            Scribe_Values.Look(ref squadName, "squadName");
             Scribe_Values.Look(ref HostilityResponse, "HostilityResponse");
+            Scribe_Values.Look(ref IsHoldingFormation, "ShouldHoldFormation");
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                if (FormationType != null)
+                {
+                    SetFormation(FormationType);
+                }
+            }
+
         }
         public string GetUniqueLoadID()
         {

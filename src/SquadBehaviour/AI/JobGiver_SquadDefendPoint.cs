@@ -13,9 +13,16 @@ namespace SquadBehaviour
 
         protected override bool TryFindShootingPosition(Pawn pawn, out IntVec3 dest, Verb verbToUse = null)
         {
-            Thing enemyTarget = pawn.mindState.enemyTarget;
-            Verb verb = verbToUse ?? pawn.TryGetAttackVerb(enemyTarget, !pawn.IsColonist, false);
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            {
+                dest = IntVec3.Invalid;
+                return false;
+            }
 
+            float maxDistance = squadMember.AssignedSquad.MaxAttackDistanceFor(pawn);
+            Thing enemyTarget = squadMember.AssignedSquad.GetSquadTarget(maxDistance);
+            float distance = enemyTarget.Position.DistanceTo(pawn.Position);
+            Verb verb = verbToUse ?? pawn.TryGetAttackVerb(enemyTarget, !pawn.IsColonist, false);
             if (verb == null)
             {
                 dest = IntVec3.Invalid;
@@ -25,42 +32,40 @@ namespace SquadBehaviour
             IntVec3 defendPos = IntVec3.Invalid;
             float defendRadius = 0f;
 
-            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            if (squadMember.AssignedSquad.InFormation)
             {
-                if (squadMember.AssignedSquad.InFormation)
-                {
-                    defendPos = squadMember.SquadLeader.GetFormationPositionFor(pawn, squadMember.DefendPoint, Rot4.North);
-                }
-                else
-                {
-                    defendPos = squadMember.DefendPoint;
-                }
-                defendRadius = 5f; 
+                defendPos = squadMember.SquadLeader.GetFormationPositionFor(pawn, squadMember.DefendPoint, Rot4.North);
             }
+            else
+            {
+                defendPos = squadMember.DefendPoint;
+            }
+
+
+            defendRadius = squadMember.AssignedSquad.AggresionDistance;
 
             if (defendPos.IsValid)
             {
-                return CastPositionFinder.TryFindCastPosition(new CastPositionRequest
-                {
-                    caster = pawn,
-                    target = enemyTarget,
-                    verb = verb,
-                    maxRangeFromTarget = 9999f,
-                    locus = defendPos,
-                    maxRangeFromLocus = defendRadius,
-                    wantCoverFromTarget = (verb.verbProps.range > 7f)
-                }, out dest);
+                return squadMember.AssignedSquad.TryFindCastPositionFor(pawn, enemyTarget, verb, defendPos, defendRadius, out dest);
             }
 
             dest = IntVec3.Invalid;
             return false;
         }
+
+
         protected override Job TryGiveJob(Pawn pawn)
         {
-            this.UpdateEnemyTarget(pawn);
-            Thing enemyTarget = pawn.mindState.enemyTarget;
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            {
+                return null;
+            }
 
-            if (enemyTarget == null)
+
+            this.UpdateEnemyTarget(pawn);
+            Thing enemyTarget = squadMember.AssignedSquad.FindTargetForMember(pawn);
+
+            if (enemyTarget == null || pawn.CurrentEffectiveVerb.IsMeleeAttack && squadMember.AssignedSquad.IsHoldingFormation && enemyTarget.Position.DistanceTo(pawn.Position) > squadMember.AssignedSquad.MaxAttackDistanceFor(pawn))
             {
                 return StayAtDefendPointJob(pawn);
             }

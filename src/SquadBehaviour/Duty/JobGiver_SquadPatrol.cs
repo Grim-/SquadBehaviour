@@ -6,19 +6,15 @@ namespace SquadBehaviour
 {
     public class JobGiver_SquadPatrol : ThinkNode_JobGiver
     {
-
-
-        // How close does a pawn need to be to consider a point reached
         private const float ReachedPointDistanceSquared = 1.5f * 1.5f;
 
         public JobGiver_SquadPatrol()
         {
-
         }
 
         protected virtual int PatrolJobExpireInterval
         {
-            get { return 300; }
+            get { return 120; }
         }
 
         protected override Job TryGiveJob(Pawn pawn)
@@ -30,69 +26,49 @@ namespace SquadBehaviour
 
             if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
+                Log.Error($"{pawn.Label} has is not part of a squad but is trying to patrol.");
                 return null;
             }
 
             Zone_PatrolPath patrolZone = squadMember.PatrolTracker.PatrolZone as Zone_PatrolPath;
             if (patrolZone == null)
             {
+                Log.Error($"{pawn.Label} has no assigned patrol zone but is trying to patrol.");
                 return null;
             }
 
-            if (squadMember.PatrolTracker.PatrolZone != patrolZone)
+            if (!squadMember.PatrolTracker.HasPatrolPath)
             {
-                squadMember.PatrolTracker.SetPatrolZone(patrolZone);
+                Log.Error($"{pawn.Label} has no patrol path but is trying to patrol.");
+                return null;
             }
 
-            // Check if we are close enough to the current point to consider it reached
-            IntVec3 currentPoint = squadMember.PatrolTracker.CurrentPoint;
+            IntVec3 currentPoint = patrolZone.FindReachablePoint(pawn, pawn.Position);
+
             if (currentPoint.IsValid)
             {
                 float distanceSquared = (pawn.Position - currentPoint).LengthHorizontalSquared;
                 if (distanceSquared <= ReachedPointDistanceSquared)
                 {
-                    // Mark the current point as reached
                     squadMember.PatrolTracker.MarkCurrentPointReached();
                 }
             }
 
-            IntVec3 targetPoint;
-
-            // If we've reached the current point, advance to the next
+            IntVec3 startPoint;
             if (squadMember.PatrolTracker.HasReachedCurrentPoint())
             {
-                targetPoint = squadMember.PatrolTracker.AdvanceToNextPoint();
+                startPoint = squadMember.PatrolTracker.AdvanceToNextPoint();
             }
             else
             {
-                // Otherwise, continue to the current point
-                targetPoint = currentPoint;
-
-                // If the current point is invalid, try to get a valid next point
-                if (!targetPoint.IsValid && squadMember.PatrolTracker.HasPatrolPath)
-                {
-                    targetPoint = squadMember.PatrolTracker.AdvanceToNextPoint();
-                }
+                startPoint = currentPoint;
             }
 
+            IntVec3 targetPoint = patrolZone.FindReachablePoint(pawn, startPoint);
             if (!targetPoint.IsValid)
             {
-                Log.Message($"[{pawn.LabelShort}] Target point is invalid - returning null job");
+                Log.Error($"{pawn.Label} cannot find any valid patrol point");
                 return null;
-            }
-
-            bool canReach = pawn.CanReach(targetPoint, PathEndMode.OnCell, Danger.Deadly);
-            if (!canReach)
-            {
-                // If can't reach the target point, try initializing to closest point
-                squadMember.PatrolTracker.InitializeToClosestPoint(pawn.Position);
-                targetPoint = squadMember.PatrolTracker.CurrentPoint;
-
-                canReach = pawn.CanReach(targetPoint, PathEndMode.OnCell, Danger.Deadly);
-                if (!canReach)
-                {
-                    return null;
-                }
             }
 
             Job job = JobMaker.MakeJob(JobDefOf.Goto, targetPoint);

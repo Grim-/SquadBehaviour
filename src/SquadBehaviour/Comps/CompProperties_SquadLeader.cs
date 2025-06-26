@@ -27,7 +27,8 @@ namespace SquadBehaviour
         protected SquadMemberState _SquadState = SquadMemberState.CalledToArms;
         protected Dictionary<int, Squad> _ActiveSquads = new Dictionary<int, Squad>();
         #endregion
-
+        protected FormationDef _MetaFormationType = SquadDefOf.ColumnFormation;
+        public FormationDef MetaFormationType => _MetaFormationType;
         #region Properties
         public Pawn Pawn => this.parent as Pawn;
         public Lord SquadLord { get => this._SquadLord; set => this._SquadLord = value; }
@@ -48,19 +49,31 @@ namespace SquadBehaviour
             }
         }
 
+        public int cellsBetweenSquads = 5;
+        public IntVec3 squadsOffset = new IntVec3(0, 0, -1);
 
-        public bool CanCommandAnimals
+        public bool CanEverBeLeader => this.Pawn.RaceProps.Humanlike && !this.Pawn.WorkTagIsDisabled(WorkTags.Violent);
+
+
+        public Dictionary<int, bool> squadFoldouts = new Dictionary<int, bool>();
+        public Dictionary<int, bool> settingsFoldouts = new Dictionary<int, bool>();
+
+        public bool CanCommandAnimals(out string cantCommandReason)
         {
-            get
+            cantCommandReason = "";
+            if (Prefs.DevMode && DebugSettings.godMode)
             {
-                var animalSkill = this.Pawn.skills.GetSkill(SkillDefOf.Animals);
-                if (animalSkill == null)
-                    return false;
-
-                Log.Message($"CanCommandAnimals check for {Pawn.Label}: level={animalSkill.Level}, levelInt={animalSkill.levelInt}");
-
-                return animalSkill.Level >= 8;
+                return true;
             }
+            var animalSkill = this.Pawn.skills.GetSkill(SkillDefOf.Animals);
+            if (animalSkill == null || animalSkill.Level < 8)
+            {
+                cantCommandReason = "requires 8 animal skill to command animals";
+                return false;
+            }
+              
+            Log.Message($"CanCommandAnimals check for {Pawn.Label}: level={animalSkill.Level}, levelInt={animalSkill.levelInt}");
+            return animalSkill.Level >= 8;
         }
         public bool CanCommandMechs => this.Pawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant);
 
@@ -193,6 +206,16 @@ namespace SquadBehaviour
             return _ActiveSquads.ContainsKey(squadID);
         }
 
+        public virtual bool TryGetSquadByID(int squadID, out Squad squad)
+        {
+            squad = null;
+            if (HasSquadByID(squadID))
+            {
+                squad = _ActiveSquads[squadID];
+                return true;
+            }
+            return false;
+        }
         public virtual Squad GetSquadByID(int squadID)
         {
             if (HasSquadByID(squadID))
@@ -209,28 +232,110 @@ namespace SquadBehaviour
         #endregion
 
         #region Formation Management
+
+        public virtual void SetMetaFormation(FormationDef metaFormationType)
+        {
+            _MetaFormationType = metaFormationType;
+        }
+
         public virtual IntVec3 GetFormationPositionFor(Pawn pawn, IntVec3 Origin, Rot4 OriginRotation)
         {
-            foreach (var squad in _ActiveSquads.OrderBy(x => x.Key))
+            if (IsPartOfAnySquad(pawn, out Squad squad))
             {
-                if (squad.Value.Members.Contains(pawn))
-                {
-                    return squad.Value.GetFormationPositionFor(pawn, Origin, OriginRotation);
-                }
+                //var orderedSquads = _ActiveSquads.OrderBy(x => x.Key).ToList();
+                //int squadIndex = orderedSquads.FindIndex(s => s.Value == squad);
+
+                //if (squadIndex != -1)
+                //{
+                //    IntVec3 squadCenter = GetMetaFormationPosition(squadIndex, Origin, OriginRotation, orderedSquads.Count);
+                //    return squad.GetFormationPositionFor(pawn, squadCenter, OriginRotation);
+                //}
+                return squad.GetFormationPositionFor(pawn, Origin + squadsOffset, OriginRotation);
             }
 
             return IntVec3.Invalid;
         }
 
-        public virtual IntVec3 GetFormationPositionFor(Pawn pawn) => GetFormationPositionFor(pawn, Pawn.Position, Pawn.Rotation);
+
+        public virtual IntVec3 GetMetaFormationPosition(int squadIndex, IntVec3 origin, Rot4 originRotation, int totalSquads)
+        {
+            float totalWidth = (totalSquads - 1) * cellsBetweenSquads;
+            float startOffset = -totalWidth / 2f;
+            origin += squadsOffset;
+
+            Vector3 offsetForSquad = new Vector3(startOffset + squadIndex * cellsBetweenSquads, 0, 0);
+
+            return origin + new IntVec3(Mathf.RoundToInt(offsetForSquad.x), 0, Mathf.RoundToInt(offsetForSquad.z));
+        }
+
+        public virtual IntVec3 GetFormationPositionFor(Pawn pawn, bool userLeaderRotation = false)
+        {
+            Rot4 rot = userLeaderRotation ? Pawn.Rotation : Rot4.North;
+
+            return GetFormationPositionFor(pawn, Pawn.Position, rot);
+        }
         #endregion
 
         #region Order Management
-        public virtual void IssueGlobalOrder(SquadOrderDef orderDef, LocalTargetInfo target)
+
+
+        /// <summary>
+        /// Issue an order to all squads and units
+        /// </summary>
+        /// <param name="duty"></param>
+        /// <param name="target"></param>
+        /// <param name="isGlobal"></param>
+        public void IssueGlobalOrder(SquadOrderDef duty, LocalTargetInfo target, bool isGlobal = false)
         {
-            foreach (var squad in ActiveSquads)
+            foreach (var item in ActiveSquads)
             {
-                squad.Value.IssueSquadOrder(orderDef, target);
+                foreach (var member in item.Value.Members)
+                {
+                    IssueOrder(member, duty, target, isGlobal);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Issue an order to all units in a squad
+        /// </summary>
+        /// <param name="squad"></param>
+        /// <param name="duty"></param>
+        /// <param name="target"></param>
+        /// <param name="isGlobal"></param>
+        public void IssueSquadOrder(Squad squad, SquadOrderDef duty, LocalTargetInfo target, bool isGlobal = false)
+        {
+            foreach (var member in squad.Members)
+            {
+                IssueOrder(member, duty, target, isGlobal);
+            }
+        }
+
+
+        /// <summary>
+        /// Issue an order to a specific unit.
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="duty"></param>
+        /// <param name="target"></param>
+        /// <param name="isGlobal"></param>
+        public void IssueOrder(Pawn pawn, SquadOrderDef duty, LocalTargetInfo target, bool isGlobal = false)
+        {
+            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            {
+                SquadOrderWorker squadOrderWorker = duty.CreateWorker(this, squadMember);
+                if (squadOrderWorker.CanExecuteOrder(target))
+                {
+                    if (isGlobal)
+                    {
+                        squadOrderWorker.ExecuteOrderGlobal(target);
+                    }
+                    else
+                    {
+                        squadOrderWorker.ExecuteOrder(target);
+                    }                 
+                }
             }
         }
         #endregion
@@ -261,6 +366,7 @@ namespace SquadBehaviour
             Scribe_Collections.Look(ref _ActiveSquads, "activeSquads", LookMode.Value, LookMode.Deep);
             Scribe_Defs.Look(ref _FormationType, "formationType");
             Scribe_Values.Look(ref _FollowDistance, "followDistance", 5f);
+            Scribe_Values.Look(ref cellsBetweenSquads, "cellsBetweenSquads", 5);
             Scribe_Values.Look(ref InFormation, "inFormation", true);
             Scribe_Values.Look(ref IsLeaderRoleActive, "IsLeaderRoleActive", false);
             Scribe_Values.Look(ref SquadHostilityResponse, "SquadHostilityResponse");

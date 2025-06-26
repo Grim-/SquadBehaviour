@@ -28,7 +28,16 @@ namespace SquadBehaviour
 
         public override void ExecuteOrderGlobal(LocalTargetInfo Target)
         {
-           
+            foreach (var member in this.SquadMember.AssignedSquad.Members)
+            {
+                if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+                {
+                    Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, Target);
+                    job.playerForced = true;
+                    job.killIncappedTarget = true;
+                    squadMember.Pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                }
+            }
         }
     }
 }

@@ -6,15 +6,4 @@
     <targetType>Cell</targetType>
     <removeIfBuildingDespawned>true</removeIfBuildingDespawned>
   </DesignationDef>
-
-  <DesignationCategoryDef>
-    <defName>DesignatePatrolRoute</defName>
-    <label>DesignatePatrolRoute</label>
-    <description>DesignatePatrolRoute</description>
-    <order>950</order>
-    <specialDesignatorClasses>
-      <li>SquadBehaviour.Designator_ZoneAdd_PatrolPath</li>
-    </specialDesignatorClasses>
-  </DesignationCategoryDef>
-
 </Defs>

@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
 
 namespace SquadBehaviour
@@ -78,7 +77,13 @@ namespace SquadBehaviour
                 Mathf.RoundToInt(position.z)
             );
         }
-
+        private static Vector3 CalculateSingleFileFormation(Vector3 leaderPos, int index, Rot4 rotation, float spacing)
+        {
+            int column = 0;
+            int row = index % 3;
+            Vector3 offset = new Vector3((row - 1) * spacing, 0, (-column - 1) * spacing);
+            return leaderPos + RotateOffset(offset, rotation);
+        }
         private static Vector3 CalculateColumnFormation(Vector3 leaderPos, int index, Rot4 rotation, float spacing)
         {
             int column = index / 3;
@@ -174,96 +179,6 @@ namespace SquadBehaviour
             Vector3 offset = new Vector3((-row - 1) * spacing, 0, (col - colOffset) * spacing);
 
             return leaderPos + RotateOffset(offset, rotation);
-        }
-    }
-
-    public class FormationDef : Def
-    {
-        public string uiIconPath = "";
-        private Texture2D _Icon = null;
-        public Texture2D Icon
-        {
-            get
-            {
-                if (_Icon == null)
-                {
-                    string path = String.IsNullOrEmpty(uiIconPath) ? "UI/Designators/Cancel" : uiIconPath;
-
-                    _Icon = ContentFinder<Texture2D>.Get(path);
-                }
-
-                return _Icon;
-            }
-        }
-
-        public Type formationWorker;
-
-        public FormationWorker CreateWorker()
-        {
-            FormationWorker SquadOrderWorker = (FormationWorker)Activator.CreateInstance(formationWorker);
-            return SquadOrderWorker;
-        }
-    }
-
-    public abstract class FormationWorker
-    {
-        public virtual IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            return leaderPos.ToIntVec3();
-        }
-    }
-
-    public class ColumnFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Column, leaderPos, rotation, index, totalUnits, spacing);
-        }
-    }
-
-    public class CircleFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Circle, leaderPos, rotation, index, totalUnits, spacing);
-        }
-    }
-
-    public class BoxFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Box, leaderPos, rotation, index, totalUnits, spacing);
-        }
-    }
-
-    public class WedgeFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Wedge, leaderPos, rotation, index, totalUnits, spacing);
-        }
-    }
-
-    public class LineFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Line, leaderPos, rotation, index, totalUnits, spacing);
-        }
-    }
-
-    public class PhalanxFormationWorker : FormationWorker
-    {
-        public override IntVec3 GetFormationPosition(Pawn pawn, Vector3 leaderPos, int index, Rot4 rotation, int totalUnits)
-        {
-            float spacing = FormationUtils.GetPawnSpacing(pawn);
-            return FormationUtils.GetFormationPosition(FormationUtils.FormationType.Phalanx, leaderPos, rotation, index, totalUnits, spacing);
         }
     }
 }

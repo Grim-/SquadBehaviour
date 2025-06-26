@@ -5,11 +5,12 @@ namespace SquadBehaviour
 {
     public class PatrolTracker : IExposable
     {
-        private Comp_PawnSquadMember squadMember;
+        private Pawn parentPawn;
+        private Comp_PawnSquadMember squadMember => parentPawn.GetComp<Comp_PawnSquadMember>();
         private List<IntVec3> patrolPoints = new List<IntVec3>();
         private int currentIndex = 0;
         private bool isReversing = false;
-        private PatrolMode patrolMode = PatrolMode.Loop;
+        private PatrolMode patrolMode = PatrolMode.PingPong;
         private Zone_PatrolPath patrolZone;
         private bool reachedCurrentPoint = false;
 
@@ -19,12 +20,13 @@ namespace SquadBehaviour
 
         public PatrolTracker()
         {
+
         }
 
-        public PatrolTracker(Comp_PawnSquadMember squadMember, PatrolMode mode = PatrolMode.Loop)
+        public PatrolTracker(Pawn squadMember, PatrolMode mode = PatrolMode.PingPong)
         {
             patrolMode = mode;
-            this.squadMember = squadMember;
+            this.parentPawn = squadMember;
         }
 
         public void SetPatrolZone(Zone_PatrolPath zone)
@@ -61,6 +63,11 @@ namespace SquadBehaviour
 
         public void ClearPatrol()
         {
+            if (patrolZone != null)
+            {
+             
+            }
+
             patrolPoints.Clear();
             patrolZone = null;
             Reset();
@@ -144,13 +151,14 @@ namespace SquadBehaviour
             return patrolPoints[nextIndex];
         }
 
-        public void InitializeToClosestPoint(IntVec3 position)
+        public IntVec3 GetClosestPoint(IntVec3 position)
         {
             if (patrolPoints.Count == 0)
-                return;
+                return IntVec3.Invalid;
 
             int closestIndex = 0;
             float closestDist = float.MaxValue;
+            IntVec3 closestPos = IntVec3.Invalid;
             for (int i = 0; i < patrolPoints.Count; i++)
             {
                 float dist = (position - patrolPoints[i]).LengthHorizontalSquared;
@@ -158,18 +166,22 @@ namespace SquadBehaviour
                 {
                     closestDist = dist;
                     closestIndex = i;
+                    closestPos = patrolPoints[i];
                 }
             }
+
             currentIndex = closestIndex;
             reachedCurrentPoint = false;
+            return closestPos;
         }
+
 
         public void ExposeData()
         {
             Scribe_Collections.Look(ref patrolPoints, "patrolPoints", LookMode.Value);
             Scribe_Values.Look(ref currentIndex, "currentIndex", 0);
             Scribe_Values.Look(ref isReversing, "isReversing", false);
-            Scribe_Values.Look(ref patrolMode, "patrolMode", PatrolMode.Loop);
+            Scribe_Values.Look(ref patrolMode, "patrolMode", PatrolMode.PingPong);
             Scribe_References.Look(ref patrolZone, "patrolZone");
             Scribe_Values.Look(ref reachedCurrentPoint, "reachedCurrentPoint", false);
         }

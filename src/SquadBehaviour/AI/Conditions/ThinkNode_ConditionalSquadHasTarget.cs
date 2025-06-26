@@ -19,17 +19,7 @@ namespace SquadBehaviour
                 return false;
             }
 
-            if (squadMember.AssignedSquad.HasEnemiesNearby())
-            {
-                return true;
-            }
-
-            if (pawn.mindState.enemyTarget != null)
-            {
-                return true;
-            }
-
-            if (squadMember.AssignedSquad.LeaderHasValidTarget())
+            if (squadMember.AssignedSquad.HasSquadTarget())
             {
                 return true;
             }

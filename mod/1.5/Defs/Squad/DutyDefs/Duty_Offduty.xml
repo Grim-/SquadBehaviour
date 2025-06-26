@@ -7,6 +7,5 @@
       <maintainsFormation>false</maintainsFormation>
       <respondToThreats>false</respondToThreats>
     </props>
-    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
   </SquadBehaviour.SquadDutyDef>
 </Defs>

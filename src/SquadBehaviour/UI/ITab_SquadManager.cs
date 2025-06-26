@@ -107,8 +107,7 @@ namespace SquadBehaviour
 
                 if (SquadLeader.AddSquad(newSquadId))
                 {
-                    Squad squad = SquadLeader.ActiveSquads[newSquadId];
-                    squad.squadName = "Squad " + newSquadId;
+                    Squad squad = SquadLeader.GetSquadByID(newSquadId);
                     Messages.Message("New squad created.", MessageTypeDefOf.PositiveEvent);
                 }
                 else

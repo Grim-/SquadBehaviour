@@ -84,7 +84,21 @@
     <Compile Include="AbilityUtility.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalCanCheckInterval.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPlayerFaction.cs" />
-    <Compile Include="SquadAnimalExtension.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadMemberHasDuty.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalCannotBreakFormation.cs" />
+    <Compile Include="Formation\BoxFormationWorker.cs" />
+    <Compile Include="Formation\CircleFormationWorker.cs" />
+    <Compile Include="Formation\ColumnFormationWorker.cs" />
+    <Compile Include="Formation\CustomFormationWorker.cs" />
+    <Compile Include="Formation\FormationDef.cs" />
+    <Compile Include="Formation\FormationWorker.cs" />
+    <Compile Include="Formation\LineFormationWorker.cs" />
+    <Compile Include="Formation\PhalanxFormationWorker.cs" />
+    <Compile Include="Formation\SingleFileFormationWorker.cs" />
+    <Compile Include="Patrol\ITab_PatrolPathDebug.cs" />
+    <Compile Include="Patrol\PatrolMode.cs" />
+    <Compile Include="SquadMemberExtension.cs" />
+    <Compile Include="UI\AIUtil.cs" />
     <Compile Include="UI\AttackJobUtil.cs" />
     <Compile Include="AI\JobGiver_ActivelySearchForTargets.cs" />
     <Compile Include="AI\JobGiver_EnhancedHostilityResponse.cs" />
@@ -99,17 +113,16 @@
     <Compile Include="Duty\JobGiver_SquadPatrol.cs" />
     <Compile Include="Orders\SquadOrder_ClearDuty.cs" />
     <Compile Include="Orders\SquadOrder_PatrolZone.cs" />
-    <Compile Include="Duty\ThinkNode_ConditionalAlreadyPatrolling.cs" />
-    <Compile Include="Duty\ThinkNode_ConditionalEnemiesNearPatrol.cs" />
-    <Compile Include="Duty\ThinkNode_ConditionalIsPatrolling.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalAlreadyPatrolling.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalEnemiesNearPatrol.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPatrolling.cs" />
     <Compile Include="Gizmo\Gizmo_SquadMember.cs" />
     <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath.cs" />
     <Compile Include="Patrol\Designator_ZoneAdd_PatrolPath_Expand.cs" />
     <Compile Include="Patrol\PatrolTracker.cs" />
-    <Compile Include="Patrol\PatrolPathManager.cs" />
     <Compile Include="SquadBehaviourPatches.cs" />
     <Compile Include="Duty\SquadDutyDef.cs" />
-    <Compile Include="Duty\ThinkNode_ConditionalHasDutyAssigned.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalHasDutyAssigned.cs" />
     <Compile Include="AI\JobGiver_MoveToDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadDefendPoint.cs" />
     <Compile Include="AI\JobGiver_SquadMemberDefendSquadLeader.cs" />
@@ -130,7 +143,7 @@
     <Compile Include="UI\DragDropManager.cs" />
     <Compile Include="UI\ITab_SquadManager.cs" />
     <Compile Include="AI\JobDriver_FormationFollow.cs" />
-    <Compile Include="AI\JobGiver_SummonedCreatureFightEnemy.cs" />
+    <Compile Include="AI\JobGiver_SquadMemberFight.cs" />
     <Compile Include="AI\JobGiver_SummonedCreatureFollowMaster.cs" />
     <Compile Include="AI\JobGiver_SummonedCreatureFormationFollow.cs" />
     <Compile Include="SquadDefOf.cs" />
@@ -155,8 +168,8 @@
     <Compile Include="Comps\Hediff_SquadMember.cs" />
     <Compile Include="SquadManagerWindow.cs" />
     <Compile Include="FormationUtils.cs" />
-    <Compile Include="ISquadLeader.cs" />
-    <Compile Include="ISquadMember.cs" />
+    <Compile Include="Interface\ISquadLeader.cs" />
+    <Compile Include="Interface\ISquadMember.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\RowLayoutManager.cs" />
     <Compile Include="Squad.cs" />
@@ -164,6 +177,8 @@
     <Compile Include="SquadManager.cs" />
     <Compile Include="SquadUtil.cs" />
     <Compile Include="Patrol\Zone_PatrolPath.cs" />
+    <Compile Include="Formation\WedgeFormationWorker.cs" />
+    <Compile Include="UI\Window_SquadFormationEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -3,7 +3,7 @@
   <SquadBehaviour.SquadOrderDef>
     <defName>AttackOrder</defName>
     <label>Order : Attack</label>
-    <uiIconPath>UI/Commands/AttackMelee</uiIconPath>
+    <uiIconPath>AttackOrderUIIcon</uiIconPath>
     <workerClass>SquadBehaviour.SquadOrder_Attack</workerClass>
     <requiresTarget>true</requiresTarget>
     <targetingParameters>

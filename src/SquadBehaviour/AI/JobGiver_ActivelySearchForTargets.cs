@@ -1,34 +1,29 @@
-﻿using Verse;
+﻿using UnityEngine;
+using Verse;
 using Verse.AI;
 
 namespace SquadBehaviour
 {
     public class JobGiver_ActivelySearchForTargets : ThinkNode_JobGiver
-	{
-		protected int LastCheckTick = 0;
+    {
+        protected int LastCheckTick = 0;
 
-		protected override Job TryGiveJob(Pawn pawn)
-		{
-			if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
-			{
-				return null;
-			}
-
-            if (Current.Game.tickManager.TicksGame + 150 > LastCheckTick)
+        protected override Job TryGiveJob(Pawn pawn)
+        {
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
             {
-				LastCheckTick = Current.Game.tickManager.TicksGame;
+                return null;
+            }
 
-				Thing thing = (Thing)AttackTargetFinder.BestAttackTarget(pawn,
-					TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable,
-					null, 0f, 8f, default(IntVec3), float.MaxValue, false, true, false, false);
+            float maxDist = squadMember.AssignedSquad.MaxAttackDistanceFor(pawn);
+      
+            Thing thing = squadMember.AssignedSquad.FindTargetForMember(pawn, maxDist);
 
-				if (thing != null && thing.Position.DistanceTo(pawn.Position) < squadMember.AssignedSquad.AggresionDistance)
-				{
-					return AttackJobUtil.TryGetAttackNearbyEnemyJob(pawn);
-				}
-			}
-
-			return null;
-		}
-	}
+            if (thing != null && thing.Position.DistanceTo(pawn.Position) < maxDist)
+            {
+                return AttackJobUtil.TryGetAttackNearbyEnemyJob(squadMember);
+            }
+            return null;
+        }
+    }
 }

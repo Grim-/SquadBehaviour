@@ -6,5 +6,10 @@
       <li Class="SquadBehaviour.JobGiver_EnhancedHostilityResponse" />
     </value>
   </Operation>
-
+  <Operation Class="PatchOperationReplace">
+    <xpath>/Defs/ThinkTreeDef[defName="AnimalConstant"]/thinkRoot/subNodes/li/subNodes/li[@Class="JobGiver_AnimalFlee"]</xpath>
+    <value>
+      <li Class="SquadBehaviour.JobGiver_EnhancedHostilityResponse" />
+    </value>
+  </Operation>
 </Patch>

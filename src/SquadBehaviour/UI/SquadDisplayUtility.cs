@@ -13,37 +13,43 @@ namespace SquadBehaviour
         public float MemberRowHeight = 24f;
         public float IconSize = 24f;
         public float DefaultSpacing = 5f;
-        public float SettingsSectionHeight = 180f;
-        public Dictionary<int, bool> squadFoldouts = new Dictionary<int, bool>();
-        public Dictionary<int, bool> settingsFoldouts = new Dictionary<int, bool>();
+        public float SettingsSectionHeight = 200f;
+
 
         private const float DRAG_HIGHLIGHT_ALPHA = 0.3f;
+
         private const float SCROLLVIEW_WIDTH_OFFSET = 20f;
         private const float SQUAD_ENTRY_VERTICAL_SPACING = 10f;
         private const float SQUAD_HEADER_FOLDOUT_BUTTON_WIDTH = 30f;
         private const float SQUAD_HEADER_NAME_WIDTH = 120f;
         private const float SQUAD_HEADER_WIDGET_WIDTH = 30f;
+
         private const float DRAGGED_PAWN_LABEL_OFFSET_X = 50f;
         private const float DRAGGED_PAWN_LABEL_OFFSET_Y = 2f;
         private const float DRAGGED_PAWN_LABEL_WIDTH = 100f;
         private const float DRAGGED_PAWN_LABEL_HEIGHT = 20f;
+
         private const float MEMBER_ROW_HORIZONTAL_INDENT = 20f;
-        private const float MEMBER_ROW_NAME_WIDTH = 100f;
+        private const float MEMBER_ROW_NAME_WIDTH = 160f;
         private const float MEMBER_ROW_HEALTH_BAR_WIDTH = 80f;
         private const float MEMBER_ROW_BUTTON_SIZE = 22f;
         private const float MEMBER_ROW_BUTTON_SPACING = 2f;
         private const float MEMBER_ROW_REMOVE_BUTTON_WIDTH = 60f;
+
         private const float SETTINGS_SECTION_HORIZONTAL_PADDING = 20f;
         private const float SETTINGS_SECTION_VERTICAL_PADDING = 10f;
         private const float SETTINGS_SECTION_ROW_HEIGHT = 30f;
         private const float SETTINGS_LABEL_WIDTH_PERCENT = 0.4f;
         private const float SETTINGS_SLIDER_WIDTH_PERCENT = 0.55f;
+
         private const float FOLLOW_DISTANCE_MIN = 1f;
         private const float FOLLOW_DISTANCE_MAX = 30f;
         private const float FOLLOW_DISTANCE_ROUND_TO = 0.5f;
+
         private const float AGGRESSION_DISTANCE_MIN = 1f;
         private const float AGGRESSION_DISTANCE_MAX = 30f;
         private const float AGGRESSION_DISTANCE_ROUND_TO = 0.5f;
+
         private const float FORMATION_CHECKBOX_WIDTH = 200f;
         private const float MINIMUM_LIST_HEIGHT = 50f;
         private const float BUTTON_MARGIN = 5f;
@@ -54,12 +60,14 @@ namespace SquadBehaviour
 
         private Pawn interactingPawn = null;
         private Squad interactingSquad = null;
+        protected Comp_PawnSquadLeader leader = null;
 
         public SquadDisplayUtility()
         {
-            squadFoldouts = new Dictionary<int, bool>();
-            settingsFoldouts = new Dictionary<int, bool>();
+
         }
+
+
 
         public void DrawSquadsList(Rect contentRect, ref Vector2 scrollPosition, Dictionary<int, Squad> activeSquads, Comp_PawnSquadLeader leader)
         {
@@ -71,6 +79,8 @@ namespace SquadBehaviour
                 return;
             }
 
+
+            this.leader = leader;
             squadHeaderRects.Clear();
 
             float viewHeight = CalculateTotalHeight(activeSquads);
@@ -87,26 +97,54 @@ namespace SquadBehaviour
                 int squadId = squadEntry.Key;
                 Squad squad = squadEntry.Value;
 
-                if (!squadFoldouts.ContainsKey(squadId))
+
+                if (!squadEntry.Value.IsVisible)
                 {
-                    squadFoldouts[squadId] = true;
+                    continue;
                 }
 
-                if (!settingsFoldouts.ContainsKey(squadId))
+                if (!leader.squadFoldouts.ContainsKey(squadId))
                 {
-                    settingsFoldouts[squadId] = false;
+                    ShowquadFoldOut(squadId);
                 }
 
-                bool expanded = squadFoldouts[squadId];
-                bool settingsExpanded = settingsFoldouts[squadId];
+                if (!leader.settingsFoldouts.ContainsKey(squadId))
+                {
+                    HideSquadSettings(squadId);
+                }
+
+                bool expanded = leader.squadFoldouts[squadId];
+                bool settingsExpanded = leader.settingsFoldouts[squadId];
 
                 Rect headerRect = new Rect(0f, curY, viewRect.width, SquadRowHeight);
                 squadHeaderRects[squadId] = headerRect;
 
+
+                bool wasExpanded = expanded;
+                bool wasSettingsExpanded = settingsExpanded;
+
                 curY += DrawSquadHeader(viewRect.width, curY, squad, squadId, leader, ref expanded, ref settingsExpanded);
 
-                squadFoldouts[squadId] = expanded;
-                settingsFoldouts[squadId] = settingsExpanded;
+                if (expanded != wasExpanded)
+                {
+                    if (expanded)
+                    {
+                        ShowquadFoldOut(squadId);
+                    }
+                    else HideSquadFoldOut(squadId);
+                }
+
+                if (settingsExpanded != wasSettingsExpanded)
+                {
+                    if (settingsExpanded)
+                    {
+                        ShowSquadSettings(squadId);
+                    }
+                    else HideSquadSettings(squadId);
+                }
+
+                //leader.squadFoldouts[squadId] = expanded;
+                //leader.settingsFoldouts[squadId] = settingsExpanded;
 
                 if (settingsExpanded && expanded)
                 {
@@ -133,6 +171,30 @@ namespace SquadBehaviour
 
             DrawDraggedPawn();
         }
+
+
+        private void ShowquadFoldOut(int squadID)
+        {
+            leader.squadFoldouts[squadID] = true;
+        }
+
+
+        private void HideSquadFoldOut(int squadID, bool hideSettingsAuto = true)
+        {
+            leader.squadFoldouts[squadID] = false;
+            if (hideSettingsAuto) HideSquadSettings(squadID);
+        }
+
+        private void ShowSquadSettings(int squadID)
+        {
+            leader.settingsFoldouts[squadID] = true;
+        }
+
+        private void HideSquadSettings(int squadID)
+        {
+            leader.settingsFoldouts[squadID] = false;
+        }
+
 
         private void DrawDraggedPawn()
         {
@@ -167,10 +229,20 @@ namespace SquadBehaviour
             RowLayoutManager headerLayout = new RowLayoutManager(squadHeaderRect, DefaultSpacing);
 
             Rect foldoutRect = headerLayout.NextRect(SQUAD_HEADER_FOLDOUT_BUTTON_WIDTH, 0f);
-            if (Widgets.ButtonImage(foldoutRect, expanded ? TexButton.Collapse : TexButton.Reveal))
+            if (Widgets.ButtonImage(foldoutRect, expanded ? SquadWidgets.ArrowDownUIIcon : SquadWidgets.ArrowRightUIIcon))
             {
-                expanded = !expanded;
+                if (expanded)
+                {
+                    HideSquadFoldOut(squadId);
+                    expanded = false;
+                }
+                else
+                {
+                    ShowquadFoldOut(squadId);
+                    expanded = true;
+                }
             }
+
 
             Rect nameRect = headerLayout.NextRect(SQUAD_HEADER_NAME_WIDTH, DefaultSpacing);
             Widgets.DrawBoxSolidWithOutline(nameRect, Color.clear, Color.grey);
@@ -188,20 +260,98 @@ namespace SquadBehaviour
                 Widgets.DrawHighlightIfMouseover(nameRect);
             }
 
+            TooltipHandler.TipRegion(nameRect, "Hold shift while clicking and drag into another squad.");
+
             SquadWidgets.DrawFormationSelector(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), squad.FormationType.Icon, squad.SetFormation);
+            //SquadWidgets.DrawAttackModeSelector(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), squad.FormationType.Icon, squad.ToggleAttackState);
             SquadWidgets.DrawHostilitySelector(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), SquadWidgets.GetHostilityTexture(squad.HostilityResponse), squad.SetHositilityResponse);
             SquadWidgets.DrawStateSelector(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), squad.SquadState, squad.SetSquadState, false);
-            SquadWidgets.DrawOrderFloatGrid(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), TexButton.ExecuteColonist, (SquadOrderDef orderDEf, LocalTargetInfo target) =>
+            SquadWidgets.DrawOrderFloatGrid(headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing), SquadWidgets.OrdersUIIcon, (SquadOrderDef orderDEf, LocalTargetInfo target) =>
             {
-                squad.IssueSquadOrder(orderDEf, target, true);
+                leader.IssueSquadOrder(squad, orderDEf, target, true);
             });
 
-            Rect settingsRect = headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing);
-            if (Widgets.ButtonImage(settingsRect, settingsExpanded ? TexButton.Minus : TexButton.Plus))
+
+            Rect addMemberButtonRect = headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing);
+
+            Widgets.DrawBoxSolidWithOutline(addMemberButtonRect, Color.clear, Color.white * 0.6f);
+
+            DrawButtonImageWithFloatMenu(addMemberButtonRect, SquadWidgets.SettingsMaimize, () =>
             {
-                settingsExpanded = !settingsExpanded;
+                List<FloatMenuOption> menuOptions = new List<FloatMenuOption>();
+                if (squad.Leader != null && squad.Leader.Spawned)
+                {
+                    IEnumerable<Pawn> availablePawns = squad.Leader.Map.mapPawns.AllPawnsSpawned.Where(x => x.Faction != null && x.Faction == Faction.OfPlayer && x != squad.Leader && !squad.Members.Contains(x));
+
+                    foreach (var item in availablePawns)
+                    {
+
+                        string menuLabel = $"Add {item.LabelShortCap}";
+
+
+                        FloatMenuOption option = new FloatMenuOption(menuLabel, () =>
+                        {
+                            squad.AddMember(item);
+                        });
+
+   
+
+
+
+                        menuOptions.Add(option);
+                    }
+                }
+                return menuOptions;
+            }, "Add member");
+
+
+
+            Rect mergeSquadWithButton = headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing);
+
+            Widgets.DrawBoxSolidWithOutline(mergeSquadWithButton, Color.clear, Color.white * 0.6f);
+
+            DrawButtonImageWithFloatMenu(mergeSquadWithButton, SquadWidgets.MergeUIIcon, () =>
+            {
+                List<FloatMenuOption> menuOptions = new List<FloatMenuOption>();
+                if (squad.Leader != null && squad.Leader.Spawned)
+                {
+                    foreach (var item in squad.SquadLeader.ActiveSquads.Where(x => x.Value != squad))
+                    {
+                        menuOptions.Add(new FloatMenuOption($"Merge with ... {item.Value.squadName}", () =>
+                        {
+                            squad.TryMergeFrom(item.Value);
+                        }));
+                    }
+                }
+                return menuOptions;
+            }, "Merge with squad...");
+
+
+
+            Rect holdFormationRect = headerLayout.NextRect(SQUAD_HEADER_FOLDOUT_BUTTON_WIDTH, 0f);
+            if (Widgets.ButtonImage(holdFormationRect, squad.IsHoldingFormation ? SquadWidgets.HoldFormationUIIcon : SquadWidgets.BreakFormationUIIcon))
+            {
+                squad.IsHoldingFormation = !squad.IsHoldingFormation;
             }
-            TooltipHandler.TipRegion(settingsRect, "Advanced Settings");
+
+            TooltipHandler.TipRegion(holdFormationRect, squad.IsHoldingFormation ? "Holding formation" : "Break Formation");
+
+            Rect settingsRect = headerLayout.NextRect(SQUAD_HEADER_WIDGET_WIDTH, DefaultSpacing);
+            if (Widgets.ButtonImage(settingsRect, settingsExpanded ? SquadWidgets.SettingsMinimize : SquadWidgets.SettingsMaimize))
+            {
+                if (settingsExpanded)
+                {
+                    this.HideSquadSettings(squadId);
+                    settingsExpanded = false;
+                }
+                else
+                {
+                    this.ShowSquadSettings(squadId);
+                    settingsExpanded = true;
+                }
+            }
+   
+            TooltipHandler.TipRegion(settingsRect, "Squad Config");
 
             if (DragDropManager.IsDragConfirmed &&
                 (DragDropManager.OriginSquad == null || DragDropManager.OriginSquad.squadID != squadId))
@@ -266,20 +416,35 @@ namespace SquadBehaviour
                 }
             }
         }
+        private void DrawButtonImageWithFloatMenu(Rect buttonRect, Texture2D tex, Func<List<FloatMenuOption>> getOptions, string tooltip = "")
+        {
+            if (Widgets.ButtonImage(buttonRect, tex))
+            {
+                List<FloatMenuOption> menuOptions = getOptions();
+                if (menuOptions.Count > 0)
+                {
+                    Find.WindowStack.Add(new FloatMenu(menuOptions));
+                }
+            }
 
+            if (!String.IsNullOrEmpty(tooltip))
+            {
+                TooltipHandler.TipRegion(buttonRect, new TipSignal(tooltip));
+            }
+
+        }
         public float DrawMemberRow(Pawn pawn, float width, float yPos, Comp_PawnSquadLeader leader, Squad currentSquad, bool isLeader = false)
         {
-            Rect rowRect = new Rect(MEMBER_ROW_HORIZONTAL_INDENT, yPos, width - MEMBER_ROW_HORIZONTAL_INDENT, MemberRowHeight);
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            {
+                return yPos;
+            }
 
+            Rect rowRect = new Rect(MEMBER_ROW_HORIZONTAL_INDENT, yPos, width - MEMBER_ROW_HORIZONTAL_INDENT, MemberRowHeight);
             bool isBeingDragged = DragDropManager.DraggedPawn == pawn && DragDropManager.IsDragConfirmed;
             if (isBeingDragged)
             {
                 GUI.color = new Color(1f, 1f, 1f, 0.3f);
-            }
-
-            if (Mouse.IsOver(rowRect))
-            {
-                Widgets.DrawHighlight(rowRect);
             }
 
             RowLayoutManager memberLayout = new RowLayoutManager(rowRect, DefaultSpacing, MEMBER_ROW_BUTTON_SPACING);
@@ -289,54 +454,57 @@ namespace SquadBehaviour
 
             if (Mouse.IsOver(portraitRect))
             {
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.shift)
                 {
                     interactingPawn = pawn;
                     interactingSquad = currentSquad;
                     DragDropManager.StartDrag(pawn, currentSquad);
                     Event.current.Use();
                 }
-            }
+                else if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+                {
+                    Event.current.Use();
+                    Find.CameraDriver.JumpToCurrentMapLoc(pawn.Position);
+                    Find.Selector.Select(pawn);
+                }
 
-            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
-            {
                 string tooltip = squadMember.GetStatusReport();
                 if (!isBeingDragged)
                 {
                     tooltip += "\nDrag to transfer to another squad";
                 }
-                TooltipHandler.TipRegion(portraitRect, tooltip);
 
-                if (Widgets.ButtonInvisible(portraitRect, true))
-                {
-                    if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
-                    {
-                        Event.current.Use();
-                        ShowStateChangeMenu(squadMember);
-                    }
-                }
+                Widgets.DrawHighlight(rowRect);
+                Widgets.DrawBoxSolidWithOutline(portraitRect, Color.clear, Color.white * 0.7f);
+                TooltipHandler.TipRegion(portraitRect, tooltip);
             }
 
+
             string roleLabel = isLeader ? " (Leader)" : "";
+            string nameLabel = $"{pawn.LabelShort}{roleLabel}";
+            Vector2 textSize = Text.CalcSize(nameLabel);
             Rect nameRect = memberLayout.NextRect(MEMBER_ROW_NAME_WIDTH, DefaultSpacing);
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(nameRect, $"{pawn.LabelShort}{roleLabel}");
+            Widgets.Label(nameRect, nameLabel);
             Text.Anchor = TextAnchor.UpperLeft;
 
             float healthPct = pawn.health.summaryHealth.SummaryHealthPercent;
             Rect healthRect = memberLayout.NextRect(MEMBER_ROW_HEALTH_BAR_WIDTH, DefaultSpacing);
             Widgets.FillableBar(healthRect, healthPct);
 
-            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember member))
+
+            SquadWidgets.DrawStateSelector(memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE), squadMember.CurrentState, squadMember.SetCurrentMemberState);
+            SquadWidgets.DrawOrderFloatGrid(memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE), SquadWidgets.OrdersUIIcon, (SquadOrderDef orderDEf, LocalTargetInfo target) =>
             {
-                DrawMemberStateButton(memberLayout, member);
-                DrawMemberAbilitiesButton(memberLayout, member);
-                DrawMemberOrdersButton(memberLayout, member);
-                Rect removeButtonRect = memberLayout.NextRect(MEMBER_ROW_REMOVE_BUTTON_WIDTH);
-                if (Widgets.ButtonText(removeButtonRect, "Remove"))
-                {
-                    member?.LeaveSquad();
-                }
+                leader.IssueOrder(squadMember.Pawn, orderDEf, target, false);
+            });
+            DrawMemberAbilitiesButton(memberLayout, squadMember);
+
+
+            Rect removeButtonRect = memberLayout.NextRect(MEMBER_ROW_REMOVE_BUTTON_WIDTH);
+            if (Widgets.ButtonText(removeButtonRect, "Remove"))
+            {
+                squadMember?.LeaveSquad();
             }
 
             if (isBeingDragged)
@@ -347,25 +515,13 @@ namespace SquadBehaviour
             return MemberRowHeight;
         }
 
-        private void DrawMemberStateButton(RowLayoutManager memberLayout, Comp_PawnSquadMember member)
-        {
-            Rect stateRect = memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE, MEMBER_ROW_BUTTON_SPACING);
-            if (Widgets.ButtonImage(stateRect, TexCommand.Draft))
-            {
-                ShowStateChangeMenu(member);
-            }
-            if (Mouse.IsOver(stateRect))
-            {
-                TooltipHandler.TipRegion(stateRect, "Set member state");
-            }
-        }
-
         private void DrawMemberAbilitiesButton(RowLayoutManager memberLayout, Comp_PawnSquadMember member)
         {
-            Rect abilitiesRect = memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE, MEMBER_ROW_BUTTON_SPACING);
-            if (Widgets.ButtonImage(abilitiesRect, TexCommand.DesirePower))
+            Rect abilitiesRect = memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE);
+            if (Widgets.ButtonInvisible(abilitiesRect))
             {
                 member.AbilitiesAllowed = !member.AbilitiesAllowed;
+                Widgets.DrawHighlight(abilitiesRect);
             }
 
             Widgets.DrawBoxSolid(abilitiesRect.ContractedBy(2f), member.AbilitiesAllowed ? new Color(0.2f, 0.8f, 0.2f, 0.3f) : new Color(0.8f, 0.2f, 0.2f, 0.3f));
@@ -378,57 +534,23 @@ namespace SquadBehaviour
             }
         }
 
-        private void DrawMemberOrdersButton(RowLayoutManager memberLayout, Comp_PawnSquadMember member)
-        {
-            Rect ordersRect = memberLayout.NextRect(MEMBER_ROW_BUTTON_SIZE, MEMBER_ROW_BUTTON_SPACING);
-            GUI.DrawTexture(ordersRect, member.CurrentStance?.Tex ?? TexCommand.Attack);
-
-            if (Widgets.ButtonInvisible(ordersRect))
-            {
-                List<FloatMenuOption> orderOptions = new List<FloatMenuOption>();
-                orderOptions.Add(new FloatMenuOption($"Clear Duty", () => {
-                    member.CurrentStance = null;
-                    member.ClearDefendPoint();
-                }));
-
-                foreach (SquadOrderDef orderDef in DefDatabase<SquadOrderDef>.AllDefsListForReading)
-                {
-                    if (orderDef.requiresTarget)
-                    {
-                        orderOptions.Add(new FloatMenuOption(orderDef.defName, () => {
-                            Find.Targeter.BeginTargeting(orderDef.targetingParameters, (LocalTargetInfo target) => {
-                                member.IssueOrder(orderDef, target);
-                            });
-                        }));
-                    }
-                    else
-                    {
-                        orderOptions.Add(new FloatMenuOption(orderDef.defName, () => {
-                            member.IssueOrder(orderDef, null);
-                        }));
-                    }
-                }
-
-                if (orderOptions.Count == 0)
-                {
-                    orderOptions.Add(new FloatMenuOption("No orders available", null));
-                }
-
-                Find.WindowStack.Add(new FloatMenu(orderOptions));
-            }
-            if (Mouse.IsOver(ordersRect))
-            {
-                TooltipHandler.TipRegion(ordersRect, member.CurrentStance?.label ?? "Set orders");
-            }
-            Widgets.DrawHighlightIfMouseover(ordersRect);
-        }
-
         private float DrawSquadSettings(float width, float yPos, Squad squad)
         {
             Rect settingsRect = new Rect(MEMBER_ROW_HORIZONTAL_INDENT, yPos, width - MEMBER_ROW_HORIZONTAL_INDENT, SettingsSectionHeight);
             Widgets.DrawLightHighlight(settingsRect);
 
             float currentY = settingsRect.y + SETTINGS_SECTION_VERTICAL_PADDING;
+
+            float totalButtonWidth = (FORMATION_CHECKBOX_WIDTH * 3) + (BUTTON_MARGIN * 2);
+            float startX = settingsRect.x + (settingsRect.width - totalButtonWidth) / 2f;
+            if (startX < settingsRect.x + SETTINGS_SECTION_HORIZONTAL_PADDING)
+            {
+                startX = settingsRect.x + SETTINGS_SECTION_HORIZONTAL_PADDING;
+            }
+
+
+
+
 
             float followDistance = squad.FollowDistance;
             DrawSliderSetting(ref currentY, settingsRect, "Follow Distance:", ref followDistance, new FloatRange(FOLLOW_DISTANCE_MIN, FOLLOW_DISTANCE_MAX), FOLLOW_DISTANCE_ROUND_TO);
@@ -444,93 +566,60 @@ namespace SquadBehaviour
                 squad.AggresionDistance = aggressionDistance;
             }
 
-            bool inFormation = squad.InFormation;
-            DrawCheckboxSetting(ref currentY, settingsRect, "Maintain Formation", ref inFormation, squad.SetInFormation);
 
-            // Calculate button widths based on available space and desired margin
-            float totalButtonWidth = (FORMATION_CHECKBOX_WIDTH * 3) + (BUTTON_MARGIN * 2);
-            float startX = settingsRect.x + (settingsRect.width - totalButtonWidth) / 2f;
-            if (startX < settingsRect.x + SETTINGS_SECTION_HORIZONTAL_PADDING)
+            float squadZOffset = squad.SquadOffset.z;
+            DrawSliderSetting(ref currentY, settingsRect, "Squad Offset:", ref squadZOffset, new FloatRange(0, 10), 1);
+            if (squadZOffset != squad.SquadOffset.z)
             {
-                startX = settingsRect.x + SETTINGS_SECTION_HORIZONTAL_PADDING;
+                squad.SquadOffset.z = Mathf.RoundToInt(squadZOffset);
             }
 
+            bool inFormation = squad.InFormation;
+            DrawCheckboxSetting(ref currentY, settingsRect, inFormation ? "Maintaining Formation" : "Loosely following", ref inFormation, squad.SetInFormation);
 
-            Rect addSquadMemberRect = new Rect(startX, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
-            DrawButtonWithFloatMenu(addSquadMemberRect, "Add To Squad", () =>
-            {
-                List<FloatMenuOption> menuOptions = new List<FloatMenuOption>();
-                if (squad.Leader != null && squad.Leader.Spawned)
-                {
-                    foreach (var item in squad.Leader.Map.mapPawns.AllPawnsSpawned.Where(x => x.Faction != null && x.Faction == Faction.OfPlayer && x != squad.Leader && !squad.Members.Contains(x)))
-                    {
-                        menuOptions.Add(new FloatMenuOption($"Add {item.LabelShortCap}", () =>
-                        {
-                            squad.AddMember(item);
-                        }));
-                    }
-                }
-                return menuOptions;
-            });
 
-            Rect mergeSquadsRect = new Rect(addSquadMemberRect.xMax + BUTTON_MARGIN, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
-            DrawButtonWithFloatMenu(mergeSquadsRect, "Merge with..", () =>
-            {
-                List<FloatMenuOption> menuOptions = new List<FloatMenuOption>();
-                if (squad.Leader != null && squad.Leader.Spawned)
-                {
-                    foreach (var item in squad.SquadLeader.ActiveSquads.Where(x => x.Value != squad))
-                    {
-                        menuOptions.Add(new FloatMenuOption($"{item.Value.squadName}", () =>
-                        {
-                            squad.TryMergeFrom(item.Value);
-                        }));
-                    }
-                }
-                return menuOptions;
-            });
 
-            Rect disbandSquadRect = new Rect(mergeSquadsRect.xMax + BUTTON_MARGIN, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
+            bool canLeaveFormation = squad.IsHoldingFormation;
+            DrawCheckboxSetting(ref currentY, settingsRect, canLeaveFormation ? "Holding Position" : "Advancing", ref canLeaveFormation, squad.SetIsHoldingFormation);
+
+            Rect disbandSquadRect = new Rect(startX, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
             if (Widgets.ButtonText(disbandSquadRect, "Disband Squad"))
             {
                 squad.DisbandSquad();
             }
+
+            Rect debugButtonRect = new Rect(disbandSquadRect.xMax + 2f, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
+            if (Prefs.DevMode && DebugSettings.godMode)
+            {         
+                DrawButtonWithFloatMenu(debugButtonRect, "Debug Quick Add:", () =>
+                {
+                    List<FloatMenuOption> options = new List<FloatMenuOption>();
+                    foreach (var item in DefDatabase<PawnKindDef>.AllDefs)
+                    {
+                        options.Add(new FloatMenuOption(item.label, () =>
+                        {
+                            Pawn pawn = PawnGenerator.GeneratePawn(item, squad.Leader.Faction);
+                            GenSpawn.Spawn(pawn, squad.Leader.Position, squad.Leader.Map);
+                            squad.AddMember(pawn);
+                        }));
+
+                    }
+                    return options;
+                });
+            }
+
+
+            Rect setCustomFormation = new Rect(debugButtonRect.xMax + 2f, currentY, 130f, SETTINGS_SECTION_ROW_HEIGHT);
+            if (Widgets.ButtonText(setCustomFormation, "Set Custom Formation"))
+            {
+                Window_SquadFormationEditor.OpenFormationEditor(leader, squad);
+            }
+
             currentY += SETTINGS_SECTION_ROW_HEIGHT;
 
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.UpperLeft;
             return SettingsSectionHeight;
-        }
-
-        public static void DrawFormationSelector(Rect formationRect, Squad squad)
-        {
-            if (Widgets.ButtonText(formationRect, "Formation: " + squad.FormationType.ToString()))
-            {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (FormationDef formation in DefDatabase<FormationDef>.AllDefs)
-                {
-                    options.Add(new FloatMenuOption(
-                        formation.label,
-                        delegate { squad.SetFormation(formation); }
-                    ));
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
-            if (Mouse.IsOver(formationRect))
-            {
-                TooltipHandler.TipRegion(formationRect, "Change formation");
-            }
-        }
-
-        private void ShowStateChangeMenu(Comp_PawnSquadMember squadMember)
-        {
-            List<FloatMenuOption> stateOptions = new List<FloatMenuOption>
-            {
-                new FloatMenuOption("Call To Arms", () => squadMember.SetCurrentMemberState(SquadMemberState.CalledToArms)),
-                new FloatMenuOption("At Ease", () => squadMember.SetCurrentMemberState(SquadMemberState.AtEase)),
-                new FloatMenuOption("Do Nothing", () => squadMember.SetCurrentMemberState(SquadMemberState.DoNothing))
-            };
-            Find.WindowStack.Add(new FloatMenu(stateOptions));
         }
 
         public float CalculateTotalHeight(Dictionary<int, Squad> activeSquads)
@@ -544,14 +633,19 @@ namespace SquadBehaviour
 
                 height += SquadRowHeight;
 
-                if (settingsFoldouts.ContainsKey(squadId) && settingsFoldouts[squadId])
+                if (leader.squadFoldouts.ContainsKey(squadId) && leader.squadFoldouts[squadId])
                 {
-                    height += SettingsSectionHeight;
-                }
+                    if (!squad.IsVisible)
+                    {
+                        continue;
+                    }
+                    if (leader.settingsFoldouts.ContainsKey(squadId) && leader.settingsFoldouts[squadId])
+                    {
+                        height += SettingsSectionHeight;
+                    }
 
-                if (squadFoldouts.ContainsKey(squadId) && squadFoldouts[squadId])
-                {
                     int memberCount = 0;
+
                     if (squad.Leader != null)
                         memberCount++;
                     if (squad.Members != null)

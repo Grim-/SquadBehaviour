@@ -9,7 +9,7 @@
       <respondToThreats>false</respondToThreats>
       <patrolLeashRadius>30</patrolLeashRadius>
     </props>
-    <uiIconPath>UI/Commands/SquadAttack</uiIconPath>
+    <uiIconPath>PatrolOrderUIIcon</uiIconPath>
   </SquadBehaviour.SquadDutyDef>
 
 </Defs>

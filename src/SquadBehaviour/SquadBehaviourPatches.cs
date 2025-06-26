@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using LudeonTK;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,6 @@ namespace SquadBehaviour
         [StaticConstructorOnStartup]
         public static class CharacterCard_DrawCharacterCard_Patch
         {
-            private static Texture2D leaderIcon = ContentFinder<Texture2D>.Get("LeaderUIIcon", true);
-
             public static void Postfix(Rect rect, Pawn pawn, Action randomizeCallback = null, Rect creationRect = default(Rect), bool showName = true)
             {
                 if (pawn == null || pawn.health.Dead || !pawn.IsColonist)
@@ -46,21 +45,24 @@ namespace SquadBehaviour
                     TooltipHandler.TipRegion(leaderButtonRect, "Set as a squad leader");
                 }
 
-                if (Widgets.ButtonImage(leaderButtonRect, leaderIcon, true, null))
-                {
 
-                    if (pawn.TryGetComp(out Comp_PawnSquadLeader squadLeader))
+                if (Widgets.ButtonImage(leaderButtonRect, SquadWidgets.SquadUIIcon, true, null) && pawn.TryGetComp(out Comp_PawnSquadLeader squadLeader))
+                {
+                    if (!squadLeader.CanEverBeLeader)
                     {
-                        if (squadLeader.IsLeaderRoleActive)
-                        {
-                            squadLeader.SetSquadLeader(false);
-                            Messages.Message(pawn.LabelShort + " is no longer a squad leader", pawn, MessageTypeDefOf.NeutralEvent, false);
-                        }
-                        else
-                        {
-                            squadLeader.SetSquadLeader(true);
-                            Messages.Message(pawn.LabelShort + " is a squad leader", pawn, MessageTypeDefOf.NeutralEvent, false);
-                        }
+                        Messages.Message(pawn.LabelShort + " is not capable of leading a squad.", pawn, MessageTypeDefOf.NegativeEvent, false);
+                        return;
+                    }
+
+                    if (squadLeader.IsLeaderRoleActive)
+                    {
+                        squadLeader.SetSquadLeader(false);
+                        Messages.Message(pawn.LabelShort + " is no longer a squad leader", pawn, MessageTypeDefOf.NeutralEvent, false);
+                    }
+                    else
+                    {
+                        squadLeader.SetSquadLeader(true);
+                        Messages.Message(pawn.LabelShort + " is a squad leader", pawn, MessageTypeDefOf.NeutralEvent, false);
                     }
 
 
@@ -70,19 +72,88 @@ namespace SquadBehaviour
             }
         }
 
-        [HarmonyPatch(typeof(MentalStateHandler), "TryStartMentalState")]
-        public static class Patch_MentalStateHandler_TryStartMentalState
+
+        [TweakValue("MagicAndMyths")]
+        public static float IconXOffset = 2f;
+        [TweakValue("MagicAndMyths")]
+        public static float IconYOffset = 0f;
+        [HarmonyPatch(typeof(PawnUIOverlay), "DrawPawnGUIOverlay")]
+        public static class PawnUIOverlay_DrawPawnGUIOverlay_Patch
         {
-            public static bool Prefix(Pawn ___pawn, ref bool __result)
+            public static void Postfix(PawnUIOverlay __instance, Pawn ___pawn)
             {
-                if (___pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+                if (!___pawn.Spawned || ___pawn.Map.fogGrid.IsFogged(___pawn.Position))
                 {
-                    __result = false;
-                    return false;
+                    return;
                 }
-                return true;
+
+                if (!___pawn.RaceProps.Humanlike)
+                {
+                    if (___pawn.RaceProps.Animal)
+                    {
+                        if (!Prefs.AnimalNameMode.ShouldDisplayAnimalName(___pawn))
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (!___pawn.IsColonyMech)
+                        {
+                            return;
+                        }
+                        if (!Prefs.MechNameMode.ShouldDisplayMechName(___pawn))
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                if (___pawn.IsMutant && !___pawn.mutant.Def.showLabel)
+                {
+                    return;
+                }
+
+                Vector2 labelPos = GenMapUI.LabelDrawPosFor(___pawn, -0.6f);
+
+                string pawnName = ___pawn.LabelShort;
+                GameFont originalFont = Text.Font;
+                Text.Font = GameFont.Tiny;
+                float textWidth = Text.CalcSize(pawnName).x;
+                Text.Font = originalFont;
+
+
+                Vector2 iconPos = new Vector2(labelPos.x + textWidth / 2 + IconXOffset, labelPos.y + IconYOffset);
+                Rect iconRect = new Rect(iconPos.x, iconPos.y, 16f, 16f);
+
+                if (___pawn.TryGetSquadLeader(out Comp_PawnSquadLeader squadLeader) && squadLeader.IsLeaderRoleActive)
+                {
+                    GUI.DrawTexture(iconRect, SquadWidgets.SquadUIIcon);
+                }
+                else if(___pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+                {
+                    if (squadMember.CurrentStance != null && squadMember.CurrentStance.Tex != null)
+                    {
+                        GUI.DrawTexture(iconRect, squadMember.CurrentStance.Tex);
+                    }          
+                }
+
             }
         }
+
+        //[HarmonyPatch(typeof(MentalStateHandler), "TryStartMentalState")]
+        //public static class Patch_MentalStateHandler_TryStartMentalState
+        //{
+        //    public static bool Prefix(Pawn ___pawn, ref bool __result)
+        //    {
+        //        if (___pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+        //        {
+        //            __result = false;
+        //            return false;
+        //        }
+        //        return true;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(Pawn_MindState), "StartFleeingBecauseOfPawnAction")]
         public static class Patch_Pawn_MindState_StartFleeingBecauseOfPawnAction

@@ -28,7 +28,14 @@ namespace SquadBehaviour
 
         public override void ExecuteOrderGlobal(LocalTargetInfo Target)
         {
-            throw new System.NotImplementedException();
+            foreach (var member in this.SquadMember.AssignedSquad.Members)
+            {
+                if (member.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+                {
+                    squadMember.SetDefendPoint(Target.Cell);
+                    squadMember.CurrentStance = SquadDefOf.DefendPoint;
+                }
+            }
         }
     }
 }
