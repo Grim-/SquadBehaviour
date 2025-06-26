@@ -50,9 +50,24 @@ namespace SquadBehaviour
 
         public float MaxFormationDistance = 3f;
 
+        public string squadIconPath = "";
+
+        private Texture2D _Icon;
+        public Texture2D Icon
+        {
+            get
+            {
+                if (_Icon == null && !string.IsNullOrEmpty(squadIconPath))
+                {
+                    _Icon = ContentFinder<Texture2D>.Get(squadIconPath);
+                }
+
+                return _Icon;
+            }
+        }
 
 
-        public IntVec3 SquadOffset = IntVec3.Zero;
+        public IntVec3 SquadOffset = new IntVec3(0, 0, 1);
 
 
         public float MaxAttackDistanceFor(Pawn pawn)
@@ -486,7 +501,7 @@ namespace SquadBehaviour
             Scribe_Defs.Look(ref FormationType, "FormationType");
             Scribe_Values.Look(ref uniqueID, "uniqueID");
             Scribe_Values.Look(ref squadID, "squadID");
-            Scribe_Values.Look(ref SquadOffset, "SquadOffset");
+            Scribe_Values.Look(ref SquadOffset, "SquadOffset", new IntVec3(0, 0, 1));
             Scribe_Values.Look(ref squadName, "squadName");
             Scribe_Values.Look(ref HostilityResponse, "HostilityResponse");
             Scribe_Values.Look(ref IsHoldingFormation, "ShouldHoldFormation");

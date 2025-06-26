@@ -36,7 +36,7 @@ namespace SquadBehaviour
 
 			return TryGetAttackNearbyEnemyJob(pawn, thing);
 		}
-		public static Job TryGetAttackNearbyEnemyJob(Pawn pawn, Thing Target)
+		public static Job TryGetAttackNearbyEnemyJob(Pawn pawn, Thing Target, float maxRange = -1f)
 		{
 			if (Target == null)
 			{
@@ -56,16 +56,27 @@ namespace SquadBehaviour
 				return null;
 			}
 
-			//if (verb.IsMeleeAttack && pawn.CanReachImmediate(thing, PathEndMode.Touch))
+			//float distanceToTarget = thing.Position.DistanceTo(pawn.Position);
+
+   //         if (distanceToTarget > maxRange)
 			//{
-			//	return JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
+			//	Job waitJob = JobMaker.MakeJob(JobDefOf.Wait_Combat, thing);
+			//	waitJob.maxNumStaticAttacks = 2;
+			//	waitJob.expiryInterval = 30;
+			//	return waitJob;
 			//}
 
-			Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
+
+            if (verb.IsMeleeAttack || pawn.CanReachImmediate(thing, PathEndMode.Touch))
+            {
+                return JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
+            }
+
+            Job job = JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
 			job.maxNumStaticAttacks = 2;
 			job.killIncappedTarget = true;
 			job.expiryInterval = 2000;
-			//job.endIfCantShootTargetFromCurPos = true;
+			job.endIfCantShootTargetFromCurPos = true;
 			return job;
 		}
 

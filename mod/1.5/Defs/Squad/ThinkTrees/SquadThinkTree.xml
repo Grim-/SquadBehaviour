@@ -35,7 +35,7 @@
                     </li>
 
                     <!-- if Hosility response is set to Aggresive, check for targets -->
-                    <!-- <li Class="SquadBehaviour.ThinkNode_ConditionalIsAggresive">
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsAggresive">
                       <subNodes>
                         <li Class="SquadBehaviour.ThinkNode_ConditionalCanCheckInterval">
                           <subNodes>
@@ -43,7 +43,7 @@
                           </subNodes>
                         </li>
                       </subNodes>
-                    </li> -->
+                    </li>
 
                     <!-- 2.4 Formation Behavior -->
                     <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">

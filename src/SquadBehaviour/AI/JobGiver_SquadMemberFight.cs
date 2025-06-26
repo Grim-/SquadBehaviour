@@ -53,7 +53,12 @@ namespace SquadBehaviour
                 return null;
             }
 
-            if (pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            if (!pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember))
+            {
+                return null;
+            }
+
+            if (squadMember.CurrentState == SquadMemberState.DoNothing || squadMember.AssignedSquad.HostilityResponse == SquadHostility.None)
             {
                 return null;
             }

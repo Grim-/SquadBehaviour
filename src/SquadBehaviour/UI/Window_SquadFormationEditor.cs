@@ -19,8 +19,8 @@ namespace SquadBehaviour
         private Rect currentGridRect;
         private Color LeaderColor = new Color(0.8f, 0.8f, 0.2f, 0.8f);
         private Color UnitColor = new Color(0.2f, 0.5f, 0.8f, 0.8f);
-        private Color gridColor = new Color(0.1f, 0.1f, 0.1f, 0.3f);
-
+        private Color gridColor = new Color(1f, 1f, 1f, 0.8f);
+        private Color gridFarColor = new Color(1f, 1f, 1f, 0.1f);
         public override Vector2 InitialSize => new Vector2(800f, 600f);
 
         public Window_SquadFormationEditor(Comp_PawnSquadLeader leader, Squad squad)
@@ -61,10 +61,12 @@ namespace SquadBehaviour
         public override void DoWindowContents(Rect inRect)
         {
             Text.Font = GameFont.Medium;
+            Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(new Rect(0f, 0f, inRect.width, 35f), "Squad Formation Editor");
+            Text.Anchor = TextAnchor.UpperLeft;
 
             Text.Font = GameFont.Small;
-            Widgets.Label(new Rect(0f, 40f, inRect.width, 25f), $"Squad {selectedSquad.squadID} - Drag pawns to set custom positions");
+            Widgets.Label(new Rect(0f, 40f, inRect.width, 25f), $"Squad {selectedSquad.squadName} - Drag pawns to set custom positions");
 
             currentGridRect = new Rect(0f, 70f, inRect.width, inRect.height - 120f);
             DrawFormationGrid(currentGridRect);
@@ -80,9 +82,6 @@ namespace SquadBehaviour
 
         private void DrawFormationGrid(Rect rect)
         {
-            Widgets.DrawBoxSolid(rect, gridColor);
-
-            // Draw grid
             for (int x = -gridRadius; x <= gridRadius; x++)
             {
                 for (int z = -gridRadius; z <= gridRadius; z++)
@@ -90,17 +89,11 @@ namespace SquadBehaviour
                     Vector2 cellPos = gridCenter + new Vector2(x * cellSize, z * cellSize);
                     Vector2 screenPos = new Vector2(rect.x + cellPos.x, rect.y + cellPos.y);
                     Rect cellRect = new Rect(screenPos.x - cellSize / 2f, screenPos.y - cellSize / 2f, cellSize, cellSize);
-
-                    //Color gridColor = (x == 0 && z == 0) ? new Color(0.3f, 0.5f, 0.3f, 0.3f) : new Color(0.2f, 0.2f, 0.2f, 0.3f);
-                    Widgets.DrawBoxSolid(cellRect, gridColor);
-                    Widgets.DrawBox(cellRect, 1);
+                    float t = Mathf.Clamp01(Vector2.Distance(cellPos, gridCenter) / (gridRadius * cellSize));
+                    Widgets.DrawBoxSolidWithOutline(cellRect, Color.clear, Color.Lerp(gridColor, gridFarColor, t));
                 }
             }
-
-            // Handle input
             HandleDragInput(rect);
-
-            // Draw pawns
             foreach (var kvp in pawnPositions.ToList())
             {
                 Pawn pawn = kvp.Key;

@@ -9,11 +9,7 @@ namespace SquadBehaviour
         {
             if (pawn != null && pawn.IsPartOfSquad(out Comp_PawnSquadMember squadMember) && squadMember != null)
             {
-                IntVec3 targetCell = squadMember.SquadLeader.GetFormationPositionFor(pawn);
-                bool result = pawn.Position.InHorDistOf(targetCell, 1);
-
-               // Log.Message($"Is At Formation Position? {result}");
-                return result;
+                return squadMember.SquadLeader.GetFormationPositionFor(pawn).DistanceTo(pawn.Position) < 1;
             }
             return false;
         }

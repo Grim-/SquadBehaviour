@@ -66,6 +66,7 @@ namespace SquadBehaviour
             Job job = JobMaker.MakeJob(SquadDefOf.Squad_FormationFollow, followee);
             job.expiryInterval = 200;
             job.followRadius = memeber.AssignedSquad.FollowDistance;
+            job.locomotionUrgency = LocomotionUrgency.Sprint;
             job.SetTarget(TargetIndex.A, followee);
             job.reportStringOverride = $"Following {memeber.SquadLeader.Pawn.LabelCap} in formation";
             return job;
