@@ -28,7 +28,8 @@ namespace SquadBehaviour
 				if (!ability.OnCooldown &&
 					ability.def.verbProperties != null &&
 					ability.def.verbProperties.targetParams.CanTarget(target, ability.verb) &&
-					ability.CanApplyOn(target))
+					ability.CanApplyOn(target) && 
+					ability.AICanTargetNow((LocalTargetInfo)target))
 				{
 					potentialAbilities.Add(ability);
 				}

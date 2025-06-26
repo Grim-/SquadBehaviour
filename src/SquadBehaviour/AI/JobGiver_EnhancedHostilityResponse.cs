@@ -15,11 +15,6 @@ namespace SquadBehaviour
                 return null;
             }
 
-            //if (pawn.playerSettings != null && !pawn.playerSettings.UsesConfigurableHostilityResponse)
-            //{
-            //    return null;
-            //}
-
             if (pawn.RaceProps.Humanlike && PawnUtility.PlayerForcedJobNowOrSoon(pawn))
             {
                 return null;
@@ -48,6 +43,23 @@ namespace SquadBehaviour
                 if (squadMember.CurrentState == SquadMemberState.DoNothing || squadMember.AssignedSquad.HostilityResponse == SquadHostility.None)
                 {
                     return null;
+                }
+
+                if (pawn.abilities != null && !pawn.abilities.abilities.NullOrEmpty() && squadMember.AbilitiesAllowed)
+                {
+                    Thing threat = AbilityUtility.FindBestAbilityTarget(pawn);
+                    if (threat != null)
+                    {
+                        Ability ability = AbilityUtility.GetBestAbility(pawn, threat);
+                        if (ability != null)
+                        {
+                            Job abilityJob = AbilityUtility.GetAbilityJob(pawn, threat, ability);
+                            if (abilityJob != null)
+                            {
+                                return abilityJob;
+                            }
+                        }
+                    }
                 }
 
                 float maxDist = squadMember.AssignedSquad.MaxAttackDistanceFor(pawn);
