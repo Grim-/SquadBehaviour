@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.FormationDef>
+    <defName>ColumnFormation</defName>
+    <label>Column</label>
+    <formationWorker>SquadBehaviour.ColumnFormationWorker</formationWorker>
+    <uiIconPath>FormationColumn</uiIconPath>
+  </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>CircleFormation</defName>
+    <label>Cricle</label>
+    <formationWorker>SquadBehaviour.CircleFormationWorker</formationWorker>
+    <uiIconPath>FormationCircle</uiIconPath>
+  </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>BoxFormation</defName>
+    <label>Box</label>
+    <formationWorker>SquadBehaviour.BoxFormationWorker</formationWorker>
+    <uiIconPath>FormationBox</uiIconPath>
+  </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>WedgeFormation</defName>
+    <label>Wedge</label>
+    <formationWorker>SquadBehaviour.WedgeFormationWorker</formationWorker>
+    <uiIconPath>FormationWedge</uiIconPath>
+  </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>LineFormation</defName>
+    <label>Line</label>
+    <formationWorker>SquadBehaviour.LineFormationWorker</formationWorker>
+    <uiIconPath>FormationLine</uiIconPath>
+  </SquadBehaviour.FormationDef>
+
+  <SquadBehaviour.FormationDef>
+    <defName>CustomFormation</defName>
+    <label>Custom</label>
+    <formationWorker>SquadBehaviour.CustomFormationWorker</formationWorker>
+    <uiIconPath>FormationBox</uiIconPath>
+  </SquadBehaviour.FormationDef>
+</Defs>

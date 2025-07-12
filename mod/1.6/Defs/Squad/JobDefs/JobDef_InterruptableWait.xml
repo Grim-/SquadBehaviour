@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <JobDef>
+    <defName>SquadMember_InterruptableWait</defName>
+    <driverClass>SquadBehaviour.JobDriver_InterruptableWait</driverClass>
+    <reportString>staring.</reportString>
+    <carryThingAfterJob>true</carryThingAfterJob>
+    <dropThingBeforeJob>false</dropThingBeforeJob>
+  </JobDef>
+
+</Defs>

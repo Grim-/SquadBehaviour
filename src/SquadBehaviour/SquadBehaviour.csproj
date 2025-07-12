@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>D:\Games\RimWorld\Mods\SquadBehaviours\1.5\Assemblies\</OutputPath>
+    <OutputPath>H:\SteamLibrary\steamapps\common\RimWorld\Mods\SquadBehaviours\1.6\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,8 +36,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>H:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -83,6 +82,7 @@
   <ItemGroup>
     <Compile Include="AbilityUtility.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalCanCheckInterval.cs" />
+    <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPatrolTime.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalIsPlayerFaction.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalSquadMemberHasDuty.cs" />
     <Compile Include="AI\Conditions\ThinkNode_ConditionalCannotBreakFormation.cs" />

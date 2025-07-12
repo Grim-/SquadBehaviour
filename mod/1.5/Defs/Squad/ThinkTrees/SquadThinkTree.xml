@@ -93,7 +93,6 @@
                     <li Class="SquadBehaviour.ThinkNode_ConditionalHasPatrolZone">
                       <subNodes>
                         <li Class="SquadBehaviour.ThinkNode_ConditionalIsPatrolTime">
-                          <assignment>Work</assignment>
                           <subNodes>
                             <li Class="SquadBehaviour.JobGiver_SquadPatrol" />
                           </subNodes>

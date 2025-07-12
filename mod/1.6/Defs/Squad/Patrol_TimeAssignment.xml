@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <TimeAssignmentDef>
+    <defName>Patrol</defName>
+    <label>patrol</label>
+    <color>(133, 133, 61)</color>
+    <allowRest>false</allowRest>
+    <allowJoy>false</allowJoy>
+  </TimeAssignmentDef>
+
+</Defs>

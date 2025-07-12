@@ -109,7 +109,7 @@ namespace SquadBehaviour
                     }
                 }
 
-                if (___pawn.IsMutant && !___pawn.mutant.Def.showLabel)
+                if (___pawn.IsMutant && ___pawn.mutant.Def.hideLabel)
                 {
                     return;
                 }

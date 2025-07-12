@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThinkTreeDef Abstract="true" Name="BaseSquadTree">
+    <thinkRoot Class="ThinkNode_Priority">
+      <subNodes>
+        <li Class="SquadBehaviour.ThinkNode_ConditionalIsPlayerFaction">
+          <subNodes>
+            <!-- 1. If pawn is in a squad -->
+            <li Class="SquadBehaviour.ThinkNode_ConditionalIsPartOfASquad">
+              <subNodes>
+
+                <!-- 2. If squad is in "Called to Arms" mode -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsCalledToArms">
+                  <subNodes>
+
+
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalSquadMemberHasDuty">
+                      <subNodes>
+                        <!-- 2.1 Fetch and execute squad duty -->
+                        <li Class="SquadBehaviour.ThinkNode_SquadDuty" />
+                      </subNodes>
+                    </li>
+
+
+                    <!-- 2.3 If squad has a combat target, attack -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalSquadHasTarget">
+                      <subNodes>
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalSquadMemberCanUseAbilities">
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_TryUseAbilities" />
+                          </subNodes>
+                        </li>
+                        <li Class="SquadBehaviour.JobGiver_SquadMemberFight" />
+                      </subNodes>
+                    </li>
+
+                    <!-- if Hosility response is set to Aggresive, check for targets -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsAggresive">
+                      <subNodes>
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalCanCheckInterval">
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_ActivelySearchForTargets" />
+                          </subNodes>
+                        </li>
+                      </subNodes>
+                    </li>
+
+                    <!-- 2.4 Formation Behavior -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
+                      <subNodes>
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtFormationPosition">
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                          </subNodes>
+                        </li>
+
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalIsAtFormationPosition">
+                          <invert>true</invert>
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_SquadMemberFollowInFormation" />
+                          </subNodes>
+                        </li>
+                      </subNodes>
+                    </li>
+
+                    <!-- 2.5 Loose Formation (No strict formation) -->
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalIsSquadInFormation">
+                      <invert>true</invert>
+                      <subNodes>
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalNearSquadLeader">
+                          <invert>true</invert>
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_SquadMemberFollowLoose" />
+                          </subNodes>
+                        </li>
+
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalNearSquadLeader">
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                          </subNodes>
+                        </li>
+                      </subNodes>
+                    </li>
+
+                  </subNodes>
+                </li>
+
+                <!-- if not called to arms, but had a patrol zone set and its patrol time, go patrol, squad duty handles this while at arms -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalIsCalledToArms">
+                  <invert>true</invert>
+                  <subNodes>
+
+                    <li Class="SquadBehaviour.ThinkNode_ConditionalHasPatrolZone">
+                      <subNodes>
+                        <li Class="SquadBehaviour.ThinkNode_ConditionalIsPatrolTime">
+                          <subNodes>
+                            <li Class="SquadBehaviour.JobGiver_SquadPatrol" />
+                          </subNodes>
+                        </li>
+                      </subNodes>
+                    </li>
+                  </subNodes>
+                </li>
+
+                <!-- 3. If "Do Nothing" is active -->
+                <li Class="SquadBehaviour.ThinkNode_ConditionalShouldDoNothing">
+                  <subNodes>
+                    <li Class="SquadBehaviour.JobGiver_StandAndStareShort" />
+                  </subNodes>
+                </li>
+
+              </subNodes>
+            </li>
+          </subNodes>
+        </li>
+      </subNodes>
+    </thinkRoot>
+  </ThinkTreeDef>
+
+  <ThinkTreeDef ParentName="BaseSquadTree">
+    <defName>SquadThinkTree</defName>
+    <insertTag>Humanlike_PreMain</insertTag>
+  </ThinkTreeDef>
+
+  <ThinkTreeDef ParentName="BaseSquadTree">
+    <defName>AnimalSquadThinkTree</defName>
+    <insertTag>Animal_PreMain</insertTag>
+    <insertPriority>100</insertPriority>
+  </ThinkTreeDef>
+
+  <ThinkTreeDef ParentName="BaseSquadTree">
+    <defName>MechanoidSquadThinkTree</defName>
+  </ThinkTreeDef>
+
+</Defs>

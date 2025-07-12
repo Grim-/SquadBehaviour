@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadOrderDef>
+    <defName>ClearDuty</defName>
+    <label>Order : Clear Duty</label>
+    <uiIconPath>ClearOrdersUIIcon</uiIconPath>
+    <workerClass>SquadBehaviour.SquadOrder_ClearDuty</workerClass>
+    <requiresTarget>false</requiresTarget>
+  </SquadBehaviour.SquadOrderDef>
+</Defs>

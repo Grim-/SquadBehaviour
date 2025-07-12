@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <SquadBehaviour.SquadDutyDef>
+    <defName>DefendPoint</defName>
+    <label>Defend Point</label>
+    <JobGiver Class="SquadBehaviour.JobGiver_SquadDefendPoint" />
+    <props>
+      <maintainsFormation>true</maintainsFormation>
+      <respondToThreats>true</respondToThreats>
+      <defensiveRadius>20</defensiveRadius>
+    </props>
+    <uiIconPath>DefendPointOrderUIIcon</uiIconPath>
+  </SquadBehaviour.SquadDutyDef>
+</Defs>

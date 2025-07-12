@@ -122,15 +122,16 @@ namespace SquadBehaviour
             }
         }
 
-        public override void PostDeSpawn(Map map)
+        public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
         {
             this.ClearCurrentDuties();
             if (_AssignedSquad != null)
             {
                 _AssignedSquad.RemoveMember(this.Pawn);
             }
-            base.PostDeSpawn(map);
+            base.PostDeSpawn(map, mode);
         }
+
         public void ClearCurrentDuties()
         {
             this.CurrentStance = null;
